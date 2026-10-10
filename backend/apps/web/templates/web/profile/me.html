@@ -1,0 +1,119 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Profilim{% endblock %}
+
+{% block content %}
+<div class="card card-flush" style="margin-bottom:20px">
+  <div class="profile-cover"></div>
+  <div class="profile-head stack">
+    <div class="row-between wrap" style="align-items:flex-end">
+      {% avatar user "xl" %}
+      <div class="row wrap">
+        {% if user.portfolio_slug %}<a href="{% url 'web:portfolio' user.portfolio_slug %}" class="btn btn-ghost btn-sm">{% icon "external" "icon-sm" %} Portfolio</a>{% endif %}
+        <a href="{% url 'web:profile-edit' %}" class="btn btn-primary btn-sm">{% icon "edit" "icon-sm" %} Tahrirlash</a>
+      </div>
+    </div>
+    <div>
+      <h1>{{ user|display_name }}</h1>
+      <p class="muted">{{ user.faculty.name|default:"Fakultet ko'rsatilmagan" }}{% if user.course %} · {{ user.course }}-kurs{% endif %} · {{ user.get_role_display }}</p>
+      {% if user.bio %}<p style="margin-top:10px; max-width:640px">{{ user.bio }}</p>{% endif %}
+    </div>
+    <div class="row wrap">
+      <span class="chip chip-primary">⭐ {{ my_level.name }}</span>
+      <span class="chip chip-accent">⚡ {{ user.xp }} XP</span>
+      <span class="chip">🔥 {{ streak.current|default:0 }} kun</span>
+      <span class="chip">🪙 {{ user.coins }}</span>
+      {% if user.github_url %}<a href="{{ user.github_url }}" class="chip chip-outline" target="_blank" rel="noopener">{% icon "github" "icon-sm" %} GitHub</a>{% endif %}
+      {% if user.linkedin_url %}<a href="{{ user.linkedin_url }}" class="chip chip-outline" target="_blank" rel="noopener">{% icon "link" "icon-sm" %} LinkedIn</a>{% endif %}
+    </div>
+    {% if not user.portfolio_slug or not user.faculty %}
+    <div class="card" style="background:var(--accent-soft); border-color:transparent">
+      <div class="row"><span style="font-size:22px">✨</span><div class="grow small"><b>Profilingizni to'ldiring:</b> fakultet va portfolio manzilini kiriting. Shunda ommaviy portfolio sahifangiz ochiladi.</div>
+        <a href="{% url 'web:profile-edit' %}" class="btn btn-accent btn-sm">To'ldirish</a></div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="layout-main-aside">
+  <div class="stack">
+    <div class="card card-lg">
+      <div class="card-header"><h2>Ko'nikmalarim</h2></div>
+      <div class="grid-2" style="align-items:center">
+        {% radar skill_map %}
+        <div class="stack-sm">
+          {% for us in skills %}
+          <div class="row">
+            <div class="grow">
+              <div class="row-between"><span class="bold small">{{ us.skill.name }}</span>
+                <span class="row-sm">{% if us.endorsements.all %}<span class="chip chip-success" title="O'qituvchi tasdiqlagan">✓ {{ us.endorsements.all|length }}</span>{% endif %}<span class="tiny muted">{{ us.level }}/5</span></span></div>
+              <div class="bar" style="margin-top:4px"><span style="width:{{ us.level|ratio:5 }}%"></span></div>
+            </div>
+            <form method="post" action="{% url 'web:profile-skill-remove' us.pk %}" class="inline-form">{% csrf_token %}
+              <button class="btn btn-ghost btn-sm btn-icon" title="Olib tashlash" aria-label="Olib tashlash">{% icon "x" "icon-sm" %}</button></form>
+          </div>
+          {% empty %}
+          <p class="muted small">Ko'nikmalaringizni qo'shing: radar diagramma avtomatik chiziladi va loyihalarga jamoadosh sifatida tavsiya qilinasiz.</p>
+          {% endfor %}
+        </div>
+      </div>
+      <hr>
+      <form method="post" action="{% url 'web:profile-skill-add' %}" class="row wrap" style="align-items:flex-end">
+        {% csrf_token %}
+        <div class="field grow" style="min-width:200px"><label for="id_skill">Ko'nikma qo'shish</label>{{ skill_form.skill }}</div>
+        <div class="field" style="min-width:150px"><label for="id_level">Daraja</label>{{ skill_form.level }}</div>
+        <button class="btn btn-primary">{% icon "plus" %} Qo'shish</button>
+      </form>
+    </div>
+
+    <div class="card card-lg">
+      <div class="card-header"><h2>Yutuqlarim</h2><a href="{% url 'web:profile-achievement-add' %}" class="btn btn-soft btn-sm">{% icon "plus" "icon-sm" %} Qo'shish</a></div>
+      <div class="list">
+        {% for a in achievements %}
+        <div class="list-item">
+          <span class="stat-icon {% if a.status == 'approved' %}tone-success{% elif a.status == 'rejected' %}tone-danger{% else %}tone-info{% endif %}">{% icon "award" %}</span>
+          <div class="grow">
+            <div class="bold">{{ a.title }}</div>
+            <div class="small muted">{{ a.get_kind_display }} · {{ a.achieved_on|date:"d.m.Y" }}{% if a.review_comment %} · «{{ a.review_comment }}»{% endif %}</div>
+          </div>
+          {% if a.status == "approved" %}<span class="chip chip-success">+{{ a.xp_awarded }} XP</span>
+          {% elif a.status == "rejected" %}<span class="chip chip-danger">Rad etildi</span>
+          {% else %}
+            <span class="chip chip-info">Kutilmoqda</span>
+            <form method="post" action="{% url 'web:profile-achievement-delete' a.pk %}" class="inline-form">{% csrf_token %}
+              <button class="btn btn-ghost btn-sm btn-icon" aria-label="O'chirish">{% icon "trash" "icon-sm" %}</button></form>
+          {% endif %}
+        </div>
+        {% empty %}
+        {% include "web/partials/empty.html" with emoji="🏅" title="Yutuqlaringizni qo'shing" text="Olimpiada, hakaton, sertifikat yoki maqola: o'qituvchi tasdiqlagach XP olasiz." %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <aside class="stack">
+    <div class="card">
+      <div class="card-header"><h3>Daraja</h3><span class="chip chip-primary">{{ my_level.number }}/5</span></div>
+      <div class="bold" style="font-size:18px">{{ my_level.name }}</div>
+      <div class="progress" style="margin:10px 0 6px"><span style="width:{{ my_level.progress|percent }}%"></span></div>
+      <div class="small muted">{% if my_level.next_level_xp %}{{ user.xp }} / {{ my_level.next_level_xp }} XP: keyingi darajaga{% else %}Eng yuqori daraja!{% endif %}</div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>Nishonlar</h3><a href="{% url 'web:arena' %}?tab=badges" class="small bold">Hammasi</a></div>
+      {% if badges %}<div class="badge-row">{% for ub in badges %}<span class="badge-pill" title="{{ ub.badge.description }}">{{ ub.badge.icon }} {{ ub.badge.name }}</span>{% endfor %}</div>
+      {% else %}<p class="small muted">Hali nishon yo'q.</p>{% endif %}
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>Loyihalar</h3></div>
+      <div class="list">
+        {% for m in memberships %}
+        <a href="{% url 'web:project-detail' m.project.pk %}" class="list-item list-item-link">
+          <div class="grow"><div class="bold truncate">{{ m.project.title }}</div><div class="small muted">{{ m.role }}</div></div>
+          {% if m.status == "pending" %}<span class="chip">So'rov</span>{% else %}<span class="chip chip-success">{{ m.project.get_stage_display }}</span>{% endif %}
+        </a>
+        {% empty %}<p class="small muted">Hali loyihada emassiz.</p>{% endfor %}
+      </div>
+    </div>
+  </aside>
+</div>
+{% endblock %}

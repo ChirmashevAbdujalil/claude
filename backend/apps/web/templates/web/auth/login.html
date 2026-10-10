@@ -1,0 +1,36 @@
+{% extends "web/base.html" %}
+{% load web_tags %}
+{% block title %}Kirish{% endblock %}
+
+{% block body %}
+<div class="auth-wrap">
+  <div class="auth-card stack-lg">
+    <a href="{% url 'web:landing' %}" class="brand" style="justify-content:center"><span class="brand-mark">★</span><span>Talent Hub<small>ADTI iqtidorlar platformasi</small></span></a>
+    <div class="card card-lg stack">
+      <div class="center stack-sm">
+        <h1 style="font-size:1.6rem">Xush kelibsiz! 👋</h1>
+        <p class="muted">Davom etish uchun hisobingizga kiring</p>
+      </div>
+
+      <div class="stack-sm">
+        <div class="card" style="background:var(--primary-soft); border-color:transparent">
+          <div class="row">
+            <span class="stat-icon" style="background:#229ED9;color:#fff">{% icon "send" %}</span>
+            <div><div class="bold">Telegram orqali</div><div class="small muted">Botimizdagi «Platformani ochish» tugmasini bosing: avtomatik kirasiz.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider-text">yoki login va parol bilan</div>
+
+      <form method="post" class="form">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        {% include "web/partials/form_fields.html" %}
+        <button class="btn btn-gradient btn-lg btn-block">Kirish {% icon "arrow-right" %}</button>
+      </form>
+    </div>
+    <p class="center small muted">Login va parolni dekanat yoki administrator beradi.</p>
+  </div>
+</div>
+{% endblock %}

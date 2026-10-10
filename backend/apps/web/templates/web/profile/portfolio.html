@@ -1,0 +1,115 @@
+{% extends "web/base.html" %}
+{% load web_tags %}
+{% block title %}{{ profile|display_name }}: portfolio{% endblock %}
+{% block description %}{{ profile|display_name }}: {{ profile.faculty.name|default:"ADTI" }} talabasi. Ko'nikmalar, yutuqlar va loyihalar.{% endblock %}
+
+{% block body %}
+<header class="landing-nav">
+  <a href="{% url 'web:landing' %}" class="brand"><span class="brand-mark">★</span><span>Talent Hub<small>ADTI iqtidorlar platformasi</small></span></a>
+  {% if user.is_authenticated %}<a href="{% url 'web:dashboard' %}" class="btn btn-ghost btn-sm">Platformaga qaytish</a>
+  {% else %}<a href="{% url 'web:login' %}" class="btn btn-ghost btn-sm">Kirish</a>{% endif %}
+</header>
+
+<main style="max-width:1080px; margin:0 auto; padding:0 16px 48px">
+  <div class="card card-flush" style="margin-bottom:20px">
+    <div class="profile-cover" style="height:150px"></div>
+    <div class="profile-head stack">
+      <div class="row-between wrap" style="align-items:flex-end">
+        {% avatar profile "xl" %}
+        <div class="row wrap">
+          <button type="button" class="btn btn-ghost btn-sm" data-copy="{{ share_url }}">{% icon "copy" "icon-sm" %} <span data-label>Havolani nusxalash</span></button>
+          {% if is_owner %}<a href="{% url 'web:profile-edit' %}" class="btn btn-primary btn-sm">{% icon "edit" "icon-sm" %} Tahrirlash</a>{% endif %}
+        </div>
+      </div>
+      <div>
+        <h1>{{ profile|display_name }}</h1>
+        <p class="muted">{{ profile.faculty.name|default:"ADTI" }}{% if profile.course %} · {{ profile.course }}-kurs talabasi{% endif %}</p>
+        {% if profile.bio %}<p style="margin-top:10px; max-width:680px">{{ profile.bio }}</p>{% endif %}
+      </div>
+      <div class="row wrap">
+        {% with lvl=profile.xp|level %}<span class="chip chip-primary">⭐ {{ lvl.name }}</span>{% endwith %}
+        <span class="chip chip-accent">⚡ {{ profile.xp }} XP</span>
+        {% if profile.github_url %}<a href="{{ profile.github_url }}" class="chip chip-outline" target="_blank" rel="noopener">{% icon "github" "icon-sm" %} GitHub</a>{% endif %}
+        {% if profile.linkedin_url %}<a href="{{ profile.linkedin_url }}" class="chip chip-outline" target="_blank" rel="noopener">{% icon "link" "icon-sm" %} LinkedIn</a>{% endif %}
+        {% if not profile.is_public %}<span class="chip chip-danger">Yopiq profil</span>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="layout-main-aside">
+    <div class="stack">
+      <div class="card card-lg">
+        <h2 style="margin-bottom:14px">Ko'nikmalar</h2>
+        <div class="grid-2" style="align-items:center">
+          {% radar skill_map %}
+          <div class="stack-sm">
+            {% for us in skills %}
+            <div class="row">
+              <div class="grow">
+                <div class="row-between"><span class="bold small">{{ us.skill.name }}</span>
+                  <span class="row-sm">{% if us.endorsements.all %}<span class="chip chip-success" title="O'qituvchilar tasdiqlagan">✓ {{ us.endorsements.all|length }}</span>{% endif %}<span class="tiny muted">{{ us.level }}/5</span></span></div>
+                <div class="bar" style="margin-top:4px"><span style="width:{{ us.level|ratio:5 }}%"></span></div>
+              </div>
+              {% if is_reviewer %}
+                {% if us.pk in endorsed_ids %}<span class="chip chip-success">{% icon "check" "icon-sm" %}</span>
+                {% else %}
+                <form method="post" action="{% url 'web:endorse-skill' us.pk %}" class="inline-form">{% csrf_token %}
+                  <button class="btn btn-soft btn-sm" title="Ko'nikmani tasdiqlash">{% icon "check" "icon-sm" %} Tasdiqlash</button></form>
+                {% endif %}
+              {% endif %}
+            </div>
+            {% empty %}<p class="muted small">Ko'nikmalar hali qo'shilmagan.</p>{% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-lg">
+        <h2 style="margin-bottom:6px">Tasdiqlangan yutuqlar</h2>
+        <div class="list">
+          {% for a in achievements %}
+          <div class="list-item">
+            <span class="stat-icon tone-success">{% icon "award" %}</span>
+            <div class="grow"><div class="bold">{{ a.title }}</div><div class="small muted">{{ a.get_kind_display }} · {{ a.achieved_on|date:"E Y" }}</div></div>
+            {% if a.proof_url %}<a href="{{ a.proof_url }}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm btn-icon" aria-label="Hujjat">{% icon "external" "icon-sm" %}</a>{% endif %}
+          </div>
+          {% empty %}<p class="muted small" style="padding:8px 0">Hali tasdiqlangan yutuq yo'q.</p>{% endfor %}
+        </div>
+      </div>
+
+      {% if projects %}
+      <div class="card card-lg">
+        <h2 style="margin-bottom:6px">Loyihalar</h2>
+        <div class="list">
+          {% for m in projects %}
+          <div class="list-item"><span class="stat-icon tone-primary">{% icon "rocket" %}</span>
+            <div class="grow"><div class="bold">{{ m.project.title }}</div><div class="small muted">{{ m.role }} · {{ m.project.get_stage_display }}</div></div></div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <aside class="stack">
+      <div class="card">
+        <h3 style="margin-bottom:12px">Nishonlar</h3>
+        {% if badges %}<div class="badge-row">{% for ub in badges %}<span class="badge-pill" title="{{ ub.badge.description }}">{{ ub.badge.icon }} {{ ub.badge.name }}</span>{% endfor %}</div>
+        {% else %}<p class="small muted">Hali nishon yo'q.</p>{% endif %}
+      </div>
+
+      {% if flag_form %}
+      <div class="card stack-sm" style="border-color:color-mix(in srgb, var(--accent) 40%, var(--border))">
+        <h3>✨ Iqtidor belgisi</h3>
+        <p class="small muted">Bu talabada alohida iqtidor ko'rdingizmi? Belgilang: rahbariyat panelida ko'rinadi.</p>
+        <form method="post" action="{% url 'web:talent-flag' profile.pk %}" class="form">{% csrf_token %}
+          {% include "web/partials/form_fields.html" with form=flag_form %}
+          <button class="btn btn-accent btn-block">Belgilash</button>
+        </form>
+        {% for flag in flags %}
+        <div class="small" style="border-top:1px solid var(--border); padding-top:8px"><b>{{ flag.get_area_display }}</b>: {{ flag.note }} <span class="muted">({{ flag.flagged_by|display_name }})</span></div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </aside>
+  </div>
+</main>
+{% endblock %}

@@ -1,0 +1,1 @@
+<span class="avatar {% if size %}avatar-{{ size }}{% endif %}" style="--hue: {{ hue }}" title="{{ user.get_full_name|default:user.username }}">{% if user.avatar %}<img src="{{ user.avatar.url }}" alt="">{% else %}{{ initials }}{% endif %}</span>

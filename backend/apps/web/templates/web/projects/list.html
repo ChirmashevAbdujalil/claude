@@ -1,0 +1,47 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Loyihalar{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><h1>Loyihalar 🚀</h1><p>G'oyadan startupgacha. Jamoa toping yoki o'zingiz yig'ing.</p></div>
+  <a href="{% url 'web:project-create' %}" class="btn btn-gradient">{% icon "plus" %} Loyiha yaratish</a>
+</div>
+
+<form method="get" class="row wrap" style="margin-bottom:16px">
+  <div class="tabs">
+    <a href="?" class="tab {% if not mine and not stage %}active{% endif %}">Barchasi</a>
+    <a href="?mine=1" class="tab {% if mine %}active{% endif %}">Mening loyihalarim</a>
+    {% for value, label in stages %}{% if value %}<a href="?stage={{ value }}" class="tab {% if stage == value %}active{% endif %}">{{ label }}</a>{% endif %}{% endfor %}
+  </div>
+  <div class="row-sm grow" style="min-width:220px">
+    <input type="search" name="q" value="{{ q }}" class="input" placeholder="Loyiha qidirish...">
+    <button class="btn btn-ghost btn-icon" aria-label="Qidirish">{% icon "search" %}</button>
+  </div>
+</form>
+
+{% if page.object_list %}
+<div class="grid-3">
+  {% for project in page %}
+  <a href="{% url 'web:project-detail' project.pk %}" class="card card-link stack-sm">
+    <div class="row-between">
+      <span class="chip chip-primary">{{ project.get_stage_display }}</span>
+      {% if project.is_recruiting %}<span class="chip chip-success">👋 Jamoa yig'ilmoqda</span>{% endif %}
+    </div>
+    <h3>{{ project.title }}</h3>
+    <p class="muted small" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">{{ project.description }}</p>
+    {% if project.skills_needed.all %}
+    <div class="row-sm wrap">{% for skill in project.skills_needed.all|slice:":4" %}<span class="chip">{{ skill.name }}</span>{% endfor %}</div>
+    {% endif %}
+    <div class="row-between" style="margin-top:auto; padding-top:8px">
+      <div class="row-sm">{% avatar project.owner "sm" %}<span class="small bold truncate">{{ project.owner|display_name }}</span></div>
+      <span class="meta"><span>{% icon "users" "icon-sm" %}{{ project.member_count }}</span></span>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% include "web/partials/pagination.html" %}
+{% else %}
+<div class="card">{% url 'web:project-create' as create_url %}{% include "web/partials/empty.html" with emoji="💡" title="Loyiha topilmadi" text="Birinchi bo'lib g'oyangizni e'lon qiling va jamoa yig'ing." action_url=create_url action_label="Loyiha yaratish" %}</div>
+{% endif %}
+{% endblock %}

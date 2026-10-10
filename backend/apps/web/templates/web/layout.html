@@ -1,0 +1,47 @@
+{% extends "web/base.html" %}
+{% load web_tags %}
+
+{% block body %}
+<div class="app">
+  <aside class="sidebar" aria-label="Asosiy menyu">
+    <a href="{% url 'web:dashboard' %}" class="brand" style="padding: 4px 10px 14px">
+      <span class="brand-mark">★</span>
+      <span>Talent Hub<small>ADTI iqtidorlar platformasi</small></span>
+    </a>
+    {% include "web/partials/nav_links.html" %}
+    <div class="sidebar-footer">
+      <a href="{% url 'web:profile' %}" class="nav-link {% active 'profile' %}">
+        {% avatar user "sm" %}
+        <span class="grow"><span class="truncate" style="display:block">{{ user|display_name }}</span>
+          <span class="tiny muted">{{ my_level.name }} · {{ user.xp }} XP</span></span>
+      </a>
+      <form method="post" action="{% url 'web:logout' %}">{% csrf_token %}
+        <button class="nav-link btn-block" style="border:0;background:none;cursor:pointer;font:inherit">{% icon "logout" %} Chiqish</button>
+      </form>
+    </div>
+  </aside>
+
+  <div class="app-body">
+    <header class="topbar">
+      <a href="{% url 'web:dashboard' %}" class="brand"><span class="brand-mark">★</span><span>Talent Hub</span></a>
+      <div class="row-sm">
+        <a href="{% url 'web:shop' %}" class="chip chip-accent" title="Tangalar">{% icon "coin" "icon-sm" %} {{ user.coins }}</a>
+        <a href="{% url 'web:arena' %}" class="chip chip-primary" title="XP">{% icon "bolt" "icon-sm" %} {{ user.xp }} XP</a>
+        <a href="{% url 'web:profile' %}" aria-label="Profil">{% avatar user "sm" %}</a>
+      </div>
+    </header>
+
+    <main class="main" id="main">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <nav class="bottom-nav" aria-label="Pastki menyu">
+    <a href="{% url 'web:dashboard' %}" class="{% active 'dashboard' %}">{% icon "home" %}Bosh sahifa</a>
+    <a href="{% url 'web:challenges' %}" class="{% active 'challenges' 'challenge' %}">{% icon "target" %}Challenge</a>
+    <a href="{% url 'web:ai' %}" class="{% active 'ai' %}">{% icon "sparkles" %}AI Mentor</a>
+    <a href="{% url 'web:arena' %}" class="{% active 'arena' %}">{% icon "trophy" %}Arena</a>
+    <a href="{% url 'web:menu' %}" class="{% active 'menu' 'profile' 'projects' 'project' 'feed' 'post' 'events' 'event' 'opportunities' 'opportunity' 'shop' 'review' 'insights' %}">{% icon "compass" %}Menyu</a>
+  </nav>
+</div>
+{% endblock %}

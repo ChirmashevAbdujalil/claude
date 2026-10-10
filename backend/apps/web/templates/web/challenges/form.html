@@ -1,0 +1,24 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}{% if instance %}Challenge'ni tahrirlash{% else %}Yangi challenge{% endif %}{% endblock %}
+
+{% block content %}
+<a href="{% if instance %}{% url 'web:challenge-detail' instance.pk %}{% else %}{% url 'web:challenges' %}{% endif %}" class="back-link">{% icon "arrow-left" "icon-sm" %} Orqaga</a>
+<div class="page-header"><div><h1>{% if instance %}Challenge'ni tahrirlash{% else %}Yangi challenge ✍️{% endif %}</h1>
+  <p>Talabalar iqtidorini ochib beradigan qiziqarli vazifa tuzing.</p></div></div>
+
+<div class="layout-main-aside">
+  <form method="post" class="card card-lg form">
+    {% csrf_token %}
+    {% include "web/partials/form_fields.html" %}
+    <div class="form-actions"><button class="btn btn-primary btn-lg">{% icon "check" %} Saqlash</button></div>
+  </form>
+  <aside class="card stack-sm" style="align-self:start">
+    <h3>💡 Maslahatlar</h3>
+    <p class="small muted"><b>Kunlik</b>: 1-2 daqiqalik savol. «To'g'ri javob» maydonini to'ldirsangiz, avtomatik tekshiriladi.</p>
+    <p class="small muted"><b>Haftalik</b>: amaliy masala, sxema yoki kod. Siz tekshirib baho qo'yasiz.</p>
+    <p class="small muted"><b>Oylik</b>: katta keys, ko'pincha korxonalarning real muammosi.</p>
+    <p class="small muted">XP baholangan foizga qarab beriladi: 80 baho = XP ning 80%.</p>
+  </aside>
+</div>
+{% endblock %}

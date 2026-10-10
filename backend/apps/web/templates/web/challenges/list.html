@@ -1,0 +1,27 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Challenge'lar{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><h1>Challenge'lar 🎯</h1><p>Har bir yechim sizga XP olib keladi va iqtidoringizni ochib beradi.</p></div>
+  {% if user.is_reviewer %}<a href="{% url 'web:challenge-create' %}" class="btn btn-primary">{% icon "plus" %} Yangi challenge</a>{% endif %}
+</div>
+
+<div class="tabs" style="margin-bottom:20px">
+  {% for value, label in tabs %}<a href="?tab={{ value }}" class="tab {% if tab == value %}active{% endif %}">{{ label }}</a>{% endfor %}
+</div>
+
+{% if page.object_list %}
+<div class="grid-3">{% for challenge in page %}{% include "web/partials/challenge_card.html" %}{% endfor %}</div>
+{% include "web/partials/pagination.html" %}
+{% else %}
+<div class="card">
+  {% if tab == "mine" %}
+    {% include "web/partials/empty.html" with emoji="📝" title="Hali javob yubormagansiz" text="Birinchi challenge'ni yechib ko'ring: kunlik savollar bir daqiqa oladi." %}
+  {% else %}
+    {% include "web/partials/empty.html" with emoji="🎉" title="Bu bo'limda ochiq challenge yo'q" text="Yangilari tez orada e'lon qilinadi." %}
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

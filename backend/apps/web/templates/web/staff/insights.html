@@ -1,0 +1,86 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Statistika{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><h1>Iqtidorlar statistikasi 📊</h1><p>{% if user.role == "dean" and user.faculty %}{{ user.faculty.name }} fakulteti{% else %}Butun institut{% endif %} · {{ data.generated_at|date:"d E Y, H:i" }}</p></div>
+</div>
+
+<div class="kpi-grid" style="margin-bottom:20px">
+  <div class="card stat"><span class="stat-icon tone-primary">{% icon "users" %}</span><div><div class="stat-value">{{ data.totals.students }}</div><div class="stat-label">talaba</div></div></div>
+  <div class="card stat"><span class="stat-icon tone-success">{% icon "flame" %}</span><div><div class="stat-value">{{ data.totals.active_last_7_days }}</div><div class="stat-label">7 kunda faol · {{ data.totals.active_last_7_days|ratio:data.totals.students }}%</div></div></div>
+  <div class="card stat"><span class="stat-icon tone-accent">{% icon "award" %}</span><div><div class="stat-value">{{ data.totals.approved_achievements }}</div><div class="stat-label">tasdiqlangan yutuq</div></div></div>
+  <div class="card stat"><span class="stat-icon tone-info">{% icon "rocket" %}</span><div><div class="stat-value">{{ data.totals.projects }}</div><div class="stat-label">talaba loyihasi</div></div></div>
+  <div class="card stat"><span class="stat-icon tone-primary">{% icon "target" %}</span><div><div class="stat-value">{{ data.totals.open_challenges }}</div><div class="stat-label">ochiq challenge</div></div></div>
+  <div class="card stat"><span class="stat-icon tone-danger">{% icon "check-circle" %}</span><div><div class="stat-value">{{ data.totals.pending_submissions|add:data.totals.pending_achievements }}</div><div class="stat-label">tekshiruv kutmoqda</div></div></div>
+  <div class="card stat"><span class="stat-icon tone-info">{% icon "briefcase" %}</span><div><div class="stat-value">{{ data.totals.active_opportunities }}</div><div class="stat-label">faol imkoniyat</div></div></div>
+  <div class="card stat"><span class="stat-icon tone-success">{% icon "send" %}</span><div><div class="stat-value">{{ data.totals.applications }}</div><div class="stat-label">yuborilgan ariza</div></div></div>
+</div>
+
+<div class="grid-2" style="margin-bottom:20px">
+  <div class="card card-lg stack">
+    <h2>Fakultetlar kesimida</h2>
+    {% for row in data.by_faculty %}
+    <div class="bar-row">
+      <span class="truncate bold" title="{{ row.faculty }}">{{ row.faculty }}</span>
+      <div class="bar"><span style="width:{{ row.total_xp|ratio:faculty_max }}%"></span></div>
+      <span class="small muted" style="text-align:right">{{ row.students }} t.</span>
+    </div>
+    {% empty %}<p class="muted small">Fakultetlar qo'shilmagan.</p>{% endfor %}
+    <p class="tiny muted">Ustun uzunligi: jami XP. O'ngda talabalar soni.</p>
+  </div>
+
+  <div class="card card-lg stack">
+    <h2>Darajalar taqsimoti</h2>
+    {% for row in data.level_distribution %}
+    <div class="bar-row">
+      <span class="bold">{{ row.level }}. {{ row.name }}</span>
+      <div class="bar"><span style="width:{{ row.count|ratio:level_max }}%; background:var(--gradient-warm)"></span></div>
+      <span class="small muted" style="text-align:right">{{ row.count }}</span>
+    </div>
+    {% endfor %}
+    <h3 style="margin-top:8px">Loyihalar bosqichi</h3>
+    <div class="grid-4" style="grid-template-columns:repeat(4,1fr); gap:8px">
+      {% for stage in stages %}<div class="center card" style="padding:10px; box-shadow:none"><div class="stat-value" style="font-size:1.2rem">{{ stage.count }}</div><div class="tiny muted bold">{{ stage.label }}</div></div>{% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="grid-3">
+  <div class="card card-lg">
+    <h2 style="margin-bottom:8px">🏆 Eng kuchlilar</h2>
+    <div class="list">
+      {% for s in data.top_students %}
+      <div class="list-item"><span class="rank {% if forloop.counter <= 3 %}rank-{{ forloop.counter }}{% endif %}">{{ forloop.counter }}</span>
+        <div class="grow"><div class="bold small truncate">{{ s.full_name }}</div><div class="tiny muted">{{ s.faculty|default:"" }}{% if s.course %} · {{ s.course }}-kurs{% endif %}</div></div>
+        <span class="xp small">{{ s.xp }}</span></div>
+      {% empty %}<p class="muted small">Ma'lumot yo'q.</p>{% endfor %}
+    </div>
+  </div>
+
+  <div class="card card-lg">
+    <h2 style="margin-bottom:4px">📈 Tez o'sayotganlar</h2>
+    <p class="tiny muted">Oxirgi 30 kunda eng ko'p XP to'plaganlar: «yashirin iqtidorlar»</p>
+    <div class="list">
+      {% for s in data.rising_stars %}
+      <div class="list-item"><span class="rank">{{ forloop.counter }}</span>
+        <div class="grow"><div class="bold small truncate">{{ s.full_name }}</div><div class="tiny muted">{{ s.faculty|default:"" }}{% if s.course %} · {{ s.course }}-kurs{% endif %}</div></div>
+        <span class="chip chip-success">+{{ s.xp }}</span></div>
+      {% empty %}<p class="muted small">Oxirgi 30 kunda faollik yo'q.</p>{% endfor %}
+    </div>
+  </div>
+
+  <div class="card card-lg">
+    <h2 style="margin-bottom:4px">✨ O'qituvchilar belgilagan</h2>
+    <p class="tiny muted">«Bu talabada uchqun bor» belgilari</p>
+    <div class="list">
+      {% for f in data.recent_talent_flags %}
+      <div class="list-item" style="align-items:flex-start"><span style="font-size:20px">✨</span>
+        <div class="grow"><div class="bold small">{{ f.student.full_name }} <span class="chip chip-accent">{{ f.area }}</span></div>
+          <div class="small" style="margin-top:2px">{{ f.note }}</div><div class="tiny muted">{{ f.flagged_by }} · {{ f.created_at|date:"d.m.Y" }}</div></div></div>
+      {% empty %}<p class="muted small">Hali belgi qo'yilmagan.</p>{% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

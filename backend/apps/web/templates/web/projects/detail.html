@@ -1,0 +1,120 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}{{ project.title }}{% endblock %}
+
+{% block content %}
+<a href="{% url 'web:projects' %}" class="back-link">{% icon "arrow-left" "icon-sm" %} Loyihalar</a>
+
+<div class="layout-main-aside">
+  <div class="stack">
+    <div class="card card-lg stack">
+      <div class="row-between wrap">
+        <div class="row wrap"><span class="chip chip-primary">{{ project.get_stage_display }}</span>
+          {% if project.is_recruiting %}<span class="chip chip-success">👋 Jamoa yig'ilmoqda</span>{% endif %}</div>
+        {% if is_owner or user.is_management %}<a href="{% url 'web:project-edit' project.pk %}" class="btn btn-ghost btn-sm">{% icon "edit" "icon-sm" %} Tahrirlash</a>{% endif %}
+      </div>
+      <h1>{{ project.title }}</h1>
+      <div>
+        <div class="stage-track">{% for label in stage_labels %}<span class="{% if forloop.counter0 <= stage_index %}done{% endif %}"></span>{% endfor %}</div>
+        <div class="stage-labels">{% for label in stage_labels %}<span>{{ label }}</span>{% endfor %}</div>
+      </div>
+      <div class="prose">{{ project.description }}</div>
+      {% if project.problem %}
+      <div class="card" style="background:var(--surface-2); border:0">
+        <div class="eyebrow">Qanday muammoni hal qiladi</div>
+        <p class="prose" style="margin-top:6px">{{ project.problem }}</p>
+      </div>
+      {% endif %}
+      <div class="row wrap">
+        {% if project.repo_url %}<a href="{{ project.repo_url }}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">{% icon "github" "icon-sm" %} Repozitoriy</a>{% endif %}
+        {% if project.demo_url %}<a href="{{ project.demo_url }}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">{% icon "external" "icon-sm" %} Demo</a>{% endif %}
+      </div>
+    </div>
+
+    {% if is_owner and pending_members %}
+    <div class="card card-lg">
+      <div class="card-header"><h2>Qo'shilish so'rovlari</h2><span class="chip chip-danger">{{ pending_members|length }}</span></div>
+      <div class="list">
+        {% for m in pending_members %}
+        <div class="list-item">
+          {% avatar m.user %}
+          <div class="grow"><div class="bold">{{ m.user|display_name }} <span class="muted small">· {{ m.role }}</span></div>
+            {% if m.message %}<div class="small muted">«{{ m.message }}»</div>{% endif %}</div>
+          <form method="post" action="{% url 'web:project-approve' project.pk m.pk %}" class="inline-form">{% csrf_token %}
+            <button class="btn btn-success btn-sm">{% icon "check" "icon-sm" %} Qabul qilish</button></form>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if is_owner and recommendations %}
+    <div class="card card-lg">
+      <div class="card-header"><div><h2>Tavsiya etilgan jamoadoshlar ✨</h2><p class="small muted">Loyihangizga kerakli ko'nikmalarga ega talabalar</p></div></div>
+      <div class="grid-2">
+        {% for candidate in recommendations %}
+        <div class="card row" style="box-shadow:none">
+          {% avatar candidate %}
+          <div class="grow">
+            {% if candidate.portfolio_slug %}<a href="{% url 'web:portfolio' candidate.portfolio_slug %}" class="bold">{{ candidate|display_name }}</a>{% else %}<div class="bold">{{ candidate|display_name }}</div>{% endif %}
+            <div class="small muted">{{ candidate.faculty.short_name|default:"" }} · {{ candidate.matched }} ta mos ko'nikma{% if candidate.endorsed %} · ✓ {{ candidate.endorsed }}{% endif %}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if posts %}
+    <div class="card card-lg">
+      <h2 style="margin-bottom:6px">Loyiha yangiliklari</h2>
+      <div class="list">
+        {% for post in posts %}
+        <a href="{% url 'web:post-detail' post.pk %}" class="list-item list-item-link">{% avatar post.author "sm" %}
+          <div class="grow"><div class="small truncate">{{ post.text }}</div><div class="tiny muted">{{ post.created_at|timesince }} oldin</div></div></a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <aside class="stack">
+    <div class="card stack">
+      {% if is_owner %}
+        {% if project.next_stage %}
+        <form method="post" action="{% url 'web:project-advance' project.pk %}">{% csrf_token %}
+          <button class="btn btn-gradient btn-block">{% icon "rocket" %} Keyingi bosqichga o'tkazish</button></form>
+        <p class="tiny muted center">Har bir bosqichda jamoaning har bir a'zosi +100 XP oladi</p>
+        {% else %}<div class="center"><div style="font-size:36px">🦄</div><div class="bold">Loyiha startup bosqichida!</div></div>{% endif %}
+      {% elif membership %}
+        {% if membership.status == "active" %}<div class="chip chip-success" style="justify-content:center">✓ Siz jamoa a'zosisiz · {{ membership.role }}</div>
+        {% else %}<div class="chip chip-info" style="justify-content:center">⏳ So'rovingiz ko'rib chiqilmoqda</div>{% endif %}
+      {% elif project.is_recruiting %}
+        <h3>Jamoaga qo'shilish</h3>
+        <form method="post" action="{% url 'web:project-join' project.pk %}" class="form">{% csrf_token %}
+          {% include "web/partials/form_fields.html" with form=join_form %}
+          <button class="btn btn-primary btn-block">{% icon "send" %} So'rov yuborish</button>
+        </form>
+      {% else %}
+        <p class="muted small center">Loyiha hozir a'zo qabul qilmayapti.</p>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>Jamoa</h3><span class="chip">{{ active_members|length }}</span></div>
+      <div class="list">
+        {% for m in active_members %}
+        <div class="list-item">{% avatar m.user "sm" %}<div class="grow"><div class="bold small truncate">{{ m.user|display_name }}</div><div class="tiny muted">{{ m.role }}</div></div></div>
+        {% endfor %}
+      </div>
+    </div>
+
+    {% if project.skills_needed.all %}
+    <div class="card">
+      <h3 style="margin-bottom:10px">Kerakli ko'nikmalar</h3>
+      <div class="row-sm wrap">{% for skill in project.skills_needed.all %}<span class="chip">{{ skill.name }}</span>{% endfor %}</div>
+    </div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

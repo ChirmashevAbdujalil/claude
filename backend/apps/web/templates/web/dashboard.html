@@ -1,0 +1,127 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Bosh sahifa{% endblock %}
+
+{% block content %}
+<div class="stack-lg">
+  <div class="page-header" style="margin-bottom:0">
+    <div>
+      <h1>Salom, {{ user.first_name|default:user.username }}! 👋</h1>
+      <p>Bugun iqtidoringizni yana bir qadam oldinga suramiz.</p>
+    </div>
+    {% if user.is_reviewer and pending_reviews %}
+    <a href="{% url 'web:review' %}" class="btn btn-soft">{% icon "check-circle" %} {{ pending_reviews }} ta tekshiruv kutmoqda</a>
+    {% endif %}
+  </div>
+
+  <div class="layout-main-aside">
+    <div class="stack">
+      <!-- Daraja kartasi -->
+      <div class="card card-lg hero-card stack">
+        <div class="row-between wrap">
+          <div class="row">
+            {% avatar user "lg" %}
+            <div>
+              <div class="muted small bold">{{ my_level.number }}-daraja</div>
+              <div style="font-size:22px; font-weight:800">{{ my_level.name }}</div>
+            </div>
+          </div>
+          <a href="{% url 'web:arena' %}" class="btn btn-white btn-sm">{% icon "trophy" "icon-sm" %} {% if rank %}#{{ rank.rank }} reytingda{% else %}Reyting{% endif %}</a>
+        </div>
+        <div>
+          <div class="row-between small bold">
+            <span>{{ user.xp }} XP</span>
+            {% if my_level.next_level_xp %}<span class="muted">keyingi daraja: {{ my_level.next_level_xp }} XP</span>{% else %}<span class="muted">Eng yuqori daraja 👑</span>{% endif %}
+          </div>
+          <div class="progress" style="margin-top:8px"><span style="width:{{ my_level.progress|percent }}%"></span></div>
+        </div>
+        <div class="grid-3" style="grid-template-columns:repeat(3,1fr); gap:12px">
+          <div><div class="stat-value" style="font-size:22px">🔥 {{ streak.current|default:0 }}</div><div class="muted small">kunlik streak</div></div>
+          <div><div class="stat-value" style="font-size:22px">🪙 {{ user.coins }}</div><div class="muted small">tanga</div></div>
+          <div><div class="stat-value" style="font-size:22px">🏅 {{ user.badges.count }}</div><div class="muted small">nishon</div></div>
+        </div>
+      </div>
+
+      <!-- Kunlik challenge -->
+      {% if daily %}
+      <a href="{% url 'web:challenge-detail' daily.pk %}" class="card card-link" style="border-color:color-mix(in srgb, var(--accent) 45%, var(--border)); background:linear-gradient(135deg, var(--accent-soft), var(--surface) 60%)">
+        <div class="row">
+          <div class="stat-icon tone-accent" style="width:52px;height:52px;font-size:26px">🎯</div>
+          <div class="grow">
+            <div class="eyebrow" style="color:var(--accent-text)">Bugungi challenge</div>
+            <h3 style="margin-top:2px">{{ daily.title }}</h3>
+            <div class="meta" style="margin-top:4px"><span>+{{ daily.xp_reward }} XP</span><span>{% icon "clock" "icon-sm" %}{{ daily.ends_at|timeuntil }} qoldi</span></div>
+          </div>
+          <span class="btn btn-accent btn-sm hide-mobile">Yechish</span>
+        </div>
+      </a>
+      {% endif %}
+
+      <!-- Ochiq challenge'lar -->
+      <div class="stack-sm">
+        <div class="row-between"><h2>Ochiq challenge'lar</h2><a href="{% url 'web:challenges' %}" class="small bold">Hammasi →</a></div>
+        {% if challenges %}
+        <div class="grid-3">{% for challenge in challenges %}{% include "web/partials/challenge_card.html" %}{% endfor %}</div>
+        {% else %}
+        <div class="card">{% include "web/partials/empty.html" with emoji="🎉" title="Hammasi yechilgan!" text="Yangi challenge'lar tez orada chiqadi." %}</div>
+        {% endif %}
+      </div>
+
+      <!-- Tez havolalar -->
+      <div class="grid-4" style="grid-template-columns:repeat(2,1fr)">
+        <a href="{% url 'web:ai' %}" class="card card-link stack-sm"><span class="stat-icon tone-primary">{% icon "sparkles" %}</span><div class="bold">AI Mentor</div><div class="small muted">Shaxsiy yo'l xaritasi</div></a>
+        <a href="{% url 'web:projects' %}" class="card card-link stack-sm"><span class="stat-icon tone-success">{% icon "rocket" %}</span><div class="bold">Loyihalar</div><div class="small muted">Jamoa toping</div></a>
+        <a href="{% url 'web:opportunities' %}" class="card card-link stack-sm"><span class="stat-icon tone-info">{% icon "briefcase" %}</span><div class="bold">Imkoniyatlar</div><div class="small muted">Grant va stajirovka</div></a>
+        <a href="{% url 'web:shop' %}" class="card card-link stack-sm"><span class="stat-icon tone-accent">{% icon "gift" %}</span><div class="bold">Do'kon</div><div class="small muted">{{ user.coins }} tanga bor</div></a>
+      </div>
+    </div>
+
+    <aside class="stack">
+      <div class="card">
+        <div class="card-header"><h3>Nishonlarim</h3><a href="{% url 'web:arena' %}?tab=badges" class="small bold">Hammasi</a></div>
+        {% if badges %}
+        <div class="badge-row">{% for ub in badges %}<span class="badge-pill" title="{{ ub.badge.description }}">{{ ub.badge.icon }} {{ ub.badge.name }}</span>{% endfor %}</div>
+        {% else %}<p class="muted small">Birinchi challenge'ni yechib, birinchi nishoningizni oling!</p>{% endif %}
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>Yaqin tadbirlar</h3><a href="{% url 'web:events' %}" class="small bold">Hammasi</a></div>
+        <div class="list">
+          {% for event in events %}
+          <a href="{% url 'web:event-detail' event.pk %}" class="list-item list-item-link">
+            <div class="stat-icon tone-info" style="flex-direction:column;line-height:1.05"><span class="bold" style="font-size:15px">{{ event.starts_at|date:"d" }}</span><span class="tiny">{{ event.starts_at|date:"M" }}</span></div>
+            <div class="grow"><div class="bold truncate">{{ event.title }}</div><div class="small muted truncate">{{ event.location }} · +{{ event.xp_reward }} XP</div></div>
+          </a>
+          {% empty %}<p class="muted small">Hozircha rejalashtirilgan tadbir yo'q.</p>{% endfor %}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>Loyihalarim</h3><a href="{% url 'web:project-create' %}" class="small bold">+ Yangi</a></div>
+        <div class="list">
+          {% for m in memberships %}
+          <a href="{% url 'web:project-detail' m.project.pk %}" class="list-item list-item-link">
+            <span class="stat-icon tone-success">{% icon "rocket" %}</span>
+            <div class="grow"><div class="bold truncate">{{ m.project.title }}</div><div class="small muted">{{ m.role }} · {{ m.project.get_stage_display }}</div></div>
+          </a>
+          {% empty %}<p class="muted small">G'oyangiz bormi? Loyiha yarating va jamoa yig'ing.</p>{% endfor %}
+        </div>
+      </div>
+
+      {% if opportunities %}
+      <div class="card">
+        <div class="card-header"><h3>Yangi imkoniyatlar</h3><a href="{% url 'web:opportunities' %}" class="small bold">Hammasi</a></div>
+        <div class="list">
+          {% for o in opportunities %}
+          <a href="{% url 'web:opportunity-detail' o.pk %}" class="list-item list-item-link">
+            <div class="grow"><div class="bold truncate">{{ o.title }}</div><div class="small muted truncate">{{ o.organization }}</div></div>
+            <span class="chip chip-info">{{ o.get_kind_display }}</span>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </aside>
+  </div>
+</div>
+{% endblock %}

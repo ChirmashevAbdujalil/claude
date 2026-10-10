@@ -1,0 +1,38 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Imkoniyatlar{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><h1>Imkoniyatlar 💼</h1><p>Grantlar, stajirovkalar, vakansiyalar va sanoatning real muammolari.</p></div>
+  {% if can_publish %}<a href="{% url 'web:opportunity-create' %}" class="btn btn-primary">{% icon "plus" %} E'lon joylash</a>{% endif %}
+</div>
+
+<div class="tabs" style="margin-bottom:20px">
+  {% for value, label in kinds %}<a href="?kind={{ value }}" class="tab {% if kind == value %}active{% endif %}">{{ label }}</a>{% endfor %}
+</div>
+
+{% if page.object_list %}
+<div class="grid-2">
+  {% for o in page %}
+  <a href="{% url 'web:opportunity-detail' o.pk %}" class="card card-link stack-sm" {% if o.locked %}style="opacity:.8"{% endif %}>
+    <div class="row-between">
+      <span class="chip chip-info">{{ o.get_kind_display }}</span>
+      {% if o.applied %}<span class="chip chip-success">✓ Ariza yuborilgan</span>
+      {% elif o.locked %}<span class="chip">🔒 {{ o.min_level }}-darajadan</span>{% endif %}
+    </div>
+    <h3>{{ o.title }}</h3>
+    <div class="small bold muted">{{ o.organization }}</div>
+    <p class="muted small" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ o.description }}</p>
+    <div class="meta" style="margin-top:4px">
+      {% if o.reward %}<span>{% icon "gift" "icon-sm" %}{{ o.reward }}</span>{% endif %}
+      {% if o.deadline %}<span>{% icon "clock" "icon-sm" %}{{ o.deadline|date:"d E" }} gacha</span>{% else %}<span>{% icon "clock" "icon-sm" %}Muddatsiz</span>{% endif %}
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% include "web/partials/pagination.html" %}
+{% else %}
+<div class="card">{% include "web/partials/empty.html" with emoji="🔭" title="Hozircha imkoniyat yo'q" text="Yangi grant va stajirovkalar e'lon qilinishi bilan shu yerda ko'rinadi." %}</div>
+{% endif %}
+{% endblock %}

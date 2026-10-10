@@ -1,0 +1,26 @@
+{% load web_tags %}
+<div class="nav-section">Asosiy</div>
+<a href="{% url 'web:dashboard' %}" class="nav-link {% active 'dashboard' %}">{% icon "home" %} Bosh sahifa</a>
+<a href="{% url 'web:challenges' %}" class="nav-link {% active 'challenges' 'challenge' %}">{% icon "target" %} Challenge'lar</a>
+<a href="{% url 'web:projects' %}" class="nav-link {% active 'projects' 'project' %}">{% icon "rocket" %} Loyihalar</a>
+<a href="{% url 'web:arena' %}" class="nav-link {% active 'arena' %}">{% icon "trophy" %} Arena</a>
+<a href="{% url 'web:ai' %}" class="nav-link {% active 'ai' %}">{% icon "sparkles" %} AI Mentor</a>
+
+<div class="nav-section">Imkoniyatlar</div>
+<a href="{% url 'web:opportunities' %}" class="nav-link {% active 'opportunities' 'opportunity' %}">{% icon "briefcase" %} Imkoniyatlar</a>
+<a href="{% url 'web:shop' %}" class="nav-link {% active 'shop' %}">{% icon "gift" %} Mukofotlar do'koni</a>
+<a href="{% url 'web:events' %}" class="nav-link {% active 'events' 'event' %}">{% icon "calendar" %} Tadbirlar</a>
+<a href="{% url 'web:feed' %}" class="nav-link {% active 'feed' 'post' %}">{% icon "message" %} Lenta</a>
+
+{% if user.is_reviewer %}
+<div class="nav-section">O'qituvchi</div>
+<a href="{% url 'web:review' %}" class="nav-link {% active 'review' %}">{% icon "check-circle" %} Tekshiruv
+  {% if review_count %}<span class="chip chip-danger count">{{ review_count }}</span>{% endif %}</a>
+<a href="{% url 'web:challenge-create' %}" class="nav-link">{% icon "plus" %} Challenge yaratish</a>
+{% endif %}
+{% if user.is_management %}
+<a href="{% url 'web:insights' %}" class="nav-link {% active 'insights' %}">{% icon "chart" %} Statistika</a>
+{% endif %}
+{% if user.is_staff %}
+<a href="{% url 'admin:index' %}" class="nav-link">{% icon "shield" %} Admin panel</a>
+{% endif %}

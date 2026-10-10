@@ -1,0 +1,27 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Post{% endblock %}
+
+{% block content %}
+<a href="{% url 'web:feed' %}" class="back-link">{% icon "arrow-left" "icon-sm" %} Lenta</a>
+<div class="stack" style="max-width:720px">
+  {% include "web/community/post_card.html" %}
+  <div class="card">
+    <h3 style="margin-bottom:8px">Izohlar ({{ comments|length }})</h3>
+    <div class="list">
+      {% for comment in comments %}
+      <div class="list-item" style="align-items:flex-start">
+        {% avatar comment.author "sm" %}
+        <div class="grow"><div class="small"><b>{{ comment.author|display_name }}</b> <span class="muted tiny">· {{ comment.created_at|timesince }} oldin</span></div>
+          <p class="small" style="margin-top:2px">{{ comment.text }}</p></div>
+      </div>
+      {% empty %}<p class="muted small" style="padding:8px 0">Birinchi izohni siz yozing.</p>{% endfor %}
+    </div>
+    <form method="post" class="row" style="margin-top:12px; align-items:flex-end">
+      {% csrf_token %}
+      <div class="field grow">{{ form.text }}</div>
+      <button class="btn btn-primary btn-icon" aria-label="Yuborish">{% icon "send" "icon-sm" %}</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

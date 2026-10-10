@@ -1,0 +1,27 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Yutuq qo'shish{% endblock %}
+
+{% block content %}
+<a href="{% url 'web:profile' %}" class="back-link">{% icon "arrow-left" "icon-sm" %} Profil</a>
+<div class="page-header"><div><h1>Yutuq qo'shish 🏅</h1><p>O'qituvchi tasdiqlagach, yutuq portfolioingizda chiqadi va XP olasiz.</p></div></div>
+
+<div class="layout-main-aside">
+  <form method="post" enctype="multipart/form-data" class="card card-lg form">
+    {% csrf_token %}
+    {% include "web/partials/form_fields.html" %}
+    <div class="form-actions"><button class="btn btn-primary btn-lg">{% icon "send" %} Tasdiqlashga yuborish</button></div>
+  </form>
+  <aside class="card stack-sm" style="align-self:start">
+    <h3>Qancha XP beriladi?</h3>
+    <div class="list small">
+      <div class="list-item"><span class="grow">Patent / ixtiro</span><span class="xp">600</span></div>
+      <div class="list-item"><span class="grow">Ilmiy maqola</span><span class="xp">400</span></div>
+      <div class="list-item"><span class="grow">Olimpiada, hakaton</span><span class="xp">300</span></div>
+      <div class="list-item"><span class="grow">Sport, ijod</span><span class="xp">150</span></div>
+      <div class="list-item"><span class="grow">Sertifikat</span><span class="xp">100</span></div>
+    </div>
+    <p class="tiny muted">O'qituvchi yutuq darajasiga qarab XP miqdorini o'zgartirishi mumkin.</p>
+  </aside>
+</div>
+{% endblock %}

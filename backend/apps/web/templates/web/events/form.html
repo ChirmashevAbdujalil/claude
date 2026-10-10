@@ -1,0 +1,14 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}{% if instance %}Tadbirni tahrirlash{% else %}Yangi tadbir{% endif %}{% endblock %}
+
+{% block content %}
+<a href="{% if instance %}{% url 'web:event-detail' instance.pk %}{% else %}{% url 'web:events' %}{% endif %}" class="back-link">{% icon "arrow-left" "icon-sm" %} Orqaga</a>
+<div class="page-header"><div><h1>{% if instance %}Tadbirni tahrirlash{% else %}Yangi tadbir 📅{% endif %}</h1>
+  <p>Saqlangach, tadbir sahifasida check-in uchun QR kod paydo bo'ladi.</p></div></div>
+<form method="post" class="card card-lg form" style="max-width:760px">
+  {% csrf_token %}
+  {% include "web/partials/form_fields.html" %}
+  <div class="form-actions"><button class="btn btn-primary btn-lg">{% icon "check" %} Saqlash</button></div>
+</form>
+{% endblock %}

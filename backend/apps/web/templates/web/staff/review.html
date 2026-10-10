@@ -1,0 +1,68 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Tekshiruv{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><h1>Tekshiruv navbati ✅</h1><p>Talabalar yechimlari va yutuqlarini baholang: ular XP shu yerdan oladi.</p></div>
+  <a href="{% url 'web:challenge-create' %}" class="btn btn-primary">{% icon "plus" %} Challenge yaratish</a>
+</div>
+
+<div class="tabs" style="margin-bottom:20px">
+  <a href="?tab=submissions" class="tab {% if tab != 'achievements' %}active{% endif %}">Yechimlar ({{ submissions|length }})</a>
+  <a href="?tab=achievements" class="tab {% if tab == 'achievements' %}active{% endif %}">Yutuqlar ({{ achievements|length }})</a>
+</div>
+
+{% if tab == "achievements" %}
+  <div class="stack">
+  {% for a in achievements %}
+    <div class="card card-lg stack">
+      <div class="row-between wrap">
+        <div class="row">{% avatar a.user %}
+          <div><div class="bold">{% if a.user.portfolio_slug %}<a href="{% url 'web:portfolio' a.user.portfolio_slug %}" style="color:inherit">{{ a.user|display_name }}</a>{% else %}{{ a.user|display_name }}{% endif %}</div>
+            <div class="small muted">{{ a.user.faculty.short_name|default:"" }} · {{ a.created_at|timesince }} oldin</div></div></div>
+        <span class="chip chip-info">{{ a.get_kind_display }}</span>
+      </div>
+      <div><h3>{{ a.title }}</h3><div class="small muted">{{ a.achieved_on|date:"d E Y" }}</div></div>
+      {% if a.description %}<p class="prose small">{{ a.description }}</p>{% endif %}
+      <div class="row wrap">
+        {% if a.proof %}<a href="{{ a.proof.url }}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">{% icon "external" "icon-sm" %} Hujjatni ko'rish</a>{% endif %}
+        {% if a.proof_url %}<a href="{{ a.proof_url }}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">{% icon "link" "icon-sm" %} Havola</a>{% endif %}
+      </div>
+      <form method="post" action="{% url 'web:review-achievement' a.pk %}" class="row wrap" style="align-items:flex-end">
+        {% csrf_token %}
+        <div class="field" style="width:120px"><label>XP</label><input type="number" name="xp" min="0" max="1000" placeholder="{% for k, v in kind_xp.items %}{% if k == a.kind %}{{ v }}{% endif %}{% endfor %}"></div>
+        <div class="field grow" style="min-width:200px"><label>Izoh</label><input type="text" name="comment" maxlength="255" placeholder="Ixtiyoriy"></div>
+        <button name="decision" value="approve" class="btn btn-success">{% icon "check" "icon-sm" %} Tasdiqlash</button>
+        <button name="decision" value="reject" class="btn btn-danger">{% icon "x" "icon-sm" %} Rad etish</button>
+      </form>
+    </div>
+  {% empty %}
+    <div class="card">{% include "web/partials/empty.html" with emoji="🎉" title="Hammasi tekshirilgan" text="Yangi yutuqlar kelganda shu yerda paydo bo'ladi." %}</div>
+  {% endfor %}
+  </div>
+{% else %}
+  <div class="stack">
+  {% for s in submissions %}
+    <div class="card card-lg stack">
+      <div class="row-between wrap">
+        <div class="row">{% avatar s.user %}
+          <div><div class="bold">{{ s.user|display_name }}</div><div class="small muted">{{ s.user.faculty.short_name|default:"" }}{% if s.user.course %} · {{ s.user.course }}-kurs{% endif %} · {{ s.created_at|timesince }} oldin</div></div></div>
+        <a href="{% url 'web:challenge-detail' s.challenge.pk %}" class="chip chip-primary">{{ s.challenge.title|truncatechars:40 }} · {{ s.challenge.xp_reward }} XP</a>
+      </div>
+      {% if s.answer %}<div class="answer-box">{{ s.answer }}</div>{% endif %}
+      {% if s.link %}<a href="{{ s.link }}" target="_blank" rel="noopener" class="row-sm small bold">{% icon "link" "icon-sm" %} {{ s.link }}</a>{% endif %}
+      <form method="post" action="{% url 'web:review-submission' s.pk %}" class="row wrap" style="align-items:flex-end">
+        {% csrf_token %}
+        <div class="field" style="width:130px"><label>Baho (0-100)</label><input type="number" name="score" min="0" max="100" value="100"></div>
+        <div class="field grow" style="min-width:200px"><label>Izoh talabaga</label><input type="text" name="feedback" placeholder="Nima yaxshi, nimani yaxshilash mumkin?"></div>
+        <button name="decision" value="accept" class="btn btn-success">{% icon "check" "icon-sm" %} Qabul qilish</button>
+        <button name="decision" value="reject" class="btn btn-danger">{% icon "x" "icon-sm" %} Rad etish</button>
+      </form>
+    </div>
+  {% empty %}
+    <div class="card">{% include "web/partials/empty.html" with emoji="🎉" title="Navbat bo'sh" text="Barcha yechimlar tekshirilgan. Ajoyib ish!" %}</div>
+  {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}

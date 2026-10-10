@@ -1,0 +1,68 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}{{ opportunity.title }}{% endblock %}
+
+{% block content %}
+<a href="{% url 'web:opportunities' %}" class="back-link">{% icon "arrow-left" "icon-sm" %} Imkoniyatlar</a>
+
+<div class="layout-main-aside">
+  <div class="stack">
+    <div class="card card-lg stack">
+      <div class="row wrap"><span class="chip chip-info">{{ opportunity.get_kind_display }}</span>
+        {% if opportunity.min_level > 1 %}<span class="chip">⭐ {{ opportunity.min_level }}-darajadan</span>{% endif %}
+        {% if not opportunity.is_active %}<span class="chip chip-danger">Faol emas</span>{% endif %}</div>
+      <h1>{{ opportunity.title }}</h1>
+      <div class="row-sm bold muted">{% icon "briefcase" "icon-sm" %} {{ opportunity.organization }}</div>
+      <div class="prose">{{ opportunity.description }}</div>
+      {% if opportunity.external_url %}<div><a href="{{ opportunity.external_url }}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">{% icon "external" "icon-sm" %} Batafsil ma'lumot</a></div>{% endif %}
+    </div>
+
+    {% if applications is not None %}
+    <div class="card card-lg">
+      <div class="card-header"><h2>Arizalar</h2><span class="chip">{{ applications|length }}</span></div>
+      <div class="list">
+        {% for app in applications %}
+        <div class="list-item" style="align-items:flex-start">
+          {% avatar app.user %}
+          <div class="grow">
+            <div class="row-between"><span class="bold">{{ app.user|display_name }}</span><span class="chip">{{ app.get_status_display }}</span></div>
+            <div class="small muted">{{ app.user.xp }} XP · {{ app.created_at|date:"d.m.Y" }}</div>
+            <p class="small" style="margin-top:6px">{{ app.motivation }}</p>
+            {% if app.user.portfolio_slug %}<a href="{% url 'web:portfolio' app.user.portfolio_slug %}" class="small bold">Portfolio →</a>{% endif %}
+          </div>
+        </div>
+        {% empty %}<p class="muted small">Hali ariza kelmagan.</p>{% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <aside class="stack">
+    <div class="card stack">
+      {% if opportunity.reward %}<div class="stat"><span class="stat-icon tone-accent">{% icon "gift" %}</span><div><div class="bold">{{ opportunity.reward }}</div><div class="stat-label">Mukofot / maosh</div></div></div>{% endif %}
+      <div class="stat"><span class="stat-icon tone-primary">{% icon "clock" %}</span><div>
+        <div class="bold">{% if opportunity.deadline %}{{ opportunity.deadline|date:"d E Y, H:i" }}{% else %}Muddatsiz{% endif %}</div>
+        <div class="stat-label">{% if opportunity.deadline %}{{ opportunity.deadline|timeuntil }} qoldi{% else %}Ariza qabul qilinmoqda{% endif %}</div></div></div>
+    </div>
+
+    <div class="card stack">
+      {% if application %}
+        <div class="center stack-sm"><div style="font-size:40px">📨</div><h3>Ariza yuborilgan</h3>
+          <span class="chip chip-info" style="align-self:center">{{ application.get_status_display }}</span>
+          <p class="small muted">{{ application.created_at|date:"d.m.Y" }} da yuborildi</p></div>
+      {% elif locked %}
+        <div class="center stack-sm"><div style="font-size:40px">🔒</div><h3>{{ opportunity.min_level }}-daraja kerak</h3>
+          <p class="small muted">Challenge'lar yechib va yutuqlar qo'shib darajangizni oshiring.</p>
+          <a href="{% url 'web:challenges' %}" class="btn btn-soft">Challenge'larga o'tish</a></div>
+      {% else %}
+        <h3>Ariza topshirish</h3>
+        <form method="post" class="form">{% csrf_token %}
+          {% include "web/partials/form_fields.html" %}
+          <button class="btn btn-gradient btn-block">{% icon "send" %} Ariza yuborish</button>
+          <p class="tiny muted">Arizangiz bilan birga portfolio sahifangiz ham ko'rinadi.</p>
+        </form>
+      {% endif %}
+    </div>
+  </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Menyu{% endblock %}
+
+{% block content %}
+<div class="stack">
+  <a href="{% url 'web:profile' %}" class="card card-link row">
+    {% avatar user "lg" %}
+    <div class="grow">
+      <div class="bold" style="font-size:17px">{{ user|display_name }}</div>
+      <div class="small muted">{{ my_level.name }} · {{ user.xp }} XP · 🪙 {{ user.coins }}</div>
+    </div>
+    {% icon "arrow-right" %}
+  </a>
+  <div class="card card-flush" style="padding:8px">
+    {% include "web/partials/nav_links.html" %}
+  </div>
+  <form method="post" action="{% url 'web:logout' %}">{% csrf_token %}
+    <button class="btn btn-ghost btn-block">{% icon "logout" %} Chiqish</button>
+  </form>
+</div>
+{% endblock %}

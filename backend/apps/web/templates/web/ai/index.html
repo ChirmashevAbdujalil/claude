@@ -1,0 +1,50 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}AI Mentor{% endblock %}
+
+{% block content %}
+<div class="card card-lg hero-card stack" style="margin-bottom:24px">
+  <div class="row-between wrap">
+    <div class="stack-sm">
+      <span class="chip" style="background:rgba(255,255,255,.18);color:#fff;align-self:flex-start">{% icon "sparkles" "icon-sm" %} Sun'iy intellekt</span>
+      <h1>AI Mentor 24/7</h1>
+      <p class="muted" style="max-width:560px">Shaxsiy yo'l xaritasi, startup g'oyangiz tahlili va kelajakdagi kasbingiz: barchasi sizning ko'nikmalaringizga moslab.</p>
+    </div>
+    <div class="center"><div class="muted small bold">Bugungi limit</div><div style="font-size:28px;font-weight:800">{{ used }} / {{ limit }}</div></div>
+  </div>
+</div>
+
+<div class="grid-3" style="margin-bottom:28px">
+  {% for mode in modes %}
+  <div class="card card-lg stack">
+    <div class="mode-card"><span class="mode-emoji">{{ mode.emoji }}</span>
+      <div><h3>{{ mode.title }}</h3><p class="small muted" style="margin-top:4px">{{ mode.text }}</p></div></div>
+    <form method="post" action="{% url 'web:ai-start' %}" class="stack-sm">{% csrf_token %}
+      <input type="hidden" name="mode" value="{{ mode.value }}">
+      {% for prompt in mode.prompts %}
+      <button name="text" value="{{ prompt }}" class="btn btn-ghost btn-sm" style="justify-content:flex-start; white-space:normal; text-align:left; height:auto; padding:8px 12px">💬 {{ prompt }}</button>
+      {% endfor %}
+      <button class="btn btn-soft btn-block">{% icon "plus" "icon-sm" %} Yangi suhbat</button>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+
+<h2 style="margin-bottom:12px">Suhbatlarim</h2>
+{% if conversations %}
+<div class="card">
+  <div class="list">
+    {% for c in conversations %}
+    <a href="{% url 'web:ai-chat' c.pk %}" class="list-item list-item-link">
+      <span class="mode-emoji" style="width:40px;height:40px;font-size:20px">{% if c.mode == "idea_check" %}💡{% elif c.mode == "career" %}🚀{% else %}🧭{% endif %}</span>
+      <div class="grow"><div class="bold truncate">{{ c.title|default:"Yangi suhbat" }}</div><div class="small muted">{{ c.get_mode_display }} · {{ c.updated_at|timesince }} oldin</div></div>
+      {% icon "arrow-right" "icon-sm" %}
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% else %}
+<div class="card">{% include "web/partials/empty.html" with emoji="🤖" title="Hali suhbat yo'q" text="Yuqoridagi tayyor savollardan birini tanlang." %}</div>
+{% endif %}
+<p class="tiny muted center" style="margin-top:16px">AI ba'zan xato qilishi mumkin. Muhim ma'lumotlarni rasmiy manbalardan tekshiring. Ismingiz va kontaktlaringiz AI'ga yuborilmaydi.</p>
+{% endblock %}

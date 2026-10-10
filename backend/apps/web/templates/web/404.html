@@ -1,0 +1,12 @@
+{% extends "web/base.html" %}
+{% block title %}Sahifa topilmadi{% endblock %}
+{% block body %}
+<div class="auth-wrap">
+  <div class="center stack" style="max-width:420px">
+    <div style="font-size:64px">🧭</div>
+    <h1>Sahifa topilmadi</h1>
+    <p class="muted">Bu sahifa mavjud emas yoki sizda uni ko'rish huquqi yo'q.</p>
+    <div><a href="{% url 'web:landing' %}" class="btn btn-primary">Bosh sahifaga qaytish</a></div>
+  </div>
+</div>
+{% endblock %}

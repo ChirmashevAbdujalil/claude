@@ -1,0 +1,127 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Arena{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><h1>Arena 🏆</h1><p>Reyting, fakultetlar ligasi va nishonlaringiz.</p></div>
+</div>
+
+<div class="kpi-grid" style="margin-bottom:20px">
+  <div class="card stat"><span class="stat-icon tone-accent">{% icon "bolt" %}</span><div><div class="stat-value">{{ user.xp }}</div><div class="stat-label">XP</div></div></div>
+  <div class="card stat"><span class="stat-icon tone-primary">{% icon "star" %}</span><div><div class="stat-value" style="font-size:1.1rem">{{ my_level.name }}</div><div class="stat-label">{{ my_level.number }}-daraja</div></div></div>
+  <div class="card stat"><span class="stat-icon tone-danger">{% icon "flame" %}</span><div><div class="stat-value">{{ streak.current|default:0 }}</div><div class="stat-label">kun streak · eng uzuni {{ streak.longest|default:0 }}</div></div></div>
+  <div class="card stat"><span class="stat-icon tone-accent">{% icon "coin" %}</span><div><div class="stat-value">{{ user.coins }}</div><div class="stat-label">tanga</div></div></div>
+</div>
+
+<div class="tabs" style="margin-bottom:20px">
+  {% for value, label in tabs %}<a href="?tab={{ value }}" class="tab {% if tab == value %}active{% endif %}">{{ label }}</a>{% endfor %}
+</div>
+
+{% if tab == "leaderboard" %}
+  <form method="get" class="row wrap" style="margin-bottom:16px">
+    <input type="hidden" name="tab" value="leaderboard">
+    <div class="segmented">
+      {% for value, label in periods %}
+      <input type="radio" name="period" id="p-{{ value }}" value="{{ value }}" {% if board.period == value %}checked{% endif %} onchange="this.form.submit()">
+      <label for="p-{{ value }}">{{ label }}</label>
+      {% endfor %}
+    </div>
+    <select name="faculty" class="input" style="max-width:260px" onchange="this.form.submit()">
+      <option value="">Barcha fakultetlar</option>
+      {% for f in faculties %}<option value="{{ f.pk }}" {% if faculty == f.pk|stringformat:"s" %}selected{% endif %}>{{ f.name }}</option>{% endfor %}
+    </select>
+    <noscript><button class="btn btn-ghost btn-sm">Ko'rsatish</button></noscript>
+  </form>
+
+  {% if board.rows %}
+  <div class="grid-3" style="margin-bottom:16px; grid-template-columns:repeat(3,1fr); gap:10px; align-items:end">
+    {% for row in podium %}
+    <div class="card center stack-sm" style="{% if row.rank == 1 %}order:2; padding-top:26px; border-color:#fcd34d{% elif row.rank == 2 %}order:1{% else %}order:3{% endif %}">
+      <div style="font-size:26px">{% if row.rank == 1 %}🥇{% elif row.rank == 2 %}🥈{% else %}🥉{% endif %}</div>
+      <div style="display:grid;place-items:center">{% avatar row.user "lg" %}</div>
+      <div class="bold small truncate">{{ row.user|display_name }}</div>
+      <div class="xp small">{{ row.score }} XP</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="card">
+    <div class="list">
+      {% for row in board.rows %}
+      <div class="list-item {% if row.user.pk == user.pk %}leader-me{% endif %}">
+        <span class="rank {% if row.rank <= 3 %}rank-{{ row.rank }}{% endif %}">{{ row.rank }}</span>
+        {% avatar row.user "sm" %}
+        <div class="grow">
+          {% if row.user.portfolio_slug %}<a href="{% url 'web:portfolio' row.user.portfolio_slug %}" class="bold truncate" style="color:inherit;display:block">{{ row.user|display_name }}</a>
+          {% else %}<div class="bold truncate">{{ row.user|display_name }}</div>{% endif %}
+          <div class="small muted">{{ row.user.faculty.short_name|default:"—" }}{% if row.user.course %} · {{ row.user.course }}-kurs{% endif %}</div>
+        </div>
+        <span class="xp">{{ row.score }} XP</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% if board.me and board.me.rank > board.rows|length %}
+    <div class="list-item leader-me" style="margin-top:8px">
+      <span class="rank">{{ board.me.rank }}</span>{% avatar user "sm" %}
+      <div class="grow bold">Siz</div><span class="xp">{{ board.me.score }} XP</span>
+    </div>
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="card">{% include "web/partials/empty.html" with emoji="🏁" title="Bu davrda hali hech kim ball to'plamagan" text="Birinchi bo'ling!" %}</div>
+  {% endif %}
+
+{% elif tab == "league" %}
+  <div class="card card-lg stack">
+    <div class="row-between wrap"><h2>Fakultetlar ligasi</h2><span class="chip">Semestr {{ since|date:"d E Y" }} dan</span></div>
+    {% for row in league %}
+    <div class="stack-sm">
+      <div class="row-between">
+        <div class="row"><span class="rank {% if row.rank <= 3 %}rank-{{ row.rank }}{% endif %}">{{ row.rank }}</span>
+          <div><div class="bold">{{ row.faculty }}</div><div class="small muted">{{ row.members }} talaba</div></div></div>
+        <span class="xp">{{ row.xp }} XP</span>
+      </div>
+      <div class="progress"><span style="width:{{ row.xp|ratio:league_top }}%"></span></div>
+    </div>
+    {% empty %}
+    {% include "web/partials/empty.html" with emoji="🏟️" title="Fakultetlar hali qo'shilmagan" %}
+    {% endfor %}
+  </div>
+
+{% elif tab == "badges" %}
+  <p class="muted" style="margin-bottom:12px">{{ earned_count }} / {{ badges|length }} nishon olingan</p>
+  <div class="badge-grid">
+    {% for badge in badges %}
+    <div class="badge-tile {% if not badge.earned %}locked{% endif %}">
+      <div class="emoji">{{ badge.icon }}</div>
+      <div class="bold">{{ badge.name }}</div>
+      <div class="small muted" style="margin-top:4px">{{ badge.description }}</div>
+      {% if badge.earned %}<div class="tiny bold" style="margin-top:8px;color:var(--success)">✓ {{ badge.earned.awarded_at|date:"d.m.Y" }}</div>
+      {% elif badge.xp_bonus %}<div class="tiny bold xp" style="margin-top:8px">+{{ badge.xp_bonus }} XP</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+{% elif tab == "history" %}
+  <div class="card">
+    {% if page.object_list %}
+    <div class="list">
+      {% for tx in page %}
+      <div class="list-item">
+        <span class="stat-icon {% if tx.coins < 0 %}tone-danger{% else %}tone-accent{% endif %}" style="width:38px;height:38px">{% if tx.coins < 0 %}{% icon "gift" "icon-sm" %}{% else %}{% icon "bolt" "icon-sm" %}{% endif %}</span>
+        <div class="grow"><div class="bold truncate">{{ tx.get_reason_display }}</div><div class="small muted truncate">{{ tx.note|default:"" }} · {{ tx.created_at|date:"d.m.Y H:i" }}</div></div>
+        <div class="center">
+          {% if tx.xp %}<div class="xp small">+{{ tx.xp }} XP</div>{% endif %}
+          {% if tx.coins %}<div class="small bold" style="color:{% if tx.coins < 0 %}var(--danger){% else %}var(--muted){% endif %}">{% if tx.coins > 0 %}+{% endif %}{{ tx.coins }} 🪙</div>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% include "web/partials/pagination.html" %}
+    {% else %}
+    {% include "web/partials/empty.html" with emoji="📜" title="Tarix bo'sh" text="Birinchi ballingizni oling!" %}
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}

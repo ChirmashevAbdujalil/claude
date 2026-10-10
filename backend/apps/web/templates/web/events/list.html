@@ -1,0 +1,46 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Tadbirlar{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><h1>Tadbirlar 📅</h1><p>Master-klasslar, hakatonlar va uchrashuvlar. QR orqali check-in qiling va XP oling.</p></div>
+  <div class="row wrap">
+    <a href="{% url 'web:event-checkin' %}" class="btn btn-soft">{% icon "qr" %} Check-in</a>
+    {% if user.is_reviewer %}<a href="{% url 'web:event-create' %}" class="btn btn-primary">{% icon "plus" %} Tadbir</a>{% endif %}
+  </div>
+</div>
+
+<div class="tabs" style="margin-bottom:20px">
+  <a href="?" class="tab {% if not past %}active{% endif %}">Kelgusi</a>
+  <a href="?past=1" class="tab {% if past %}active{% endif %}">O'tgan</a>
+</div>
+
+{% if page.object_list %}
+<div class="grid-2">
+  {% for event in page %}
+  <a href="{% url 'web:event-detail' event.pk %}" class="card card-link row" style="align-items:flex-start">
+    <div class="center" style="min-width:64px; padding:10px; border-radius:14px; background:var(--primary-soft); color:var(--primary-text)">
+      <div style="font-size:24px; font-weight:800; line-height:1">{{ event.starts_at|date:"d" }}</div>
+      <div class="tiny bold" style="text-transform:uppercase">{{ event.starts_at|date:"M" }}</div>
+    </div>
+    <div class="grow stack-sm">
+      <h3>{{ event.title }}</h3>
+      <div class="meta">
+        <span>{% icon "clock" "icon-sm" %}{{ event.starts_at|date:"H:i" }}</span>
+        <span>{% icon "pin" "icon-sm" %}{{ event.location }}</span>
+        <span>{% icon "users" "icon-sm" %}{{ event.registered_count }}{% if event.capacity %}/{{ event.capacity }}{% endif %}</span>
+      </div>
+      <div class="row-sm wrap">
+        <span class="chip chip-accent">+{{ event.xp_reward }} XP</span>
+        {% if event.is_registered %}<span class="chip chip-success">✓ Ro'yxatdasiz</span>{% endif %}
+      </div>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% include "web/partials/pagination.html" %}
+{% else %}
+<div class="card">{% include "web/partials/empty.html" with emoji="🗓️" title="Tadbirlar yo'q" text="Yangi tadbirlar e'lon qilinishi bilan shu yerda chiqadi." %}</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "web/base.html" %}
+{% load web_tags %}
+{% block title %}Iqtidoringizni kashf qiling{% endblock %}
+{% block body_class %}landing{% endblock %}
+
+{% block body %}
+<header class="landing-nav">
+  <a href="{% url 'web:landing' %}" class="brand"><span class="brand-mark">★</span><span>Talent Hub<small>ADTI iqtidorlar platformasi</small></span></a>
+  <a href="{% url 'web:login' %}" class="btn btn-ghost btn-sm">Kirish</a>
+</header>
+
+<section class="landing-hero">
+  <div>
+    <span class="chip chip-primary">🎓 Andijon davlat texnika instituti</span>
+    <h1 style="margin-top:18px">Iqtidoringizni <span class="gradient-text">kashf qiling</span>, rivojlantiring va dunyoga ko'rsating</h1>
+    <p class="lead">Challenge'lar yeching, loyihalar quring, AI mentor bilan o'sing va har bir yutug'ingiz uchun ball, nishon va real mukofotlar oling.</p>
+    <div class="form-actions">
+      <a href="{% url 'web:login' %}" class="btn btn-gradient btn-lg">Boshlash {% icon "arrow-right" %}</a>
+      <a href="#features" class="btn btn-ghost btn-lg">Imkoniyatlar</a>
+    </div>
+    <div class="row wrap" style="margin-top:28px; gap:24px">
+      <div><div class="stat-value">{{ stats.students }}</div><div class="stat-label">talaba</div></div>
+      <div><div class="stat-value">{{ stats.challenges }}</div><div class="stat-label">challenge</div></div>
+      <div><div class="stat-value">{{ stats.projects }}</div><div class="stat-label">loyiha</div></div>
+      <div><div class="stat-value">{{ stats.achievements }}</div><div class="stat-label">tasdiqlangan yutuq</div></div>
+    </div>
+  </div>
+
+  <div class="hero-visual" aria-hidden="true">
+    <div class="card card-lg hero-card stack">
+      <div class="row-between">
+        <div class="row"><span class="avatar avatar-lg" style="--hue:280;background:rgba(255,255,255,.2)">AK</span>
+          <div><div class="bold" style="font-size:18px">Aziza K.</div><div class="muted small">Kompyuter injiniringi · 2-kurs</div></div></div>
+        <span class="chip" style="background:rgba(255,255,255,.18);color:#fff">💡 Ixtirochi</span>
+      </div>
+      <div>
+        <div class="row-between small"><span>2 340 XP</span><span class="muted">Innovator: 5 000</span></div>
+        <div class="progress" style="margin-top:8px"><span style="width:44%"></span></div>
+      </div>
+      <div class="grid-3" style="grid-template-columns:repeat(3,1fr)">
+        <div><div class="stat-value" style="font-size:22px">🔥 12</div><div class="muted small">kun streak</div></div>
+        <div><div class="stat-value" style="font-size:22px">#4</div><div class="muted small">reytingda</div></div>
+        <div><div class="stat-value" style="font-size:22px">9</div><div class="muted small">nishon</div></div>
+      </div>
+    </div>
+    <div class="float-chip" style="left:-14px; bottom:-18px">🎯 Kunlik challenge +10 XP</div>
+    <div class="float-chip" style="right:-8px; top:-18px">🏆 Hakaton qahramoni</div>
+  </div>
+</section>
+
+<section class="landing-section" id="features">
+  <div class="center stack-sm" style="margin-bottom:28px">
+    <span class="eyebrow">Platforma imkoniyatlari</span>
+    <h2 style="font-size:clamp(1.5rem,1.2rem+1.4vw,2.2rem)">Kashf qilish → Rivojlantirish → Imkoniyat</h2>
+  </div>
+  <div class="grid-3">
+    <div class="card card-lg"><div class="feature-icon tone-primary">🎯</div><h3>Challenge'lar</h3><p class="muted" style="margin-top:6px">Kunlik savollar, haftalik va oylik muhandislik keyslari. Har bir yechim iqtidoringizni ochib beradi.</p></div>
+    <div class="card card-lg"><div class="feature-icon tone-accent">🤖</div><h3>AI Mentor 24/7</h3><p class="muted" style="margin-top:6px">Shaxsiy o'quv yo'l xaritasi, startup g'oyangiz tahlili va sizga mos kasblar.</p></div>
+    <div class="card card-lg"><div class="feature-icon tone-success">🚀</div><h3>Loyihalar va jamoa</h3><p class="muted" style="margin-top:6px">G'oyadan startupgacha. Platforma ko'nikmalaringizga qarab jamoadosh topib beradi.</p></div>
+    <div class="card card-lg"><div class="feature-icon tone-info">🧬</div><h3>Talent Passport</h3><p class="muted" style="margin-top:6px">Ko'nikmalar xaritasi, o'qituvchi tasdiqlagan yutuqlar va ulashsa bo'ladigan portfolio.</p></div>
+    <div class="card card-lg"><div class="feature-icon tone-danger">🏆</div><h3>Arena</h3><p class="muted" style="margin-top:6px">XP, darajalar, nishonlar, streak va fakultetlar ligasi. O'qish o'yin kabi qiziqarli.</p></div>
+    <div class="card card-lg"><div class="feature-icon tone-accent">🎁</div><h3>Real mukofotlar</h3><p class="muted" style="margin-top:6px">Tangalarni kitob, kurs va merch'ga almashtiring. Grant va stajirovkalarga ariza bering.</p></div>
+  </div>
+</section>
+
+<section class="landing-section">
+  <div class="grid-2" style="align-items:center; gap:32px">
+    <div class="stack">
+      <span class="eyebrow">Qanday ishlaydi</span>
+      <h2 style="font-size:clamp(1.4rem,1.2rem+1vw,2rem)">Besh qadamda yangi bosqichga</h2>
+      <div class="stack steps">
+        <div class="step"><h3>Telegram orqali kiring</h3><p class="muted">Bir daqiqada ro'yxatdan o'ting.</p></div>
+        <div class="step"><h3>Birinchi challenge'ni yeching</h3><p class="muted">Birinchi 5 daqiqada birinchi nishoningiz.</p></div>
+        <div class="step"><h3>Profilingizni to'ldiring</h3><p class="muted">Ko'nikmalar xaritangiz shakllanadi.</p></div>
+        <div class="step"><h3>Jamoa toping va loyiha quring</h3><p class="muted">Har bir bosqich jamoaga XP olib keladi.</p></div>
+        <div class="step"><h3>Imkoniyatlarni qo'lga kiriting</h3><p class="muted">Grant, stajirovka, ish taklifi.</p></div>
+      </div>
+    </div>
+    <div class="card card-lg stack">
+      <h3>Darajalar yo'li</h3>
+      {% for number, name, min_xp in levels %}
+      <div class="row">
+        <span class="rank {% if number == 5 %}rank-1{% endif %}">{{ number }}</span>
+        <div class="grow"><div class="bold">{{ name }}</div><div class="muted small">{{ min_xp }} XP dan</div></div>
+        {% if number == 1 %}<span class="chip chip-success">Start</span>{% elif number == 5 %}<span class="chip chip-accent">👑</span>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="landing-section">
+  <div class="cta-band hero-card card">
+    <h2 style="font-size:clamp(1.5rem,1.2rem+1.4vw,2.2rem)">Sizning iqtidoringiz ko'rinishga loyiq</h2>
+    <p class="muted" style="margin:10px auto 24px; max-width:520px">Bugun boshlang: birinchi challenge sizni kutmoqda.</p>
+    <a href="{% url 'web:login' %}" class="btn btn-white btn-lg">Platformaga kirish {% icon "arrow-right" %}</a>
+  </div>
+</section>
+
+<footer class="landing-footer">© Andijon davlat texnika instituti · ADTI Talent Hub</footer>
+{% endblock %}

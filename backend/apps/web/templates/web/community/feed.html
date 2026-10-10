@@ -1,0 +1,43 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Lenta{% endblock %}
+
+{% block content %}
+<div class="page-header"><div><h1>Lenta 💬</h1><p>Yutuqlar, loyihalar va g'oyalar bilan o'rtoqlashing.</p></div></div>
+
+<div class="layout-main-aside">
+  <div class="stack">
+    <form method="post" enctype="multipart/form-data" class="card stack-sm">
+      {% csrf_token %}
+      <div class="row" style="align-items:flex-start">
+        {% avatar user %}
+        <div class="grow stack-sm">
+          {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+          <div class="field {% if form.text.errors %}has-error{% endif %}">{{ form.text }}{% for e in form.text.errors %}<span class="error">{{ e }}</span>{% endfor %}</div>
+          <div class="row-between wrap">
+            <label class="btn btn-ghost btn-sm" style="cursor:pointer">📷 Rasm<input type="file" name="image" accept="image/*" class="sr-only"></label>
+            <button class="btn btn-primary btn-sm">{% icon "send" "icon-sm" %} Joylash</button>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    {% for post in page %}{% include "web/community/post_card.html" %}
+    {% empty %}
+    <div class="card">{% include "web/partials/empty.html" with emoji="📣" title="Lenta hali bo'sh" text="Birinchi postni siz joylang!" %}</div>
+    {% endfor %}
+    {% include "web/partials/pagination.html" %}
+  </div>
+
+  <aside class="stack">
+    <div class="card stack-sm">
+      <h3>💡 Nimalar haqida yozish mumkin?</h3>
+      <p class="small muted">Yasagan robotingiz, yechgan murakkab masalangiz, olimpiada natijangiz, loyihangiz yangiliklari yoki jamoaga odam qidirayotganingiz.</p>
+    </div>
+    <div class="card stack-sm">
+      <h3>🤝 Hamjamiyat qoidalari</h3>
+      <p class="small muted">Bir-biringizni hurmat qiling, faqat o'z ishingizni joylang va boshqalarni ilhomlantiring.</p>
+    </div>
+  </aside>
+</div>
+{% endblock %}

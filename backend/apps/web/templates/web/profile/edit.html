@@ -1,0 +1,31 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Profilni tahrirlash{% endblock %}
+
+{% block content %}
+<a href="{% url 'web:profile' %}" class="back-link">{% icon "arrow-left" "icon-sm" %} Profil</a>
+<div class="page-header"><div><h1>Profilni tahrirlash</h1><p>To'liq profil sizni o'qituvchilar va ish beruvchilarga ko'rinadigan qiladi.</p></div></div>
+
+<form method="post" enctype="multipart/form-data" class="card card-lg form" style="max-width:760px">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+  <div class="row">{% avatar user "lg" %}<div class="grow">{% include "web/partials/field.html" with field=form.avatar %}</div></div>
+  <div class="grid-2">
+    {% include "web/partials/field.html" with field=form.first_name %}
+    {% include "web/partials/field.html" with field=form.last_name %}
+    {% include "web/partials/field.html" with field=form.faculty %}
+    {% include "web/partials/field.html" with field=form.course %}
+  </div>
+  {% include "web/partials/field.html" with field=form.bio %}
+  <div class="grid-2">
+    {% include "web/partials/field.html" with field=form.github_url %}
+    {% include "web/partials/field.html" with field=form.linkedin_url %}
+  </div>
+  {% include "web/partials/field.html" with field=form.portfolio_slug %}
+  {% include "web/partials/field.html" with field=form.is_public %}
+  <div class="form-actions">
+    <button class="btn btn-primary btn-lg">{% icon "check" %} Saqlash</button>
+    <a href="{% url 'web:profile' %}" class="btn btn-ghost btn-lg">Bekor qilish</a>
+  </div>
+</form>
+{% endblock %}

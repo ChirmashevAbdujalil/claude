@@ -1,0 +1,22 @@
+{% load web_tags %}
+<a href="{% url 'web:challenge-detail' challenge.pk %}" class="card card-link stack-sm">
+  <div class="row-between">
+    <span class="row-sm small bold"><i class="kind-dot kind-{{ challenge.kind }}"></i> {{ challenge.get_kind_display }}</span>
+    <span class="chip chip-accent">+{{ challenge.xp_reward }} XP</span>
+  </div>
+  <h3>{{ challenge.title }}</h3>
+  <p class="muted small" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ challenge.description }}</p>
+  <div class="row-between" style="margin-top:4px">
+    <div class="meta">
+      <span>{% icon "bolt" "icon-sm" %}{{ challenge.get_difficulty_display }}</span>
+      <span>{% icon "clock" "icon-sm" %}{{ challenge.ends_at|timeuntil }}</span>
+    </div>
+    {% with s=challenge.my_submission %}
+      {% if s %}
+        {% if s.status == "accepted" %}<span class="chip chip-success">✓ Yechildi</span>
+        {% elif s.status == "rejected" %}<span class="chip chip-danger">Rad etildi</span>
+        {% else %}<span class="chip chip-info">Tekshirilmoqda</span>{% endif %}
+      {% elif challenge.expected_answer %}<span class="chip">⚡ Tezkor</span>{% endif %}
+    {% endwith %}
+  </div>
+</a>

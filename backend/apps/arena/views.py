@@ -1,17 +1,11 @@
-from datetime import timedelta
-
-from django.contrib.auth import get_user_model
-from django.db.models import Count, IntegerField, Q, Sum, Value
-from django.db.models.functions import Coalesce
-from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.accounts.models import Faculty
 from apps.accounts.serializers import LevelSerializer
 
+from . import selectors
 from .levels import level_for_xp
 from .models import Badge, PointTransaction, Streak
 from .serializers import (
@@ -22,10 +16,6 @@ from .serializers import (
     StreakSerializer,
     UserBadgeSerializer,
 )
-from .services import semester_start
-
-LEADERBOARD_SIZE = 50
-PERIODS = {"week": 7, "month": 30}
 
 
 class ArenaSummaryView(APIView):
@@ -78,49 +68,23 @@ class LeaderboardView(APIView):
         responses=LeaderboardEntrySerializer(many=True),
     )
     def get(self, request):
-        User = get_user_model()
-        users = User.objects.filter(role=User.Role.STUDENT, is_active=True, is_public=True)
-        faculty = request.query_params.get("faculty")
-        course = request.query_params.get("course")
-        if faculty and faculty.isdigit():
-            users = users.filter(faculty_id=int(faculty))
-        if course and course.isdigit():
-            users = users.filter(course=int(course))
-
-        period = request.query_params.get("period", "all")
-        if period in PERIODS:
-            since = timezone.now() - timedelta(days=PERIODS[period])
-            users = users.annotate(
-                score=Coalesce(
-                    Sum("transactions__xp", filter=Q(transactions__created_at__gte=since)),
-                    Value(0),
-                    output_field=IntegerField(),
-                )
-            ).filter(score__gt=0)
-        else:
-            users = users.annotate(score=Coalesce("xp", Value(0)))
-
-        top = users.select_related("faculty").order_by("-score", "id")[:LEADERBOARD_SIZE]
+        params = request.query_params
+        board = selectors.leaderboard(
+            request.user, params.get("period", "all"), params.get("faculty"), params.get("course")
+        )
         entries = [
             {
-                "rank": index,
-                "user_id": user.id,
-                "full_name": user.get_full_name() or user.username,
-                "faculty": user.faculty.short_name if user.faculty else None,
-                "course": user.course,
-                "xp": user.score,
+                "rank": row.rank,
+                "user_id": row.user.id,
+                "full_name": row.user.get_full_name() or row.user.username,
+                "faculty": row.user.faculty.short_name if row.user.faculty else None,
+                "course": row.user.course,
+                "xp": row.score,
             }
-            for index, user in enumerate(top, start=1)
+            for row in board.rows
         ]
-
-        my_entry = next((e for e in entries if e["user_id"] == request.user.id), None)
-        if my_entry is None:
-            mine = users.filter(pk=request.user.pk).first()
-            if mine is not None:
-                my_rank = users.filter(Q(score__gt=mine.score) | Q(score=mine.score, id__lt=mine.id)).count() + 1
-                my_entry = {"rank": my_rank, "xp": mine.score}
-
-        return Response({"period": period, "results": entries, "me": my_entry})
+        me = {"rank": board.me.rank, "xp": board.me.score} if board.me else None
+        return Response({"period": board.period, "results": entries, "me": me})
 
 
 class FacultyLeagueView(APIView):
@@ -128,17 +92,5 @@ class FacultyLeagueView(APIView):
 
     @extend_schema(responses=LeagueEntrySerializer(many=True))
     def get(self, request):
-        since = semester_start()
-        faculties = Faculty.objects.annotate(
-            score=Coalesce(
-                Sum("users__transactions__xp", filter=Q(users__transactions__created_at__date__gte=since)),
-                Value(0),
-                output_field=IntegerField(),
-            ),
-            members=Count("users", filter=Q(users__role="student"), distinct=True),
-        ).order_by("-score", "name")
-        results = [
-            {"rank": i, "faculty_id": f.id, "faculty": f.name, "xp": f.score, "members": f.members}
-            for i, f in enumerate(faculties, start=1)
-        ]
+        since, results = selectors.faculty_league()
         return Response({"semester_start": since, "results": results})

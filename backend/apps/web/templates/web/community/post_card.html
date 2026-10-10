@@ -1,0 +1,25 @@
+{% load web_tags %}
+<article class="card">
+  <div class="row" style="margin-bottom:10px">
+    {% avatar post.author %}
+    <div class="grow">
+      {% if post.author.portfolio_slug %}<a href="{% url 'web:portfolio' post.author.portfolio_slug %}" class="bold" style="color:inherit">{{ post.author|display_name }}</a>
+      {% else %}<span class="bold">{{ post.author|display_name }}</span>{% endif %}
+      <div class="tiny muted">{{ post.author.faculty.short_name|default:"" }}{% if post.author.faculty %} · {% endif %}{{ post.created_at|timesince }} oldin</div>
+    </div>
+    {% if post.project %}<a href="{% url 'web:project-detail' post.project.pk %}" class="chip chip-primary">🚀 {{ post.project.title|truncatechars:24 }}</a>{% endif %}
+  </div>
+  <div class="post-body">{{ post.text }}</div>
+  {% if post.image %}<img src="{{ post.image.url }}" alt="" class="post-image" loading="lazy">{% endif %}
+  <div class="post-actions">
+    <form method="post" action="{% url 'web:post-like' post.pk %}" data-like class="inline-form">{% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <button class="btn btn-ghost btn-sm like-btn {% if post.liked %}liked{% endif %}">{% icon "heart" "icon-sm" %} <span data-count>{{ post.like_count }}</span></button>
+    </form>
+    <a href="{% url 'web:post-detail' post.pk %}" class="btn btn-ghost btn-sm">{% icon "message" "icon-sm" %} {{ post.comment_count }}</a>
+    {% if post.author_id == user.pk or user.is_management %}
+    <form method="post" action="{% url 'web:post-delete' post.pk %}" class="inline-form" style="margin-left:auto" onsubmit="return confirm('Postni o\'chirasizmi?')">{% csrf_token %}
+      <button class="btn btn-ghost btn-sm btn-icon" aria-label="O'chirish">{% icon "trash" "icon-sm" %}</button></form>
+    {% endif %}
+  </div>
+</article>

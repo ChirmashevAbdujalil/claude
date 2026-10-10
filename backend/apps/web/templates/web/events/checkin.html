@@ -1,0 +1,27 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Check-in{% endblock %}
+
+{% block content %}
+<div style="max-width:480px; margin:20px auto">
+  <div class="card card-lg stack center">
+    <div class="stat-icon tone-primary" style="width:72px;height:72px;margin:0 auto">{% icon "qr" "icon-lg" %}</div>
+    {% if event %}
+      <div class="eyebrow">Tadbirga check-in</div>
+      <h1 style="font-size:1.5rem">{{ event.title }}</h1>
+      <p class="muted">{{ event.location }} · {{ event.starts_at|date:"d E, H:i" }}</p>
+      <form method="post">{% csrf_token %}
+        <input type="hidden" name="code" value="{{ code }}">
+        <button class="btn btn-gradient btn-lg btn-block">{% icon "check" %} Men shu yerdaman! +{{ event.xp_reward }} XP</button>
+      </form>
+    {% else %}
+      <h1 style="font-size:1.5rem">Check-in</h1>
+      <p class="muted">Tadbirdagi QR kodni telefon kamerasi bilan skanerlang yoki tashkilotchi bergan kodni kiriting.</p>
+      <form method="post" class="form" style="text-align:left">{% csrf_token %}
+        <div class="field"><label for="code">Check-in kodi</label><input id="code" name="code" class="input" value="{{ code }}" required autocomplete="off"></div>
+        <button class="btn btn-primary btn-lg btn-block">Tasdiqlash</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

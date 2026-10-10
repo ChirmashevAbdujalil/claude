@@ -11,11 +11,15 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.accounts.models import Faculty, User
+from apps.arena import services as arena
 from apps.arena.models import Badge
-from apps.community.models import Event
-from apps.discovery.models import Challenge
+from apps.community.models import Event, Post
+from apps.discovery import services as discovery_services
+from apps.discovery.models import Challenge, TalentFlag
 from apps.opportunities.models import Opportunity, Reward
-from apps.profiles.models import Skill
+from apps.profiles.models import Achievement, Skill, UserSkill
+from apps.projects import services as project_services
+from apps.projects.models import Project, ProjectMember
 
 BADGES = [
     ("first-challenge", "Birinchi qadam", "Birinchi challenge muvaffaqiyatli yechildi", "🎯", 20),
@@ -64,6 +68,47 @@ REWARDS = [
     ("Talent Hub futbolkasi", "Platformaning brendli futbolkasi", 300, 50),
     ("Onlayn kurs sertifikati", "Hamkor platformada pullik kurs", 800, 10),
     ("Rektor bilan choy", "Rektor bilan shaxsiy uchrashuv", 1500, 5),
+]
+
+DEMO_STUDENTS = [
+    (
+        "Aziza",
+        "Rahimova",
+        "Robototexnika va IoT ishqibozi. Aqlli qishloq xo'jaligi ustida ishlayman.",
+        [("Python", 4), ("Elektronika", 4), ("Robototexnika", 5)],
+        2340,
+    ),
+    (
+        "Jasur",
+        "Toshmatov",
+        "Elektronika muhandisi, Arduino va datchiklar bilan ishlayman.",
+        [("Elektronika", 5), ("C++", 3)],
+        1850,
+    ),
+    (
+        "Madina",
+        "Yusupova",
+        "Shahar infratuzilmasi va ma'lumotlar tahlili.",
+        [("Ma'lumotlar tahlili", 4), ("Python", 3), ("Ingliz tili", 4)],
+        1320,
+    ),
+    ("Bekzod", "Aliyev", "Tarmoq texnologiyalari va kiberxavfsizlik.", [("Kiberxavfsizlik", 4), ("Python", 2)], 980),
+    (
+        "Dilnoza",
+        "Qodirova",
+        "Matematik modellashtirish, olimpiada ishtirokchisi.",
+        [("Matematik modellashtirish", 5), ("Ilmiy maqola yozish", 3)],
+        760,
+    ),
+    (
+        "Sardor",
+        "Ergashev",
+        "Avtomobil dizayni va 3D modellashtirish.",
+        [("3D modellashtirish", 4), ("AutoCAD", 4)],
+        540,
+    ),
+    ("Nilufar", "Saidova", "UI/UX dizayner, mobil ilovalar.", [("UI/UX dizayn", 4), ("Grafik dizayn", 3)], 310),
+    ("Otabek", "Nazarov", "Energetika va quyosh panellari.", [("Energetika", 3)], 120),
 ]
 
 DEMO_FACULTIES = [
@@ -126,20 +171,32 @@ class Command(BaseCommand):
         if created:
             rector.set_password("demo12345")
             rector.save()
-        for index in range(1, 9):
+        students = []
+        for index, (first, last, bio, skills, xp) in enumerate(DEMO_STUDENTS, start=1):
             student, created = User.objects.get_or_create(
                 username=f"demo_student{index}",
                 defaults={
-                    "first_name": f"Talaba{index}",
-                    "last_name": "Demo",
+                    "first_name": first,
+                    "last_name": last,
+                    "bio": bio,
                     "faculty": faculties[index % len(faculties)],
                     "course": (index % 4) + 1,
                     "portfolio_slug": f"demo-student-{index}",
                 },
             )
-            if created:
-                student.set_password("demo12345")
-                student.save()
+            students.append(student)
+            if not created:
+                continue
+            student.set_password("demo12345")
+            student.save()
+            for name, level in skills:
+                UserSkill.objects.get_or_create(
+                    user=student, skill=Skill.objects.get(name=name), defaults={"level": level}
+                )
+            arena.award(student, arena.Reason.MANUAL, xp, note="Demo ball")
+            today = timezone.localdate()
+            for offset in range(index % 5 + 1, 0, -1):
+                arena.touch_streak(student, today - timedelta(days=offset - 1))
 
         now = timezone.now()
         Challenge.objects.get_or_create(
@@ -191,4 +248,59 @@ class Command(BaseCommand):
                 "created_by": rector,
             },
         )
+        self._demo_activity(teacher, students)
         self.stdout.write(self.style.SUCCESS("Demo ma'lumotlar yaratildi (parol: demo12345)"))
+
+    def _demo_activity(self, teacher, students):
+        """Loyiha, postlar, yutuqlar va tekshiruv navbati: sahifalar bo'sh ko'rinmasligi uchun."""
+        if Project.objects.filter(title="Aqlli issiqxona").exists():
+            return
+        leader, partner, solver, achiever = students[0], students[1], students[2], students[3]
+        project = project_services.create_project(
+            leader,
+            title="Aqlli issiqxona",
+            description="Harorat, namlik va sug'orishni avtomatik boshqaradigan IoT tizimi. "
+            "Datchiklar ma'lumoti Telegram bot orqali fermerga yuboriladi.",
+            problem="Andijon fermerlari issiqxonada qo'lda nazorat qiladi: hosilning 20% gacha qismi yo'qoladi.",
+            skills_needed=list(Skill.objects.filter(name__in=["Elektronika", "Python", "UI/UX dizayn"])),
+        )
+        ProjectMember.objects.create(project=project, user=partner, role="Elektronika muhandisi", status="active")
+        project_services.advance_stage(project, leader)
+
+        Achievement.objects.create(
+            user=leader,
+            kind=Achievement.Kind.HACKATHON,
+            title="AI Hackathon Andijon 2026: 1-o'rin",
+            achieved_on=timezone.localdate() - timedelta(days=40),
+            proof_url="https://example.com/diplom",
+            status=Achievement.Status.APPROVED,
+            reviewed_by=teacher,
+            xp_awarded=300,
+        )
+        Achievement.objects.create(
+            user=achiever,
+            kind=Achievement.Kind.CERTIFICATE,
+            title="Cisco CCNA sertifikati",
+            achieved_on=timezone.localdate() - timedelta(days=10),
+            proof_url="https://example.com/ccna",
+        )
+        weekly = Challenge.objects.filter(kind=Challenge.Kind.WEEKLY).first()
+        if weekly:
+            discovery_services.submit(
+                weekly,
+                solver,
+                answer="Har bir to'xtash joyiga ultratovush datchigi, LoRaWAN orqali markaziy serverga, "
+                "natija xaritada real vaqtda ko'rsatiladi.",
+            )
+        for author, text in [
+            (leader, "Aqlli issiqxonamiz prototip bosqichiga chiqdi! 🌱 Datchiklar 3 kundan beri uzluksiz ishlayapti."),
+            (partner, "Arduino uchun namlik datchigini kalibrlashni o'rgandim. Kimga kerak bo'lsa yordam beraman 🔧"),
+            (students[4], "Respublika matematika olimpiadasida 2-o'rin! 🥈 Ustozimga katta rahmat."),
+        ]:
+            Post.objects.create(author=author, text=text, project=project if author == leader else None)
+        TalentFlag.objects.get_or_create(
+            student=leader,
+            flagged_by=teacher,
+            area=Skill.Category.ENGINEERING,
+            defaults={"note": "Laboratoriya ishida mustaqil ravishda yangi sxema taklif qildi."},
+        )

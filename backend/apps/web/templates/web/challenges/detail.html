@@ -1,0 +1,80 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}{{ challenge.title }}{% endblock %}
+
+{% block content %}
+<a href="{% url 'web:challenges' %}" class="back-link">{% icon "arrow-left" "icon-sm" %} Challenge'lar</a>
+
+{% if celebrate is not None %}
+<div class="card card-lg hero-card center stack-sm" style="margin-bottom:20px">
+  <div style="font-size:48px">🎉</div>
+  <h2>To'g'ri javob!</h2>
+  <p class="muted">Sizga +{{ celebrate }} XP qo'shildi. Shu ruhda davom eting!</p>
+  <div><a href="{% url 'web:challenges' %}" class="btn btn-white">Keyingi challenge {% icon "arrow-right" %}</a></div>
+</div>
+{% endif %}
+
+<div class="layout-main-aside">
+  <div class="stack">
+    <div class="card card-lg stack">
+      <div class="row wrap">
+        <span class="chip"><i class="kind-dot kind-{{ challenge.kind }}"></i> {{ challenge.get_kind_display }}</span>
+        <span class="chip">{{ challenge.get_category_display }}</span>
+        <span class="chip">{{ challenge.get_difficulty_display }}</span>
+        {% if challenge.expected_answer %}<span class="chip chip-info">⚡ Avtomatik tekshiriladi</span>{% endif %}
+      </div>
+      <h1>{{ challenge.title }}</h1>
+      <div class="prose">{{ challenge.description }}</div>
+    </div>
+
+    {% if submission %}
+    <div class="card card-lg stack">
+      <div class="row-between">
+        <h3>Sizning javobingiz</h3>
+        {% if submission.status == "accepted" %}<span class="chip chip-success">✓ Qabul qilindi · +{{ submission.xp_awarded }} XP</span>
+        {% elif submission.status == "rejected" %}<span class="chip chip-danger">Rad etildi</span>
+        {% else %}<span class="chip chip-info">⏳ Tekshirilmoqda</span>{% endif %}
+      </div>
+      {% if submission.answer %}<div class="answer-box">{{ submission.answer }}</div>{% endif %}
+      {% if submission.link %}<a href="{{ submission.link }}" target="_blank" rel="noopener" class="row-sm small bold">{% icon "link" "icon-sm" %} {{ submission.link }}</a>{% endif %}
+      {% if submission.feedback %}
+      <div class="card" style="background:var(--surface-2); border:0">
+        <div class="small bold muted">O'qituvchi izohi{% if submission.score is not None %} · baho {{ submission.score }}/100{% endif %}</div>
+        <p style="margin-top:4px">{{ submission.feedback }}</p>
+      </div>
+      {% endif %}
+    </div>
+    {% elif challenge.is_open %}
+    <div class="card card-lg">
+      <h3 style="margin-bottom:14px">Yechimingizni yuboring</h3>
+      <form method="post" class="form">
+        {% csrf_token %}
+        {% include "web/partials/form_fields.html" %}
+        <div class="form-actions"><button class="btn btn-gradient btn-lg">{% icon "send" %} Yuborish</button></div>
+        <p class="small muted">Har bir challenge'ga faqat bir marta javob yuborish mumkin.</p>
+      </form>
+    </div>
+    {% else %}
+    <div class="card">{% include "web/partials/empty.html" with emoji="⏰" title="Challenge yopilgan" text="Bu challenge'ga javob qabul qilish yakunlangan." %}</div>
+    {% endif %}
+  </div>
+
+  <aside class="stack">
+    <div class="card stack">
+      <div class="stat"><span class="stat-icon tone-accent">{% icon "bolt" %}</span><div><div class="stat-value">+{{ challenge.xp_reward }}</div><div class="stat-label">XP mukofot</div></div></div>
+      <div class="stat"><span class="stat-icon tone-primary">{% icon "clock" %}</span><div>
+        {% if challenge.is_open %}<div class="stat-value" style="font-size:1.1rem">{{ challenge.ends_at|timeuntil }}</div><div class="stat-label">qoldi · {{ challenge.ends_at|date:"d E, H:i" }}</div>
+        {% else %}<div class="stat-value" style="font-size:1.1rem">Yopilgan</div><div class="stat-label">{{ challenge.ends_at|date:"d E Y" }}</div>{% endif %}
+      </div></div>
+      {% if challenge.faculty %}<div class="stat"><span class="stat-icon tone-info">{% icon "users" %}</span><div><div class="bold">{{ challenge.faculty.name }}</div><div class="stat-label">faqat shu fakultet uchun</div></div></div>{% endif %}
+    </div>
+    {% if user.is_reviewer %}
+    <div class="card stack-sm">
+      <h3>O'qituvchi uchun</h3>
+      <a href="{% url 'web:challenge-edit' challenge.pk %}" class="btn btn-ghost btn-block">{% icon "edit" %} Tahrirlash</a>
+      <a href="{% url 'web:review' %}" class="btn btn-soft btn-block">{% icon "check-circle" %} Yechimlarni tekshirish</a>
+    </div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

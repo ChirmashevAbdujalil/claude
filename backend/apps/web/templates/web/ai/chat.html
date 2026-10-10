@@ -1,0 +1,39 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}{{ conversation.title|default:mode.title }}{% endblock %}
+
+{% block content %}
+<div class="chat card" style="padding:14px 16px">
+  <div class="row-between" style="padding-bottom:12px; border-bottom:1px solid var(--border)">
+    <div class="row">
+      <a href="{% url 'web:ai' %}" class="btn btn-ghost btn-icon btn-sm" aria-label="Orqaga">{% icon "arrow-left" "icon-sm" %}</a>
+      <span class="mode-emoji" style="width:40px;height:40px;font-size:20px">{{ mode.emoji }}</span>
+      <div><div class="bold">{{ mode.title }}</div><div class="tiny muted truncate" style="max-width:52vw">{{ conversation.title|default:"Yangi suhbat" }}</div></div>
+    </div>
+    <form method="post" action="{% url 'web:ai-delete' conversation.pk %}" onsubmit="return confirm('Suhbatni o\'chirasizmi?')">{% csrf_token %}
+      <button class="btn btn-ghost btn-icon btn-sm" aria-label="O'chirish">{% icon "trash" "icon-sm" %}</button></form>
+  </div>
+
+  <div class="chat-log" data-chat-log>
+    {% for message in messages_list %}
+      <div class="bubble {% if message.role == 'user' %}bubble-user{% else %}bubble-ai{% endif %}">{{ message.content }}</div>
+    {% empty %}
+      <div class="empty" style="margin:auto">
+        <div class="empty-icon">{{ mode.emoji }}</div>
+        <h3>{{ mode.title }}</h3>
+        <p>{{ mode.text }}</p>
+        <form method="post" class="stack-sm" style="margin-top:14px">{% csrf_token %}
+          {% for prompt in mode.prompts %}<button name="text" value="{{ prompt }}" class="btn btn-ghost btn-sm">💬 {{ prompt }}</button>{% endfor %}
+        </form>
+      </div>
+    {% endfor %}
+    <div class="typing" data-typing aria-label="AI yozmoqda"><i></i><i></i><i></i></div>
+  </div>
+
+  <form method="post" class="chat-input" data-chat>
+    {% csrf_token %}
+    <textarea name="text" rows="1" maxlength="4000" placeholder="Savolingizni yozing..." required data-autosize></textarea>
+    <button class="btn btn-gradient btn-icon" style="height:48px;width:48px" aria-label="Yuborish">{% icon "send" %}</button>
+  </form>
+</div>
+{% endblock %}

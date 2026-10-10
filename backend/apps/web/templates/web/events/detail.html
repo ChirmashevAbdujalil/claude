@@ -1,0 +1,66 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}{{ event.title }}{% endblock %}
+
+{% block content %}
+<a href="{% url 'web:events' %}" class="back-link">{% icon "arrow-left" "icon-sm" %} Tadbirlar</a>
+
+<div class="layout-main-aside">
+  <div class="stack">
+    <div class="card card-lg stack">
+      <div class="row wrap">
+        <span class="chip chip-accent">+{{ event.xp_reward }} XP</span>
+        {% if is_live %}<span class="chip chip-danger">● Hozir davom etmoqda</span>{% endif %}
+      </div>
+      <h1>{{ event.title }}</h1>
+      <div class="grid-3" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+        <div class="stat"><span class="stat-icon tone-primary">{% icon "calendar" %}</span><div><div class="bold">{{ event.starts_at|date:"d E, l" }}</div><div class="stat-label">{{ event.starts_at|date:"H:i" }}–{{ event.ends_at|date:"H:i" }}</div></div></div>
+        <div class="stat"><span class="stat-icon tone-info">{% icon "pin" %}</span><div><div class="bold">{{ event.location }}</div><div class="stat-label">Manzil</div></div></div>
+        <div class="stat"><span class="stat-icon tone-success">{% icon "users" %}</span><div><div class="bold">{{ event.registered_count }}{% if event.capacity %} / {{ event.capacity }}{% endif %}</div><div class="stat-label">ishtirokchi</div></div></div>
+      </div>
+      <div class="prose">{{ event.description }}</div>
+    </div>
+
+    {% if is_organizer and attendees is not None %}
+    <div class="card card-lg">
+      <div class="card-header"><h2>Ishtirokchilar</h2><a href="{% url 'web:event-edit' event.pk %}" class="btn btn-ghost btn-sm">{% icon "edit" "icon-sm" %} Tahrirlash</a></div>
+      <div class="list">
+        {% for reg in attendees %}
+        <div class="list-item">{% avatar reg.user "sm" %}<div class="grow bold small">{{ reg.user|display_name }}</div>
+          {% if reg.attended_at %}<span class="chip chip-success">✓ {{ reg.attended_at|date:"H:i" }}</span>{% else %}<span class="chip">Ro'yxatda</span>{% endif %}</div>
+        {% empty %}<p class="muted small">Hali hech kim ro'yxatdan o'tmagan.</p>{% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <aside class="stack">
+    {% if is_organizer %}
+    <div class="card stack" style="text-align:center">
+      <h3>Check-in QR kodi</h3>
+      <div class="qr-box" data-qr="{{ checkin_url }}"></div>
+      <p class="small muted">Tadbir davomida ekranga chiqaring. Talabalar telefon kamerasi bilan skanerlab, XP oladi.</p>
+      <button type="button" class="btn btn-ghost btn-sm" data-copy="{{ checkin_url }}">{% icon "copy" "icon-sm" %} <span data-label>Havolani nusxalash</span></button>
+    </div>
+    {% endif %}
+
+    <div class="card stack">
+      {% if registration.attended_at %}
+        <div class="center stack-sm"><div style="font-size:40px">✅</div><h3>Siz qatnashdingiz!</h3><p class="small muted">+{{ event.xp_reward }} XP olindi</p></div>
+      {% elif registration %}
+        <div class="center stack-sm"><div style="font-size:40px">🎟️</div><h3>Ro'yxatdan o'tgansiz</h3>
+          <p class="small muted">Tadbirda QR kodni skanerlang yoki tashkilotchidan kodni oling.</p>
+          <a href="{% url 'web:event-checkin' %}" class="btn btn-soft">{% icon "qr" %} Check-in</a></div>
+      {% elif is_over %}
+        <div class="center stack-sm"><div style="font-size:40px">🏁</div><h3>Tadbir yakunlangan</h3></div>
+      {% else %}
+        <form method="post" action="{% url 'web:event-register' event.pk %}">{% csrf_token %}
+          <button class="btn btn-gradient btn-block btn-lg">{% icon "check" %} Ro'yxatdan o'tish</button></form>
+        <p class="tiny muted center">Qatnashganingiz uchun +{{ event.xp_reward }} XP va streak</p>
+      {% endif %}
+    </div>
+  </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}{% if is_organizer %}<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>{% endif %}{% endblock %}

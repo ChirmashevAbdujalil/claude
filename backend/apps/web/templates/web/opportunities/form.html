@@ -1,0 +1,13 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Imkoniyat e'lon qilish{% endblock %}
+
+{% block content %}
+<a href="{% url 'web:opportunities' %}" class="back-link">{% icon "arrow-left" "icon-sm" %} Imkoniyatlar</a>
+<div class="page-header"><div><h1>Imkoniyat e'lon qilish</h1><p>Grant, stajirovka, vakansiya yoki korxonangizning real muammosi.</p></div></div>
+<form method="post" class="card card-lg form" style="max-width:760px">
+  {% csrf_token %}
+  {% include "web/partials/form_fields.html" %}
+  <div class="form-actions"><button class="btn btn-primary btn-lg">{% icon "send" %} E'lon qilish</button></div>
+</form>
+{% endblock %}

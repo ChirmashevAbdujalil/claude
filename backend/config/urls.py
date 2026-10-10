@@ -25,7 +25,10 @@ urlpatterns = [
     path("api/v1/", include(api_patterns)),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="docs"),
+    path("", include("apps.web.urls")),
 ]
+
+handler404 = "apps.web.views.public.page_not_found"
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

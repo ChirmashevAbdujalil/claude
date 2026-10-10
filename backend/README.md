@@ -1,6 +1,9 @@
 # ADTI Talent Hub: backend
 
-Python, Django va Django REST Framework asosidagi API. Veb-ilova va Telegram Mini App shu API bilan ishlaydi.
+Python, Django va Django REST Framework. Ikki qismdan iborat:
+
+- **Veb-interfeys** (Django template'lar): talabalar, o'qituvchilar va rahbariyat uchun to'liq sayt. Telegram Mini App ichida ham ishlaydi.
+- **REST API** (`/api/v1/`): mobil ilova va tashqi integratsiyalar uchun.
 
 ## Tez ishga tushirish
 
@@ -15,9 +18,13 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
+- Sayt: http://localhost:8000/
 - API hujjatlari (Swagger): http://localhost:8000/api/docs/
 - Admin panel: http://localhost:8000/admin/
-- Demo foydalanuvchilar: `demo_student1` … `demo_student8`, `demo_teacher`, `demo_rector` (parol: `demo12345`)
+- Demo foydalanuvchilar (parol: `demo12345`):
+  - `demo_student1`: talaba, loyiha asoschisi, reytingda 1-o'rin
+  - `demo_teacher`: o'qituvchi, tekshiruv navbatida yechim va yutuq bor
+  - `demo_rector`: rektorat, statistika paneli va admin panel
 
 Docker bilan (PostgreSQL bilan birga), repozitoriy ildizida:
 
@@ -25,6 +32,30 @@ Docker bilan (PostgreSQL bilan birga), repozitoriy ildizida:
 cp backend/.env.example backend/.env   # DJANGO_DEBUG=0 va DJANGO_SECRET_KEY ni to'ldiring
 POSTGRES_PASSWORD=maxfiy docker compose up --build
 ```
+
+## Veb-interfeys
+
+| Sahifa | Manzil | Kim uchun |
+|---|---|---|
+| Landing | `/` | Hamma |
+| Kirish | `/login/` (Telegram Mini App ichida avtomatik) | Hamma |
+| Bosh sahifa | `/app/` | Daraja kartasi, bugungi challenge, tadbirlar, loyihalar |
+| Challenge'lar | `/challenges/` | Yechim yuborish, kunlik savollar avtomatik tekshiriladi |
+| Arena | `/arena/` | Reyting (podium), fakultetlar ligasi, nishonlar, ball tarixi |
+| Profil | `/profile/` | Ko'nikmalar radari, yutuqlar, tahrirlash |
+| Portfolio | `/u/<slug>/` | Ommaviy sahifa. O'qituvchi shu yerda ko'nikmani tasdiqlaydi va «uchqun» belgisi qo'yadi |
+| Loyihalar | `/projects/` | Yaratish, qo'shilish, bosqichlar, jamoadosh tavsiyasi |
+| Imkoniyatlar | `/opportunities/` | Ariza topshirish. Hamkorlar e'lon joylaydi |
+| Do'kon | `/shop/` | Tangalarni sovg'aga almashtirish |
+| Lenta | `/feed/` | Postlar, layk, izohlar |
+| Tadbirlar | `/events/` | Ro'yxatdan o'tish, tashkilotchi uchun QR kod, `/events/check-in/` |
+| AI Mentor | `/ai/` | Uch rejimli chat |
+| Tekshiruv | `/review/` | O'qituvchi: yechim va yutuqlarni baholash |
+| Statistika | `/insights/` | Dekanat va rektorat |
+
+Dizayn tizimi bitta faylda: `apps/web/static/web/css/app.css`. Unda ranglar, tugmalar, kartalar va formalar bor, build bosqichi kerak emas. Sayt mobil qurilmalarga moslashgan, yorug' va qorong'i rejimni qo'llab-quvvatlaydi. Telegram ichida ochilganda Telegram mavzusiga moslashadi.
+
+Telegram Mini App ulash: @BotFather'da bot yarating, `TELEGRAM_BOT_TOKEN` ni `.env` ga yozing va botning Menu Button havolasini saytingiz manziliga (`https://.../app/`) qo'ying.
 
 ## Testlar va sifat tekshiruvi
 
@@ -50,7 +81,8 @@ backend/
     ├── opportunities/ # grant, vakansiya, stajirovka, mukofotlar do'koni
     ├── community/     # lenta, izohlar, tadbirlar va QR check-in
     ├── insights/      # rektorat va dekanat dashboardi
-    └── ai/            # AI Mentor, g'oya tekshiruvchi, karyera maslahatchisi (Claude API)
+    ├── ai/            # AI Mentor, g'oya tekshiruvchi, karyera maslahatchisi (Claude API)
+    └── web/           # veb-interfeys: template'lar, dizayn tizimi, view'lar
 ```
 
 Har bir modulda biznes qoidalari `services.py` faylida jamlangan. View'lar faqat so'rovni qabul qilib, servisni chaqiradi.

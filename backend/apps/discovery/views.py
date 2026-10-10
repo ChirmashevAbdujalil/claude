@@ -1,6 +1,4 @@
-from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -11,6 +9,7 @@ from apps.accounts.permissions import IsReviewer, ReadOnlyOrReviewer
 
 from . import services
 from .models import Challenge, Submission, TalentFlag
+from .selectors import visible_challenges
 from .serializers import (
     ChallengeSerializer,
     ReviewSerializer,
@@ -28,17 +27,7 @@ class ChallengeViewSet(viewsets.ModelViewSet):
     search_fields = ["title", "description"]
 
     def get_queryset(self):
-        qs = Challenge.objects.all()
-        user = self.request.user
-        if user.is_reviewer:
-            return qs
-        now = timezone.now()
-        qs = qs.filter(is_published=True, starts_at__lte=now).filter(
-            Q(faculty__isnull=True) | Q(faculty_id=user.faculty_id)
-        )
-        if self.request.query_params.get("state") != "all":
-            qs = qs.filter(ends_at__gte=now)
-        return qs
+        return visible_challenges(self.request.user, self.request.query_params.get("state") == "all")
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

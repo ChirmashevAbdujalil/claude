@@ -1,0 +1,9 @@
+<svg class="radar" viewBox="-30 -10 {{ size|add:60 }} {{ size|add:20 }}" role="img" aria-label="Ko'nikmalar xaritasi">
+  {% for polygon in grid %}<polygon class="grid-line" points="{{ polygon }}"/>{% endfor %}
+  {% for x, y in axes %}<line class="axis" x1="{{ center }}" y1="{{ center }}" x2="{{ x }}" y2="{{ y }}"/>{% endfor %}
+  {% if has_data %}
+    <polygon class="area" points="{{ area }}"/>
+    {% for x, y in dots %}<circle class="dot" cx="{{ x }}" cy="{{ y }}" r="3"/>{% endfor %}
+  {% endif %}
+  {% for label in labels %}<text x="{{ label.x }}" y="{{ label.y }}" text-anchor="{{ label.anchor }}">{{ label.text }}</text>{% endfor %}
+</svg>

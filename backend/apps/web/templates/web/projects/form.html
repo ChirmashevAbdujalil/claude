@@ -1,0 +1,26 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}{% if instance %}Loyihani tahrirlash{% else %}Yangi loyiha{% endif %}{% endblock %}
+
+{% block content %}
+<a href="{% if instance %}{% url 'web:project-detail' instance.pk %}{% else %}{% url 'web:projects' %}{% endif %}" class="back-link">{% icon "arrow-left" "icon-sm" %} Orqaga</a>
+<div class="page-header"><div><h1>{% if instance %}Loyihani tahrirlash{% else %}Yangi loyiha 💡{% endif %}</h1>
+  <p>G'oyangizni aniq yozing: shunda to'g'ri jamoadoshlar topiladi.</p></div></div>
+
+<div class="layout-main-aside">
+  <form method="post" class="card card-lg form">
+    {% csrf_token %}
+    {% include "web/partials/form_fields.html" %}
+    <div class="form-actions"><button class="btn btn-gradient btn-lg">{% icon "rocket" %} {% if instance %}Saqlash{% else %}Loyihani yaratish{% endif %}</button></div>
+  </form>
+  <aside class="card stack-sm" style="align-self:start">
+    <h3>🧭 Loyiha bosqichlari</h3>
+    <div class="list small">
+      <div class="list-item"><span class="rank">1</span><div><b>G'oya</b>: muammo va yechim aniqlangan</div></div>
+      <div class="list-item"><span class="rank">2</span><div><b>Prototip</b>: ishlaydigan birinchi versiya</div></div>
+      <div class="list-item"><span class="rank">3</span><div><b>Sinov</b>: real foydalanuvchilar bilan</div></div>
+      <div class="list-item"><span class="rank rank-1">4</span><div><b>Startup</b>: bozorga chiqish 🦄</div></div>
+    </div>
+  </aside>
+</div>
+{% endblock %}
