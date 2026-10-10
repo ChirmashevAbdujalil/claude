@@ -202,7 +202,7 @@ Platformaning «yuragi». Har bir modul ballar orqali bog'lanadi.
                     └───────────┬───────────┘
                                 ▼
 ┌──────────────────────────────────────────────────────────────┐
-│                   BACKEND (NestJS, modulli)                  │
+│              BACKEND (Python, Django + DRF, modulli)         │
 │  auth │ profiles │ discovery │ growth │ projects │ arena     │
 │  opportunities │ community │ insights │ notifications │ ai   │
 └───┬──────────────┬──────────────┬──────────────┬─────────────┘
@@ -219,11 +219,11 @@ PostgreSQL       Redis        Fayl ombori    AI xizmati
 | Qatlam | Texnologiya | Sabab |
 |---|---|---|
 | Frontend | Next.js, TypeScript, Tailwind, shadcn/ui | Tez, SEO (portfolio sahifalar), mobilga mos |
-| Telegram | Mini App (shu Next.js kodi) + grammY bot | Talabalar Telegram'da |
-| Backend | NestJS (TypeScript) | Modulli, frontend bilan bir til |
-| Baza | PostgreSQL + Prisma ORM | Ishonchli, relyatsion ma'lumotlar |
-| Kesh/navbat | Redis + BullMQ | Reytinglar, bildirishnomalar, fon vazifalari |
-| AI | Claude API, pgvector (tavsiyalar uchun) | Ko'p tilli, kuchli tahlil |
+| Telegram | Mini App (shu Next.js kodi) + aiogram bot (Python) | Talabalar Telegram'da |
+| Backend | Python, Django, Django REST Framework | Tayyor admin panel, xavfsizlik, tez ishlab chiqish |
+| Baza | PostgreSQL + Django ORM | Ishonchli, relyatsion ma'lumotlar, avtomatik migratsiyalar |
+| Kesh/navbat | Redis + Celery | Reytinglar, bildirishnomalar, fon vazifalari |
+| AI | Claude API (anthropic Python SDK), pgvector (tavsiyalar uchun) | Ko'p tilli, kuchli tahlil |
 | Fayllar | MinIO (S3 mos) | Sertifikat va rasmlar |
 | Infra | Docker Compose → keyinchalik Kubernetes | Oddiy boshlash |
 | CI/CD | GitHub Actions | Avtomatik test va deploy |
@@ -266,46 +266,25 @@ Notification
 
 ## 8. Repozitoriy strukturasi
 
-Monorepo (Turborepo + pnpm):
-
 ```
 adti-talent-hub/
-├── apps/
-│   ├── web/                  # Next.js: veb va Telegram Mini App
-│   │   ├── app/
-│   │   │   ├── (auth)/       # kirish, onboarding
-│   │   │   ├── (student)/    # profil, challenge, loyihalar, arena, imkoniyatlar
-│   │   │   ├── (teacher)/    # tasdiqlash, challenge yaratish
-│   │   │   ├── (partner)/    # vakansiya/muammo joylash
-│   │   │   ├── (admin)/      # rektorat va dekanat dashboard, moderatsiya
-│   │   │   └── u/[slug]/     # ommaviy portfolio sahifa
-│   │   ├── components/
-│   │   └── lib/
-│   ├── api/                  # NestJS backend
-│   │   └── src/modules/
-│   │       ├── auth/
-│   │       ├── profiles/
-│   │       ├── discovery/
-│   │       ├── growth/
-│   │       ├── projects/
-│   │       ├── arena/        # XP, coin, badge, streak, reyting, liga
-│   │       ├── opportunities/
-│   │       ├── community/
-│   │       ├── insights/
-│   │       ├── notifications/
-│   │       ├── ai/           # AI mentor, tahlil, rezyume, g'oya tekshirish
-│   │       └── integrations/ # hemis, telegram
-│   └── bot/                  # Telegram bot (grammY)
-├── packages/
-│   ├── db/                   # Prisma sxema va migratsiyalar
-│   ├── ui/                   # umumiy UI komponentlar
-│   ├── config/               # eslint, tsconfig
-│   └── shared/               # umumiy tiplar, konstantalar, XP qoidalari
-├── infra/
-│   ├── docker-compose.yml
-│   └── nginx/
+├── backend/                  # Python, Django + DRF (ishlab chiqilmoqda, batafsil: backend/README.md)
+│   ├── config/               # sozlamalar, URL'lar
+│   └── apps/
+│       ├── accounts/         # foydalanuvchi, rollar, fakultet, Telegram orqali kirish
+│       ├── profiles/         # Talent Passport: ko'nikmalar, tasdiqlar, yutuqlar, portfolio
+│       ├── arena/            # XP, tanga, daraja, nishon, streak, reyting, liga
+│       ├── discovery/        # challenge'lar, yechimlar, «uchqun» belgisi
+│       ├── projects/         # loyihalar, jamoa, jamoadosh tavsiyasi
+│       ├── opportunities/    # imkoniyatlar, arizalar, mukofotlar do'koni
+│       ├── community/        # lenta, izohlar, tadbirlar, QR check-in
+│       ├── insights/         # rektorat va dekanat dashboardi
+│       └── ai/               # AI Mentor, g'oya tekshiruvchi, karyera (Claude API)
+├── web/                      # Next.js: veb va Telegram Mini App (keyingi bosqich)
+├── bot/                      # Telegram bot, aiogram (keyingi bosqich)
 ├── docs/
-└── .github/workflows/
+├── docker-compose.yml
+└── .github/workflows/        # CI: linter, migratsiya tekshiruvi, testlar
 ```
 
 ---
@@ -368,4 +347,4 @@ adti-talent-hub/
 1. Ushbu strukturani rektoratga taqdim etish (prezentatsiya + bosiladigan prototip)
 2. Talabalar bilan so'rovnoma: qaysi funksiyalar eng qiziq
 3. Dasturchi talabalar jamoasini yig'ish
-4. Monorepo skeletini yaratish va MVP ishlab chiqishni boshlash
+4. ~~Backend MVP~~ (bajarildi) → veb-ilova va Telegram Mini App
