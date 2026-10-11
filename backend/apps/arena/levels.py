@@ -26,5 +26,7 @@ def level_for_xp(xp: int) -> dict:
         "name": name,
         "min_xp": min_xp,
         "next_level_xp": next_level[2] if next_level else None,
+        "next_level_name": next_level[1] if next_level else None,
+        "remaining": next_level[2] - xp if next_level else 0,
         "progress": progress,
     }

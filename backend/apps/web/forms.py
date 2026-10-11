@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import UserCreationForm
 from django.db import models
 
 from apps.ai.models import Conversation
@@ -28,6 +29,45 @@ class LoginForm(forms.Form):
         label="Login", max_length=150, widget=forms.TextInput(attrs={"autocomplete": "username"})
     )
     password = forms.CharField(label="Parol", widget=forms.PasswordInput(attrs={"autocomplete": "current-password"}))
+
+
+class RegisterForm(UserCreationForm):
+    first_name = forms.CharField(label="Ism", max_length=150)
+    last_name = forms.CharField(label="Familiya", max_length=150)
+
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = ["first_name", "last_name", "username"]
+        labels = {"username": "Login"}
+        help_texts = {"username": "Lotin harflari, raqamlar va @ . + - _ belgilari. Masalan: aziz_karimov"}
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.role = User.Role.STUDENT
+        if commit:
+            user.save()
+        return user
+
+
+class OnboardingProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["faculty", "course"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["faculty"].required = True
+        self.fields["faculty"].empty_label = "Fakultetni tanlang"
+        self.fields["course"].required = True
+        self.fields["course"].widget = forms.Select(
+            choices=[("", "Kursni tanlang")] + [(i, f"{i}-kurs") for i in range(1, 7)]
+        )
+
+    def clean_course(self):
+        course = self.cleaned_data.get("course")
+        if course is not None and not 1 <= course <= 6:
+            raise forms.ValidationError("Kurs 1 dan 6 gacha bo'lishi kerak")
+        return course
 
 
 class ProfileForm(forms.ModelForm):

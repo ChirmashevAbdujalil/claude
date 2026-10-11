@@ -6,7 +6,10 @@
 {% block body %}
 <header class="landing-nav">
   <a href="{% url 'web:landing' %}" class="brand"><span class="brand-mark">★</span><span>Talent Hub<small>ADTI iqtidorlar platformasi</small></span></a>
-  <a href="{% url 'web:login' %}" class="btn btn-ghost btn-sm">Kirish</a>
+  <div class="row-sm">
+    <a href="{% url 'web:login' %}" class="btn btn-ghost btn-sm">Kirish</a>
+    {% if registration_open %}<a href="{% url 'web:register' %}" class="btn btn-primary btn-sm">Ro'yxatdan o'tish</a>{% endif %}
+  </div>
 </header>
 
 <section class="landing-hero">
@@ -15,8 +18,8 @@
     <h1 style="margin-top:18px">Iqtidoringizni <span class="gradient-text">kashf qiling</span>, rivojlantiring va dunyoga ko'rsating</h1>
     <p class="lead">Challenge'lar yeching, loyihalar quring, AI mentor bilan o'sing va har bir yutug'ingiz uchun ball, nishon va real mukofotlar oling.</p>
     <div class="form-actions">
-      <a href="{% url 'web:login' %}" class="btn btn-gradient btn-lg">Boshlash {% icon "arrow-right" %}</a>
-      <a href="#features" class="btn btn-ghost btn-lg">Imkoniyatlar</a>
+      <a href="{% if registration_open %}{% url 'web:register' %}{% else %}{% url 'web:login' %}{% endif %}" class="btn btn-gradient btn-lg">Boshlash {% icon "arrow-right" %}</a>
+      <a href="{% url 'web:how-it-works' %}" class="btn btn-ghost btn-lg">Qanday ishlaydi?</a>
     </div>
     <div class="row wrap" style="margin-top:28px; gap:24px">
       <div><div class="stat-value">{{ stats.students }}</div><div class="stat-label">talaba</div></div>
@@ -93,7 +96,7 @@
   <div class="cta-band hero-card card">
     <h2 style="font-size:clamp(1.5rem,1.2rem+1.4vw,2.2rem)">Sizning iqtidoringiz ko'rinishga loyiq</h2>
     <p class="muted" style="margin:10px auto 24px; max-width:520px">Bugun boshlang: birinchi challenge sizni kutmoqda.</p>
-    <a href="{% url 'web:login' %}" class="btn btn-white btn-lg">Platformaga kirish {% icon "arrow-right" %}</a>
+    <a href="{% if registration_open %}{% url 'web:register' %}{% else %}{% url 'web:login' %}{% endif %}" class="btn btn-white btn-lg">{% if registration_open %}Ro'yxatdan o'tish{% else %}Platformaga kirish{% endif %} {% icon "arrow-right" %}</a>
   </div>
 </section>
 

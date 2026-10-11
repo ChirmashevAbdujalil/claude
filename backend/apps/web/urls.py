@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import ai, arena, challenges, community, home, opportunities, profile, projects, public, staff
+from .views import ai, arena, challenges, community, home, onboarding, opportunities, profile, projects, public, staff
 
 app_name = "web"
 
@@ -11,6 +11,12 @@ urlpatterns = [
     path("auth/telegram/", public.telegram_login, name="telegram-login"),
     path("u/<slug:slug>/", public.portfolio, name="portfolio"),
     path("menu/", public.menu, name="menu"),
+    path("register/", onboarding.register, name="register"),
+    path("welcome/", onboarding.welcome, name="welcome"),
+    path("welcome/skip/", onboarding.welcome_skip, name="welcome-skip"),
+    path("how-it-works/", onboarding.how_it_works, name="how-it-works"),
+    path("notifications/", onboarding.notifications, name="notifications"),
+    path("notifications/<int:pk>/go/", onboarding.notification_go, name="notification-go"),
     path("app/", home.dashboard, name="dashboard"),
     # Challenge'lar
     path("challenges/", challenges.challenge_list, name="challenges"),
@@ -59,6 +65,7 @@ urlpatterns = [
     # O'qituvchi va rahbariyat
     path("review/", staff.review_queue, name="review"),
     path("review/submissions/<int:pk>/", staff.review_submission, name="review-submission"),
+    path("review/submissions/<int:pk>/ai/", staff.review_submission_ai, name="review-submission-ai"),
     path("review/achievements/<int:pk>/", staff.review_achievement, name="review-achievement"),
     path("review/skills/<int:pk>/endorse/", staff.endorse_skill, name="endorse-skill"),
     path("review/students/<int:user_id>/flag/", staff.talent_flag, name="talent-flag"),

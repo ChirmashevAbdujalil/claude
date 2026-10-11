@@ -47,9 +47,9 @@
 
     <div class="card stack">
       {% if application %}
-        <div class="center stack-sm"><div style="font-size:40px">📨</div><h3>Ariza yuborilgan</h3>
-          <span class="chip chip-info" style="align-self:center">{{ application.get_status_display }}</span>
-          <p class="small muted">{{ application.created_at|date:"d.m.Y" }} da yuborildi</p></div>
+        <div class="stack-sm"><div class="center" style="font-size:40px">📨</div><h3 class="center">Arizangiz holati</h3>
+          {% stepper "application" application.status %}
+          <p class="small muted center">{{ application.created_at|date:"d.m.Y" }} da yuborildi</p></div>
       {% elif locked %}
         <div class="center stack-sm"><div style="font-size:40px">🔒</div><h3>{{ opportunity.min_level }}-daraja kerak</h3>
           <p class="small muted">Challenge'lar yechib va yutuqlar qo'shib darajangizni oshiring.</p>

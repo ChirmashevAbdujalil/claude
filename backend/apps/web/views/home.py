@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.utils import timezone
 
 from apps.arena import selectors as arena_selectors
@@ -11,10 +12,14 @@ from apps.opportunities.models import Opportunity
 from apps.profiles.models import Achievement
 from apps.projects.models import ProjectMember
 
+from ..guidance import next_steps, profile_checklist
+
 
 @login_required
 def dashboard(request):
     user = request.user
+    if user.role == user.Role.STUDENT and user.onboarded_at is None:
+        return redirect("web:welcome")
     submitted = Submission.objects.filter(user=user).values_list("challenge_id", flat=True)
     open_challenges = visible_challenges(user).exclude(pk__in=submitted).order_by("ends_at")
     if user.is_reviewer:
@@ -23,10 +28,18 @@ def dashboard(request):
         )
     daily = open_challenges.filter(kind=Challenge.Kind.DAILY).first()
 
+    steps = next_steps(user) if user.role == user.Role.STUDENT else []
+    # Kunlik savol «keyingi qadam» kartasida ko'rsatilgan bo'lsa, alohida karta takrorlanmaydi
+    if daily and steps and steps[0].url == reverse("web:challenge-detail", args=[daily.pk]):
+        daily_card = None
+    else:
+        daily_card = daily
     context = {
+        "next_steps": steps,
+        "checklist": profile_checklist(user) if user.role == user.Role.STUDENT else None,
         "streak": Streak.objects.filter(user=user).first(),
         "rank": arena_selectors.leaderboard(user).me,
-        "daily": daily,
+        "daily": daily_card,
         "challenges": open_challenges.exclude(pk=getattr(daily, "pk", None))[:3],
         "events": Event.objects.filter(ends_at__gte=timezone.now()).order_by("starts_at")[:3],
         "badges": user.badges.select_related("badge")[:6],

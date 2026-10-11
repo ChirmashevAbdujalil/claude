@@ -4,6 +4,8 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+from apps.notifications.views import telegram_webhook
+
 admin.site.site_header = "ADTI Talent Hub boshqaruvi"
 admin.site.site_title = "ADTI Talent Hub"
 admin.site.index_title = "Boshqaruv paneli"
@@ -18,6 +20,7 @@ api_patterns = [
     path("", include("apps.community.urls")),
     path("", include("apps.insights.urls")),
     path("", include("apps.ai.urls")),
+    path("", include("apps.notifications.urls")),
 ]
 
 urlpatterns = [
@@ -25,6 +28,7 @@ urlpatterns = [
     path("api/v1/", include(api_patterns)),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="docs"),
+    path("telegram/webhook/", telegram_webhook, name="telegram-webhook"),
     path("", include("apps.web.urls")),
 ]
 

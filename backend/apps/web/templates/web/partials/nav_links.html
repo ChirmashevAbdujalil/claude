@@ -5,12 +5,15 @@
 <a href="{% url 'web:projects' %}" class="nav-link {% active 'projects' 'project' %}">{% icon "rocket" %} Loyihalar</a>
 <a href="{% url 'web:arena' %}" class="nav-link {% active 'arena' %}">{% icon "trophy" %} Arena</a>
 <a href="{% url 'web:ai' %}" class="nav-link {% active 'ai' %}">{% icon "sparkles" %} AI Mentor</a>
+<a href="{% url 'web:notifications' %}" class="nav-link {% active 'notifications' 'notification' %}">{% icon "bell" %} Bildirishnomalar
+  {% if unread_notifications %}<span class="chip chip-danger count">{{ unread_notifications }}</span>{% endif %}</a>
 
 <div class="nav-section">Imkoniyatlar</div>
 <a href="{% url 'web:opportunities' %}" class="nav-link {% active 'opportunities' 'opportunity' %}">{% icon "briefcase" %} Imkoniyatlar</a>
 <a href="{% url 'web:shop' %}" class="nav-link {% active 'shop' %}">{% icon "gift" %} Mukofotlar do'koni</a>
 <a href="{% url 'web:events' %}" class="nav-link {% active 'events' 'event' %}">{% icon "calendar" %} Tadbirlar</a>
 <a href="{% url 'web:feed' %}" class="nav-link {% active 'feed' 'post' %}">{% icon "message" %} Lenta</a>
+<a href="{% url 'web:how-it-works' %}" class="nav-link">{% icon "star" %} Qanday ball olaman?</a>
 
 {% if user.is_reviewer %}
 <div class="nav-section">O'qituvchi</div>

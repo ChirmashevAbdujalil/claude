@@ -2,6 +2,7 @@ import itertools
 
 import pytest
 from django.core.management import call_command
+from django.utils import timezone
 from rest_framework.test import APIClient
 
 from apps.accounts.models import Faculty, User
@@ -26,6 +27,8 @@ def make_user(db, faculty):
         kwargs.setdefault("username", f"user{n}")
         kwargs.setdefault("first_name", f"Ism{n}")
         kwargs.setdefault("faculty", faculty)
+        kwargs.setdefault("course", 2)
+        kwargs.setdefault("onboarded_at", timezone.now())
         return User.objects.create_user(role=role, password="pass12345", **kwargs)
 
     return factory
@@ -33,7 +36,7 @@ def make_user(db, faculty):
 
 @pytest.fixture
 def student(make_user):
-    return make_user(course=2)
+    return make_user()
 
 
 @pytest.fixture

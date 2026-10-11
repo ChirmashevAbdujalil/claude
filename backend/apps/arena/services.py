@@ -12,6 +12,8 @@ from django.db import IntegrityError, transaction
 from django.db.models import F, Sum
 from django.utils import timezone
 
+from apps.notifications.services import notify
+
 from .levels import level_for_xp
 from .models import Badge, PointTransaction, Streak, UserBadge
 
@@ -113,6 +115,15 @@ def grant_badge(user, code: str) -> UserBadge | None:
         return None
     if badge.xp_bonus:
         award(user, Reason.BADGE, badge.xp_bonus, ref=f"badge:{badge.code}", note=badge.name)
+    bonus = f" (+{badge.xp_bonus} XP)" if badge.xp_bonus else ""
+    notify(
+        user,
+        f"Yangi nishon: {badge.name}{bonus}",
+        badge.description,
+        url="/arena/?tab=badges",
+        icon=badge.icon,
+        kind="success",
+    )
     return user_badge
 
 

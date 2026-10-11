@@ -3,6 +3,7 @@ from django.db import transaction
 from django.db.models import Count, Q
 
 from apps.arena import services as arena
+from apps.notifications.services import notify
 
 from .models import Project, ProjectMember
 
@@ -31,6 +32,13 @@ def request_join(project: Project, user, role: str = "A'zo", message: str = "") 
     )
     if not created:
         raise ProjectError("Siz allaqachon so'rov yuborgansiz yoki a'zosiz")
+    notify(
+        project.owner,
+        f"Jamoaga qo'shilish so'rovi: {user.get_full_name() or user.username}",
+        f"«{project.title}» loyihasiga «{role}» sifatida",
+        url=f"/projects/{project.pk}/",
+        icon="👋",
+    )
     return member
 
 
@@ -43,6 +51,14 @@ def approve_member(project: Project, actor, member_id: int) -> ProjectMember:
     member.status = ProjectMember.Status.ACTIVE
     member.save(update_fields=["status"])
     arena.grant_badge(member.user, "team-player")
+    notify(
+        member.user,
+        f"Siz «{project.title}» jamoasiga qabul qilindingiz! 🎉",
+        f"Vazifangiz: {member.role}",
+        url=f"/projects/{project.pk}/",
+        icon="🤝",
+        kind="success",
+    )
     return member
 
 
@@ -65,6 +81,14 @@ def advance_stage(project: Project, actor) -> Project:
             STAGE_XP,
             ref=f"project:{project.pk}:{next_stage}",
             note=f"{project.title}: {project.get_stage_display()}",
+        )
+        notify(
+            member.user,
+            f"Loyiha «{project.get_stage_display()}» bosqichiga o'tdi: +{STAGE_XP} XP",
+            project.title,
+            url=f"/projects/{project.pk}/",
+            icon="🚀",
+            kind="success",
         )
     if next_stage == Project.Stage.STARTUP:
         arena.grant_badge(project.owner, "startup-founder")

@@ -47,6 +47,7 @@ class User(AbstractUser):
     linkedin_url = models.URLField("LinkedIn", blank=True)
     portfolio_slug = models.SlugField("portfolio manzili", unique=True, null=True, blank=True)
     is_public = models.BooleanField("profil ommaviy", default=True)
+    onboarded_at = models.DateTimeField("boshlang'ich sozlash tugagan", null=True, blank=True)
 
     # Ball iqtisodiyoti: tezkor reyting uchun denormalizatsiya qilingan qiymatlar.
     # Haqiqiy manba arena.XpTransaction jurnali.

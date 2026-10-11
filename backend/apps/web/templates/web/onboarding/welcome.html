@@ -1,0 +1,87 @@
+{% extends "web/base.html" %}
+{% load web_tags %}
+{% block title %}Xush kelibsiz{% endblock %}
+
+{% block body %}
+<div class="auth-wrap" style="align-items:start; padding-top:32px">
+  <div class="stack-lg" style="width:100%; max-width:640px">
+    <div class="row-between">
+      <span class="brand"><span class="brand-mark">★</span><span>Talent Hub</span></span>
+      {% if step < 3 %}
+      <form method="post" action="{% url 'web:welcome-skip' %}">{% csrf_token %}<button class="btn btn-ghost btn-sm">Keyinroq</button></form>
+      {% endif %}
+    </div>
+
+    <div class="stack-sm">
+      <div class="row-between small bold muted"><span>{{ step }}-qadam / 3</span><span>{% if step == 1 %}Siz haqingizda{% elif step == 2 %}Ko'nikmalar{% else %}Tayyor!{% endif %}</span></div>
+      <div class="stage-track" style="grid-template-columns:repeat(3,1fr)">
+        {% for i in "123" %}<span class="{% if forloop.counter <= step %}done{% endif %}"></span>{% endfor %}
+      </div>
+    </div>
+
+    {% if step == 1 %}
+    <div class="card card-lg stack">
+      <div class="stack-sm">
+        <h1 style="font-size:1.6rem">Salom, {{ user.first_name|default:user.username }}! 👋</h1>
+        <p class="muted">Qaysi fakultetda o'qiysiz? Reyting, challenge'lar va fakultetlar ligasi shunga qarab moslashadi.</p>
+      </div>
+      <form method="post" class="form">
+        {% csrf_token %}
+        {% include "web/partials/form_fields.html" %}
+        <button class="btn btn-gradient btn-lg btn-block">Davom etish {% icon "arrow-right" %}</button>
+      </form>
+    </div>
+
+    {% elif step == 2 %}
+    <form method="post" class="card card-lg stack">
+      {% csrf_token %}
+      <div class="stack-sm">
+        <h1 style="font-size:1.6rem">Nimalarni bilasiz yoki o'rganyapsiz? 🧬</h1>
+        <p class="muted">3–{{ max_skills }} ta ko'nikmani tanlang. Ulardan ko'nikmalar xaritangiz chiziladi va loyihalarga jamoadosh sifatida tavsiya qilinasiz. Darajani keyin profilda o'zgartirasiz.</p>
+      </div>
+      {% for group in groups %}
+      <div class="stack-sm">
+        <div class="eyebrow">{{ group.label }}</div>
+        <div class="segmented">
+          {% for skill in group.skills %}
+          <input type="checkbox" name="skills" value="{{ skill.pk }}" id="s{{ skill.pk }}" {% if skill.pk in mine %}checked{% endif %}>
+          <label for="s{{ skill.pk }}">{{ skill.name }}</label>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+      <div class="form-actions">
+        <a href="?step=1" class="btn btn-ghost btn-lg">{% icon "arrow-left" %} Orqaga</a>
+        <button class="btn btn-gradient btn-lg grow">Davom etish {% icon "arrow-right" %}</button>
+      </div>
+    </form>
+
+    {% else %}
+    <div class="card card-lg hero-card center stack">
+      <div style="font-size:52px">🎉</div>
+      <h1>Hammasi tayyor!</h1>
+      <p class="muted">Sizga «Xush kelibsiz» nishoni berildi. Endi birinchi XP'ni olish vaqti.</p>
+      {% if daily %}
+      <div><a href="{% url 'web:challenge-detail' daily.pk %}" class="btn btn-white btn-lg btn-wrap">🎯 Birinchi challenge'ni yechish · +{{ daily.xp_reward }} XP</a></div>
+      {% else %}
+      <div><a href="{% url 'web:dashboard' %}" class="btn btn-white btn-lg">Bosh sahifaga o'tish {% icon "arrow-right" %}</a></div>
+      {% endif %}
+    </div>
+
+    <div class="card card-lg stack">
+      <h2>Platformada nima qilasiz?</h2>
+      <div class="list">
+        <div class="list-item"><span class="stat-icon tone-primary">🎯</span><div><div class="bold">Challenge yeching</div><div class="small muted">Har kuni yangi savol, har hafta amaliy masala. Har biri XP beradi.</div></div></div>
+        <div class="list-item"><span class="stat-icon tone-accent">🏆</span><div><div class="bold">Darajangizni oshiring</div><div class="small muted">Yangi boshlovchi → Izlanuvchi → Ixtirochi → Innovator → Afsona</div></div></div>
+        <div class="list-item"><span class="stat-icon tone-success">🚀</span><div><div class="bold">Loyiha quring</div><div class="small muted">Jamoa yig'ing yoki boshqalarning loyihasiga qo'shiling.</div></div></div>
+        <div class="list-item"><span class="stat-icon tone-info">🎁</span><div><div class="bold">Mukofot oling</div><div class="small muted">Tangalarni sovg'alarga almashtiring, grant va stajirovkalarga ariza bering.</div></div></div>
+      </div>
+      <div class="row wrap">
+        <a href="{% url 'web:how-it-works' %}" class="btn btn-soft">{% icon "star" "icon-sm" %} Ball qanday beriladi?</a>
+        <a href="{% url 'web:dashboard' %}" class="btn btn-ghost">Bosh sahifa</a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

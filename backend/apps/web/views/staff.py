@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 
+from apps.ai import services as ai_services
 from apps.discovery import services as discovery
 from apps.discovery.models import Submission
 from apps.insights.services import dashboard
@@ -38,6 +39,7 @@ def review_queue(request):
         "submissions": submissions,
         "achievements": achievements,
         "kind_xp": Achievement.DEFAULT_XP,
+        "ai_ready": ai_services.is_configured(),
     }
     return render(request, "web/staff/review.html", context)
 
@@ -133,3 +135,15 @@ def insights(request):
         "web/staff/insights.html",
         {"data": data, "level_max": level_max, "faculty_max": faculty_max, "stages": stages},
     )
+
+
+@reviewer_required
+@require_POST
+def review_submission_ai(request, pk):
+    """AI'dan baho va izoh qoralamasini so'raydi. O'qituvchi uni tekshirib, tasdiqlaydi yoki o'zgartiradi."""
+    submission = get_object_or_404(Submission.objects.select_related("challenge"), pk=pk)
+    if submission.status != Submission.Status.PENDING:
+        messages.error(request, "Bu yechim allaqachon tekshirilgan")
+    elif run_service(request, ai_services.suggest_review, submission):
+        messages.success(request, "AI taklifi tayyor: baho va izohni tekshirib, tasdiqlang")
+    return redirect(reverse("web:review") + f"?tab=submissions#submission-{pk}")

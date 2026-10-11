@@ -30,7 +30,11 @@
         <button class="btn btn-gradient btn-lg btn-block">Kirish {% icon "arrow-right" %}</button>
       </form>
     </div>
+    {% if registration_open %}
+    <p class="center small muted">Hisobingiz yo'qmi? <a href="{% url 'web:register' %}" class="bold">Ro'yxatdan o'ting</a></p>
+    {% else %}
     <p class="center small muted">Login va parolni dekanat yoki administrator beradi.</p>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

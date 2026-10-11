@@ -44,7 +44,7 @@
 {% else %}
   <div class="stack">
   {% for s in submissions %}
-    <div class="card card-lg stack">
+    <div class="card card-lg stack" id="submission-{{ s.pk }}">
       <div class="row-between wrap">
         <div class="row">{% avatar s.user %}
           <div><div class="bold">{{ s.user|display_name }}</div><div class="small muted">{{ s.user.faculty.short_name|default:"" }}{% if s.user.course %} · {{ s.user.course }}-kurs{% endif %} · {{ s.created_at|timesince }} oldin</div></div></div>
@@ -52,10 +52,21 @@
       </div>
       {% if s.answer %}<div class="answer-box">{{ s.answer }}</div>{% endif %}
       {% if s.link %}<a href="{{ s.link }}" target="_blank" rel="noopener" class="row-sm small bold">{% icon "link" "icon-sm" %} {{ s.link }}</a>{% endif %}
+      {% if s.ai_suggestion %}
+      <div class="ai-box stack-sm">
+        <div class="row-between"><span class="bold small">🤖 AI taklifi: {{ s.ai_suggestion.score }}/100</span><span class="tiny muted">Tekshirib, kerak bo'lsa o'zgartiring</span></div>
+        {% if s.ai_suggestion.strengths %}<div class="small"><b>Kuchli tomonlari:</b> {{ s.ai_suggestion.strengths|join:"; " }}</div>{% endif %}
+        {% if s.ai_suggestion.improvements %}<div class="small"><b>Yaxshilash mumkin:</b> {{ s.ai_suggestion.improvements|join:"; " }}</div>{% endif %}
+      </div>
+      {% elif ai_ready %}
+      <form method="post" action="{% url 'web:review-submission-ai' s.pk %}">{% csrf_token %}
+        <button class="btn btn-soft btn-sm">{% icon "sparkles" "icon-sm" %} AI'dan baho va izoh taklifini olish</button>
+      </form>
+      {% endif %}
       <form method="post" action="{% url 'web:review-submission' s.pk %}" class="row wrap" style="align-items:flex-end">
         {% csrf_token %}
-        <div class="field" style="width:130px"><label>Baho (0-100)</label><input type="number" name="score" min="0" max="100" value="100"></div>
-        <div class="field grow" style="min-width:200px"><label>Izoh talabaga</label><input type="text" name="feedback" placeholder="Nima yaxshi, nimani yaxshilash mumkin?"></div>
+        <div class="field" style="width:130px"><label>Baho (0-100)</label><input type="number" name="score" min="0" max="100" value="{{ s.ai_suggestion.score|default:100 }}"></div>
+        <div class="field grow" style="min-width:200px"><label>Izoh talabaga</label><input type="text" name="feedback" maxlength="1000" value="{{ s.ai_suggestion.feedback|default:'' }}" placeholder="Nima yaxshi, nimani yaxshilash mumkin?"></div>
         <button name="decision" value="accept" class="btn btn-success">{% icon "check" "icon-sm" %} Qabul qilish</button>
         <button name="decision" value="reject" class="btn btn-danger">{% icon "x" "icon-sm" %} Rad etish</button>
       </form>

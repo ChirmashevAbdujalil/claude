@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "apps.community",
     "apps.insights",
     "apps.ai",
+    "apps.notifications",
     "apps.web",
 ]
 
@@ -172,6 +173,13 @@ SPECTACULAR_SETTINGS = {
 # Telegram Mini App orqali kirish
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_AUTH_MAX_AGE = int(os.environ.get("TELEGRAM_AUTH_MAX_AGE", 86400))
+TELEGRAM_WEBHOOK_SECRET = os.environ.get("TELEGRAM_WEBHOOK_SECRET", "")
+
+# Saytning tashqi manzili: Telegram tugmalari va xabarlardagi havolalar uchun
+SITE_URL = os.environ.get("SITE_URL", "")
+
+# Talabalar o'zlari ro'yxatdan o'ta oladimi
+REGISTRATION_OPEN = env_bool("REGISTRATION_OPEN", True)
 
 # AI Mentor
 ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-opus-5-5")

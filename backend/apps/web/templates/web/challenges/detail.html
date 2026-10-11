@@ -35,6 +35,7 @@
         {% elif submission.status == "rejected" %}<span class="chip chip-danger">Rad etildi</span>
         {% else %}<span class="chip chip-info">⏳ Tekshirilmoqda</span>{% endif %}
       </div>
+      {% if not challenge.expected_answer %}{% stepper "submission" submission.status %}{% endif %}
       {% if submission.answer %}<div class="answer-box">{{ submission.answer }}</div>{% endif %}
       {% if submission.link %}<a href="{{ submission.link }}" target="_blank" rel="noopener" class="row-sm small bold">{% icon "link" "icon-sm" %} {{ submission.link }}</a>{% endif %}
       {% if submission.feedback %}
@@ -50,7 +51,7 @@
       <form method="post" class="form">
         {% csrf_token %}
         {% include "web/partials/form_fields.html" %}
-        <div class="form-actions"><button class="btn btn-gradient btn-lg">{% icon "send" %} Yuborish</button></div>
+        <div class="form-actions"><button class="btn btn-gradient btn-lg">{% icon "send" %} Yuborish · +{{ challenge.xp_reward }} XP</button></div>
         <p class="small muted">Har bir challenge'ga faqat bir marta javob yuborish mumkin.</p>
       </form>
     </div>

@@ -1,5 +1,6 @@
 """AI Mentor: Claude API bilan ishlash."""
 
+import json
 import logging
 import os
 
@@ -92,6 +93,34 @@ def _extract_text(response) -> str:
     return "".join(block.text for block in response.content if block.type == "text").strip()
 
 
+def _create(client=None, **kwargs):
+    """Claude API'ga so'rov yuboradi; xatolarni talabaga tushunarli `AiUnavailable` ga aylantiradi."""
+    try:
+        client = client or get_client()
+        return client.beta.messages.create(
+            model=settings.ANTHROPIC_MODEL,
+            max_tokens=kwargs.pop("max_tokens", MAX_TOKENS),
+            betas=[FALLBACK_BETA],
+            fallbacks="default",
+            **kwargs,
+        )
+    except anthropic.RateLimitError as exc:
+        logger.warning("Claude API rate limit: %s", exc)
+        raise AiUnavailable("AI hozir band. Bir daqiqadan keyin qayta urinib ko'ring.") from exc
+    except anthropic.AuthenticationError as exc:
+        logger.error("Claude API kaliti noto'g'ri yoki o'rnatilmagan")
+        raise AiUnavailable(NOT_CONFIGURED) from exc
+    except anthropic.APIStatusError as exc:
+        logger.exception("Claude API xatosi (%s)", exc.status_code)
+        raise AiUnavailable("AI vaqtincha ishlamayapti. Keyinroq urinib ko'ring.") from exc
+    except anthropic.APIConnectionError as exc:
+        logger.warning("Claude API bilan aloqa yo'q: %s", exc)
+        raise AiUnavailable("AI bilan aloqa yo'q. Keyinroq urinib ko'ring.") from exc
+    except anthropic.AnthropicError as exc:
+        logger.error("Claude mijozini yaratib bo'lmadi: %s", exc)
+        raise AiUnavailable(NOT_CONFIGURED) from exc
+
+
 def reply(conversation: Conversation, text: str, client=None) -> Message:
     """Talaba xabariga AI javobini oladi va ikkalasini saqlaydi."""
     user = conversation.user
@@ -107,33 +136,12 @@ def reply(conversation: Conversation, text: str, client=None) -> Message:
     ]
     messages = _history(conversation) + [{"role": "user", "content": text}]
 
-    try:
-        client = client or get_client()
-        response = client.beta.messages.create(
-            model=settings.ANTHROPIC_MODEL,
-            max_tokens=MAX_TOKENS,
-            system=system,
-            messages=messages,
-            output_config={"effort": prompts.EFFORT[mode]},
-            betas=[FALLBACK_BETA],
-            fallbacks="default",
-        )
-    except anthropic.RateLimitError as exc:
-        logger.warning("Claude API rate limit: %s", exc)
-        raise AiUnavailable("AI hozir band. Bir daqiqadan keyin qayta urinib ko'ring.") from exc
-    except anthropic.AuthenticationError as exc:
-        logger.error("Claude API kaliti noto'g'ri yoki o'rnatilmagan")
-        raise AiUnavailable("AI Mentor hali sozlanmagan. Administratorga murojaat qiling.") from exc
-    except anthropic.APIStatusError as exc:
-        logger.exception("Claude API xatosi (%s)", exc.status_code)
-        raise AiUnavailable("AI vaqtincha ishlamayapti. Keyinroq urinib ko'ring.") from exc
-    except anthropic.APIConnectionError as exc:
-        logger.warning("Claude API bilan aloqa yo'q: %s", exc)
-        raise AiUnavailable("AI bilan aloqa yo'q. Keyinroq urinib ko'ring.") from exc
-    except anthropic.AnthropicError as exc:
-        # Masalan, API kaliti umuman o'rnatilmagan bo'lsa
-        logger.error("Claude mijozini yaratib bo'lmadi: %s", exc)
-        raise AiUnavailable("AI Mentor hali sozlanmagan. Administratorga murojaat qiling.") from exc
+    response = _create(
+        client,
+        system=system,
+        messages=messages,
+        output_config={"effort": prompts.EFFORT[mode]},
+    )
 
     if response.stop_reason == "refusal":
         answer = REFUSAL_REPLY
@@ -157,3 +165,59 @@ def reply(conversation: Conversation, text: str, client=None) -> Message:
             conversation.title = text[:80]
         conversation.save(update_fields=["title", "updated_at"])
     return assistant
+
+
+REVIEW_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "score": {"type": "integer", "description": "0 dan 100 gacha baho"},
+        "feedback": {"type": "string", "description": "Talabaga murojaat qilingan 2-4 gaplik izoh"},
+        "strengths": {"type": "array", "items": {"type": "string"}},
+        "improvements": {"type": "array", "items": {"type": "string"}},
+    },
+    "required": ["score", "feedback", "strengths", "improvements"],
+    "additionalProperties": False,
+}
+
+
+def suggest_review(submission, client=None) -> dict:
+    """O'qituvchi uchun yechimga baho va izoh qoralamasini tayyorlaydi. Yakuniy qarorni o'qituvchi qabul qiladi.
+
+    Talabaning ismi yuborilmaydi: faqat challenge sharti va javob matni.
+    """
+    challenge = submission.challenge
+    parts = [
+        f"Challenge: {challenge.title}",
+        f"Turi: {challenge.get_kind_display()}, qiyinligi: {challenge.get_difficulty_display()}",
+        f"Sharti:\n{challenge.description}",
+    ]
+    if challenge.expected_answer:
+        parts.append(f"To'g'ri javob: {challenge.expected_answer}")
+    answer = submission.answer or "(matn yo'q)"
+    parts.append(f"Talaba javobi:\n{answer}")
+    if submission.link:
+        parts.append(f"Talaba havolasi (ochilmagan, faqat ma'lumot uchun): {submission.link}")
+
+    response = _create(
+        client,
+        max_tokens=4000,
+        system=prompts.REVIEW,
+        messages=[{"role": "user", "content": "\n\n".join(parts)}],
+        output_config={"effort": "medium", "format": {"type": "json_schema", "schema": REVIEW_SCHEMA}},
+    )
+    if response.stop_reason == "refusal":
+        raise AiUnavailable("AI bu yechimni baholay olmadi. Iltimos, qo'lda tekshiring.")
+    try:
+        data = json.loads(_extract_text(response))
+        suggestion = {
+            "score": max(0, min(100, int(data["score"]))),
+            "feedback": str(data["feedback"]).strip(),
+            "strengths": [str(item) for item in data.get("strengths", [])][:5],
+            "improvements": [str(item) for item in data.get("improvements", [])][:5],
+        }
+    except (ValueError, KeyError, TypeError) as exc:
+        logger.warning("AI tekshiruv javobini o'qib bo'lmadi: %s", exc)
+        raise AiUnavailable("AI javobini o'qib bo'lmadi. Qayta urinib ko'ring.") from exc
+    submission.ai_suggestion = suggestion
+    submission.save(update_fields=["ai_suggestion"])
+    return suggestion

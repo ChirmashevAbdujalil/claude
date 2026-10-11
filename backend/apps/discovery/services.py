@@ -1,6 +1,7 @@
 from django.db import IntegrityError, transaction
 
 from apps.arena import services as arena
+from apps.notifications.services import notify
 
 from .models import Challenge, Submission
 
@@ -31,6 +32,15 @@ def _accept(submission: Submission, score: int | None, reviewer=None, feedback: 
     submission.xp_awarded = tx.xp if tx else 0
     submission.save()
     arena.grant_badge(submission.user, "first-challenge")
+    if reviewer is not None:
+        notify(
+            submission.user,
+            f"Yechimingiz qabul qilindi: +{submission.xp_awarded} XP",
+            f"«{submission.challenge.title}»" + (f": {feedback}" if feedback else ""),
+            url=f"/challenges/{submission.challenge_id}/",
+            icon="✅",
+            kind="success",
+        )
     return submission
 
 
@@ -74,4 +84,12 @@ def review(submission: Submission, reviewer, accept: bool, score: int | None = N
     submission.reviewed_by = reviewer
     submission.feedback = feedback
     submission.save()
+    notify(
+        submission.user,
+        "Yechimingiz rad etildi",
+        f"«{submission.challenge.title}»" + (f": {feedback}" if feedback else ". O'qituvchi izohini ko'ring."),
+        url=f"/challenges/{submission.challenge_id}/",
+        icon="📝",
+        kind="warning",
+    )
     return submission

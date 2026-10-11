@@ -1,0 +1,11 @@
+<div class="stepper {% if compact %}stepper-compact{% endif %}">
+  <ol>
+    {% for step in steps %}
+    <li class="step-{{ step.state }}">
+      <span class="step-dot">{% if step.state == "done" %}✓{% elif step.state == "failed" %}✕{% else %}{{ forloop.counter }}{% endif %}</span>
+      <span class="step-label">{{ step.label }}</span>
+    </li>
+    {% endfor %}
+  </ol>
+  {% if hint and not compact %}<p class="tiny muted" style="margin-top:8px">⏳ {{ hint }}</p>{% endif %}
+</div>

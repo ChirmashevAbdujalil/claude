@@ -482,7 +482,9 @@ html, body { overflow-x: clip; }
 .landing-footer { text-align: center; padding: 30px 20px 40px; color: var(--muted); font-size: 13px; }
 
 /* ---------- Kirish sahifasi ---------- */
-.auth-wrap { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; }
+.auth-wrap { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; padding: 24px 16px; }
+.auth-wrap > * { min-width: 0; }
+.btn-wrap { white-space: normal; height: auto; min-height: 52px; padding-top: 10px; padding-bottom: 10px; text-align: center; }
 .auth-card { width: 100%; max-width: 420px; }
 
 /* ---------- Turli ---------- */
@@ -495,3 +497,38 @@ html, body { overflow-x: clip; }
 .countdown { font-variant-numeric: tabular-nums; }
 .hide-mobile { display: none; }
 @media (min-width: 640px) { .hide-mobile { display: initial; } .show-mobile { display: none; } }
+
+/* ---------- Jarayon bosqichlari (stepper) ---------- */
+.stepper ol { list-style: none; margin: 0; padding: 0; display: flex; }
+.stepper li { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; text-align: center; }
+.stepper li + li::before { content: ""; position: absolute; top: 13px; right: 50%; width: 100%; height: 2px; background: var(--surface-3); z-index: 0; }
+.stepper li.step-done + li::before, .stepper li.step-done + li.step-failed::before { background: var(--success); }
+.step-dot { position: relative; z-index: 1; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 12px; font-weight: 800; background: var(--surface-3); color: var(--muted); }
+.step-label { font-size: 12px; font-weight: 700; color: var(--muted); }
+.step-done .step-dot { background: var(--success); color: #fff; }
+.step-done .step-label { color: var(--text-2); }
+.step-current .step-dot { background: var(--primary); color: #fff; box-shadow: 0 0 0 5px var(--primary-soft); }
+.step-current .step-label { color: var(--primary-text); }
+.step-failed .step-dot { background: var(--danger); color: #fff; }
+.step-failed .step-label { color: var(--danger); }
+.stepper-compact .step-dot { width: 20px; height: 20px; font-size: 10px; }
+.stepper-compact li + li::before { top: 9px; }
+.stepper-compact .step-label { font-size: 11px; }
+
+/* ---------- Keyingi qadam va bildirishnomalar ---------- */
+.next-step { display: flex; align-items: center; gap: 16px; border: 2px solid color-mix(in srgb, var(--primary) 30%, var(--border));
+  background: linear-gradient(135deg, var(--primary-soft), var(--surface) 70%); }
+.next-step .emoji { font-size: 30px; width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; background: var(--surface); flex: none; box-shadow: var(--shadow-sm); }
+.bell { position: relative; display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; color: var(--text-2); }
+.bell:hover { background: var(--surface-2); color: var(--text); }
+.bell .dot { position: absolute; top: 3px; right: 2px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px;
+  background: var(--danger); color: #fff; font-size: 11px; font-weight: 800; display: grid; place-items: center; border: 2px solid var(--bg); }
+.checklist-item { display: flex; align-items: center; gap: 10px; padding: 7px 0; font-size: 14px; font-weight: 600; color: inherit; }
+.checklist-item .tick { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; flex: none;
+  border: 2px solid var(--border); color: transparent; }
+.checklist-item.done { color: var(--muted); text-decoration: line-through; }
+.checklist-item.done .tick { background: var(--success); border-color: var(--success); color: #fff; }
+.ai-box { border: 1px dashed color-mix(in srgb, var(--primary) 50%, var(--border)); background: var(--primary-soft); border-radius: 14px; padding: 14px; }
+.segmented input[type="checkbox"] + label::before { content: "+ "; color: var(--muted); }
+.segmented input[type="checkbox"]:checked + label::before { content: "✓ "; color: var(--primary); }

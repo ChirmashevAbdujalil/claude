@@ -328,7 +328,8 @@ def test_telegram_web_login(web, settings):
     client = web()
     response = client.post(reverse("web:telegram-login"), {"init_data": sign_init_data(fields, "123:ABC")})
     assert response.json() == {"created": True}
-    assert client.get(reverse("web:dashboard")).status_code == 200
+    # Yangi talaba avval boshlang'ich sozlashga yo'naltiriladi
+    assert client.get(reverse("web:dashboard")).url == reverse("web:welcome")
     assert web().post(reverse("web:telegram-login"), {"init_data": "hash=bad"}).status_code == 401
 
 

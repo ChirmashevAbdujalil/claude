@@ -1,0 +1,31 @@
+{% extends "web/base.html" %}
+{% load web_tags %}
+{% block title %}Ro'yxatdan o'tish{% endblock %}
+
+{% block body %}
+<div class="auth-wrap">
+  <div class="auth-card stack-lg" style="max-width:460px">
+    <a href="{% url 'web:landing' %}" class="brand" style="justify-content:center"><span class="brand-mark">★</span><span>Talent Hub<small>ADTI iqtidorlar platformasi</small></span></a>
+    <div class="card card-lg stack">
+      <div class="center stack-sm">
+        <h1 style="font-size:1.6rem">Ro'yxatdan o'tish 🚀</h1>
+        <p class="muted">Bir daqiqa, keyin birinchi challenge sizni kutadi</p>
+      </div>
+      <form method="post" class="form">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+        <div class="grid-2" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+          {% include "web/partials/field.html" with field=form.first_name %}
+          {% include "web/partials/field.html" with field=form.last_name %}
+        </div>
+        {% include "web/partials/field.html" with field=form.username %}
+        {% include "web/partials/field.html" with field=form.password1 %}
+        {% include "web/partials/field.html" with field=form.password2 %}
+        <button class="btn btn-gradient btn-lg btn-block">Hisob yaratish {% icon "arrow-right" %}</button>
+      </form>
+      <p class="center small muted">Hisobingiz bormi? <a href="{% url 'web:login' %}" class="bold">Kirish</a></p>
+    </div>
+    <p class="center tiny muted">Ro'yxatdan o'tish orqali siz talaba sifatida qo'shilasiz. O'qituvchi va rahbariyat hisoblarini administrator ochadi.</p>
+  </div>
+</div>
+{% endblock %}

@@ -2,6 +2,7 @@ from django.db import transaction
 from django.db.models import Avg
 
 from apps.arena import services as arena
+from apps.notifications.services import notify
 
 from .models import Achievement, Endorsement, Skill, UserSkill
 
@@ -30,6 +31,14 @@ def endorse(user_skill: UserSkill, teacher, comment: str = "") -> Endorsement:
     )
     if user_skill.endorsements.count() == 1:
         arena.grant_badge(user_skill.user, "first-endorsement")
+    notify(
+        user_skill.user,
+        f"«{user_skill.skill.name}» ko'nikmangiz tasdiqlandi: +{ENDORSEMENT_XP} XP",
+        f"Tasdiqladi: {teacher.get_full_name() or teacher.username}",
+        url="/profile/",
+        icon="🎓",
+        kind="success",
+    )
     return endorsement
 
 
@@ -65,6 +74,24 @@ def review_achievement(
     else:
         achievement.status = Achievement.Status.REJECTED
     achievement.save()
+    if approve:
+        notify(
+            achievement.user,
+            f"Yutug'ingiz tasdiqlandi: +{achievement.xp_awarded} XP",
+            achievement.title,
+            url="/profile/",
+            icon="🏅",
+            kind="success",
+        )
+    else:
+        notify(
+            achievement.user,
+            "Yutug'ingiz rad etildi",
+            comment or achievement.title,
+            url="/profile/",
+            icon="📝",
+            kind="warning",
+        )
     return achievement
 
 

@@ -25,6 +25,7 @@
     <header class="topbar">
       <a href="{% url 'web:dashboard' %}" class="brand"><span class="brand-mark">★</span><span>Talent Hub</span></a>
       <div class="row-sm">
+        <a href="{% url 'web:notifications' %}" class="bell" aria-label="Bildirishnomalar">{% icon "bell" %}{% if unread_notifications %}<span class="dot">{{ unread_notifications }}</span>{% endif %}</a>
         <a href="{% url 'web:shop' %}" class="chip chip-accent" title="Tangalar">{% icon "coin" "icon-sm" %} {{ user.coins }}</a>
         <a href="{% url 'web:arena' %}" class="chip chip-primary" title="XP">{% icon "bolt" "icon-sm" %} {{ user.xp }} XP</a>
         <a href="{% url 'web:profile' %}" aria-label="Profil">{% avatar user "sm" %}</a>

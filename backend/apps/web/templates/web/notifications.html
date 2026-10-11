@@ -1,0 +1,30 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Bildirishnomalar{% endblock %}
+
+{% block content %}
+<div class="page-header"><div><h1>Bildirishnomalar 🔔</h1><p>Yechimlar, yutuqlar, loyihalar va nishonlar bo'yicha yangiliklar.</p></div></div>
+
+<div class="card" style="max-width:760px">
+  {% if items %}
+  <div class="list">
+    {% for n in items %}
+    <a href="{% url 'web:notification-go' n.pk %}" class="list-item list-item-link {% if not n.is_read %}leader-me{% endif %}" style="align-items:flex-start">
+      <span class="stat-icon {% if n.kind == 'success' %}tone-success{% elif n.kind == 'warning' %}tone-danger{% else %}tone-primary{% endif %}" style="font-size:20px">{{ n.icon }}</span>
+      <div class="grow">
+        <div class="bold">{{ n.title }}</div>
+        {% if n.body %}<div class="small muted">{{ n.body }}</div>{% endif %}
+        <div class="tiny muted" style="margin-top:2px">{{ n.created_at|timesince }} oldin</div>
+      </div>
+      {% if not n.is_read %}<span class="chip chip-primary">Yangi</span>{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  {% include "web/partials/empty.html" with emoji="🔕" title="Hozircha bildirishnoma yo'q" text="Yechimingiz tekshirilganda, nishon olganingizda yoki jamoaga qabul qilinganingizda shu yerda xabar chiqadi." %}
+  {% endif %}
+</div>
+{% if user.telegram_id %}
+<p class="small muted" style="margin-top:12px">📲 Bildirishnomalar Telegram botga ham yuboriladi.</p>
+{% endif %}
+{% endblock %}

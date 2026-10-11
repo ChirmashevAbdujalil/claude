@@ -11,6 +11,7 @@ from django.views.decorators.http import require_POST
 
 from apps.community import services
 from apps.community.models import Event, EventRegistration, Post
+from apps.notifications.services import notify
 
 from ..forms import CommentForm, EventForm, PostForm
 from .common import paginate, reviewer_required, run_service
@@ -56,6 +57,14 @@ def post_detail(request, pk):
         comment.post = post
         comment.author = request.user
         comment.save()
+        if post.author_id != request.user.id:
+            notify(
+                post.author,
+                f"{request.user.get_full_name() or request.user.username} postingizga izoh yozdi",
+                comment.text[:120],
+                url=f"/feed/{post.pk}/",
+                icon="💬",
+            )
         return redirect("web:post-detail", pk=pk)
     comments = post.comments.select_related("author")
     return render(request, "web/community/post_detail.html", {"post": post, "form": form, "comments": comments})

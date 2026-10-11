@@ -100,3 +100,53 @@ def radar(skill_map):
         "labels": labels,
         "has_data": any(row["score"] for row in skill_map),
     }
+
+
+STEPPERS = {
+    "submission": {
+        "labels": ["Yuborildi", "Tekshirilmoqda", "Natija"],
+        "progress": {"pending": 1},
+        "done": {"accepted": "Qabul qilindi"},
+        "failed": {"rejected": "Rad etildi"},
+        "hint": "O'qituvchilar odatda 1–3 ish kuni ichida tekshiradi",
+    },
+    "achievement": {
+        "labels": ["Yuborildi", "O'qituvchi ko'rmoqda", "Natija"],
+        "progress": {"pending": 1},
+        "done": {"approved": "Tasdiqlandi"},
+        "failed": {"rejected": "Rad etildi"},
+        "hint": "Hujjat tekshirilgach XP avtomatik qo'shiladi",
+    },
+    "application": {
+        "labels": ["Yuborildi", "Ko'rib chiqilmoqda", "Saralandi", "Natija"],
+        "progress": {"submitted": 1, "shortlisted": 3},
+        "done": {"accepted": "Qabul qilindi"},
+        "failed": {"rejected": "Rad etildi"},
+        "hint": "Natija haqida bildirishnoma olasiz",
+    },
+}
+
+
+@register.inclusion_tag("web/partials/stepper.html")
+def stepper(kind, status, compact=False):
+    """Jarayon bosqichlari: done / current / todo / failed."""
+    config = STEPPERS[kind]
+    labels = list(config["labels"])
+    last = len(labels) - 1
+    if status in config["done"]:
+        labels[last] = config["done"][status]
+        states = ["done"] * len(labels)
+        hint = ""
+    elif status in config["failed"]:
+        labels[last] = config["failed"][status]
+        states = ["done"] * last + ["failed"]
+        hint = ""
+    else:
+        current = config["progress"].get(status, 1)
+        states = ["done" if i < current else "current" if i == current else "todo" for i in range(len(labels))]
+        hint = config["hint"]
+    return {
+        "steps": [{"label": label, "state": state} for label, state in zip(labels, states, strict=True)],
+        "hint": hint,
+        "compact": compact,
+    }

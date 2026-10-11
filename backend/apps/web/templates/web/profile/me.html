@@ -75,6 +75,7 @@
           <div class="grow">
             <div class="bold">{{ a.title }}</div>
             <div class="small muted">{{ a.get_kind_display }} · {{ a.achieved_on|date:"d.m.Y" }}{% if a.review_comment %} · «{{ a.review_comment }}»{% endif %}</div>
+            {% if a.status == "pending" %}<div style="margin-top:8px; max-width:360px">{% stepper "achievement" a.status compact=True %}</div>{% endif %}
           </div>
           {% if a.status == "approved" %}<span class="chip chip-success">+{{ a.xp_awarded }} XP</span>
           {% elif a.status == "rejected" %}<span class="chip chip-danger">Rad etildi</span>

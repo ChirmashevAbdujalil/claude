@@ -38,6 +38,10 @@ POSTGRES_PASSWORD=maxfiy docker compose up --build
 | Sahifa | Manzil | Kim uchun |
 |---|---|---|
 | Landing | `/` | Hamma |
+| Ro'yxatdan o'tish | `/register/` | Talabalar o'zlari ro'yxatdan o'tadi (`REGISTRATION_OPEN=0` bilan yopiladi) |
+| Boshlang'ich sozlash | `/welcome/` | 3 qadam: fakultet va kurs → ko'nikmalar → birinchi challenge |
+| Qanday ball olaman? | `/how-it-works/` | Ball, daraja va nishon qoidalari (koddagi qiymatlardan avtomatik) |
+| Bildirishnomalar | `/notifications/` | Saytda 🔔 va Telegram botga xabar |
 | Kirish | `/login/` (Telegram Mini App ichida avtomatik) | Hamma |
 | Bosh sahifa | `/app/` | Daraja kartasi, bugungi challenge, tadbirlar, loyihalar |
 | Challenge'lar | `/challenges/` | Yechim yuborish, kunlik savollar avtomatik tekshiriladi |
@@ -56,6 +60,26 @@ POSTGRES_PASSWORD=maxfiy docker compose up --build
 Dizayn tizimi bitta faylda: `apps/web/static/web/css/app.css`. Unda ranglar, tugmalar, kartalar va formalar bor, build bosqichi kerak emas. Sayt mobil qurilmalarga moslashgan, yorug' va qorong'i rejimni qo'llab-quvvatlaydi. Telegram ichida ochilganda Telegram mavzusiga moslashadi.
 
 Telegram Mini App ulash: @BotFather'da bot yarating, `TELEGRAM_BOT_TOKEN` ni `.env` ga yozing va botning Menu Button havolasini saytingiz manziliga (`https://.../app/`) qo'ying.
+
+## Talabaga yo'l ko'rsatish
+
+- **Keyingi qadam**: bosh sahifada talabaning holatiga qarab bitta asosiy tavsiya chiqadi (ko'nikma qo'shish, kunlik savol, xavf ostidagi streak, jamoa so'rovlari, tadbir). Mantiq `apps/web/guidance.py` faylida.
+- **Profil to'liqligi**: 6 bandli ro'yxat va foiz.
+- **Holat chizig'i**: yechim, yutuq va arizada «Yuborildi → Tekshirilmoqda → Natija».
+
+## Bildirishnomalar va Telegram bot
+
+Muhim hodisalarda (yechim tekshirildi, yutuq tasdiqlandi, nishon olindi, jamoaga qabul qilindi, izoh yozildi) bildirishnoma saytda saqlanadi. Talaba Telegram orqali kirgan bo'lsa, botga ham xabar boradi.
+
+Botni ulash (sayt `https` manzilda ishlayotgan bo'lishi kerak):
+
+1. @BotFather'da bot yarating va tokenni oling.
+2. `.env` fayliga yozing: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` (uzun tasodifiy satr), `SITE_URL=https://...`
+3. `python manage.py telegram_setup`: webhook va «Platforma» menyu tugmasi sozlanadi.
+
+## AI tekshiruv yordamchisi
+
+O'qituvchi tekshiruv sahifasida «AI'dan baho va izoh taklifini olish» tugmasini bosadi. AI baho, izoh, kuchli tomonlar va yaxshilash yo'llarini taklif qiladi, ular formaga oldindan yoziladi. Yakuniy qarorni o'qituvchi qabul qiladi. AI'ga talabaning ismi yuborilmaydi.
 
 ## Testlar va sifat tekshiruvi
 
@@ -81,7 +105,8 @@ backend/
     ├── opportunities/ # grant, vakansiya, stajirovka, mukofotlar do'koni
     ├── community/     # lenta, izohlar, tadbirlar va QR check-in
     ├── insights/      # rektorat va dekanat dashboardi
-    ├── ai/            # AI Mentor, g'oya tekshiruvchi, karyera maslahatchisi (Claude API)
+    ├── ai/            # AI Mentor, g'oya tekshiruvchi, karyera maslahatchisi, tekshiruv yordamchisi (Claude API)
+    ├── notifications/ # bildirishnomalar va Telegram bot
     └── web/           # veb-interfeys: template'lar, dizayn tizimi, view'lar
 ```
 

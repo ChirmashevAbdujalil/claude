@@ -22,6 +22,7 @@ from apps.projects import services as project_services
 from apps.projects.models import Project, ProjectMember
 
 BADGES = [
+    ("welcome", "Xush kelibsiz", "Boshlang'ich sozlashni yakunladingiz", "👋", 20),
     ("first-challenge", "Birinchi qadam", "Birinchi challenge muvaffaqiyatli yechildi", "🎯", 20),
     ("first-endorsement", "Tan olingan", "O'qituvchi birinchi ko'nikmangizni tasdiqladi", "✅", 20),
     ("streak-7", "Olovli hafta", "7 kun ketma-ket faollik", "🔥", 0),
@@ -158,6 +159,7 @@ class Command(BaseCommand):
                 "first_name": "Demo",
                 "last_name": "O'qituvchi",
                 "role": User.Role.TEACHER,
+                "onboarded_at": timezone.now(),
                 "faculty": faculties[0],
             },
         )
@@ -166,7 +168,13 @@ class Command(BaseCommand):
             teacher.save()
         rector, created = User.objects.get_or_create(
             username="demo_rector",
-            defaults={"first_name": "Demo", "last_name": "Rektorat", "role": User.Role.RECTOR, "is_staff": True},
+            defaults={
+                "first_name": "Demo",
+                "last_name": "Rektorat",
+                "role": User.Role.RECTOR,
+                "onboarded_at": timezone.now(),
+                "is_staff": True,
+            },
         )
         if created:
             rector.set_password("demo12345")
@@ -182,6 +190,7 @@ class Command(BaseCommand):
                     "faculty": faculties[index % len(faculties)],
                     "course": (index % 4) + 1,
                     "portfolio_slug": f"demo-student-{index}",
+                    "onboarded_at": timezone.now(),
                 },
             )
             students.append(student)

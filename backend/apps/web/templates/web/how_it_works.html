@@ -1,0 +1,74 @@
+{% extends "web/base.html" %}
+{% load web_tags %}
+{% block title %}Qanday ball olaman?{% endblock %}
+
+{% block body %}
+<header class="landing-nav">
+  <a href="{% if user.is_authenticated %}{% url 'web:dashboard' %}{% else %}{% url 'web:landing' %}{% endif %}" class="brand"><span class="brand-mark">★</span><span>Talent Hub<small>ADTI iqtidorlar platformasi</small></span></a>
+  {% if user.is_authenticated %}<a href="{% url 'web:dashboard' %}" class="btn btn-ghost btn-sm">{% icon "arrow-left" "icon-sm" %} Platformaga qaytish</a>
+  {% else %}<a href="{% url 'web:login' %}" class="btn btn-ghost btn-sm">Kirish</a>{% endif %}
+</header>
+
+<main style="max-width:980px; margin:0 auto; padding:0 16px 48px" class="stack-lg">
+  <div class="card card-lg hero-card stack-sm">
+    <h1>Qanday ball olaman? ⚡</h1>
+    <p class="muted" style="max-width:640px">Platformadagi har bir foydali harakat XP beradi. XP darajangizni oshiradi, daraja esa yangi imkoniyatlarni ochadi. XP bilan birga tanga ham olasiz: uni do'konda sovg'aga almashtirasiz.</p>
+  </div>
+
+  <div class="grid-3">
+    <div class="card stat"><span class="stat-icon tone-accent">{% icon "bolt" %}</span><div><div class="bold">XP</div><div class="stat-label">Daraja va reyting uchun. Hech qachon kamaymaydi</div></div></div>
+    <div class="card stat"><span class="stat-icon tone-accent">{% icon "coin" %}</span><div><div class="bold">Har 10 XP = {{ coins_per_10 }} tanga</div><div class="stat-label">Mukofotlar do'konida sarflanadi</div></div></div>
+    <div class="card stat"><span class="stat-icon tone-primary">{% icon "shield" %}</span><div><div class="bold">Kunlik limit: {{ daily_cap }} XP</div><div class="stat-label">Tasdiqlangan yutuqlar limitga kirmaydi</div></div></div>
+  </div>
+
+  <div class="card card-lg">
+    <h2 style="margin-bottom:6px">Harakatlar uchun XP</h2>
+    <div class="list">
+      {% for icon, title, xp, note in rows %}
+      <div class="list-item"><span style="font-size:22px; width:32px; text-align:center">{{ icon }}</span>
+        <div class="grow"><div class="bold">{{ title }}</div><div class="small muted">{{ note }}</div></div>
+        <span class="chip chip-accent">{{ xp }}</span></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card card-lg">
+      <h2 style="margin-bottom:4px">Yutuqlar uchun XP</h2>
+      <p class="small muted">O'qituvchi tasdiqlagach beriladi. Yutuq darajasiga qarab o'qituvchi miqdorni o'zgartirishi mumkin.</p>
+      <div class="list">
+        {% for name, xp in achievement_rows %}
+        <div class="list-item"><span class="grow bold small">{{ name }}</span><span class="xp small">{{ xp }} XP</span></div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="card card-lg">
+      <h2 style="margin-bottom:4px">Darajalar</h2>
+      <p class="small muted">Yuqori daraja grant, stajirovka va ayrim mukofotlarni ochadi.</p>
+      <div class="list">
+        {% for number, name, min_xp in levels %}
+        <div class="list-item"><span class="rank {% if number == 5 %}rank-1{% endif %}">{{ number }}</span>
+          <div class="grow bold">{{ name }}</div><span class="small muted">{{ min_xp }} XP dan</span>
+          {% if user.is_authenticated and my_level.number == number %}<span class="chip chip-primary">Siz shu yerdasiz</span>{% endif %}</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-lg">
+    <h2 style="margin-bottom:12px">Nishonlar</h2>
+    <div class="badge-grid">
+      {% for badge in badges %}
+      <div class="badge-tile"><div class="emoji">{{ badge.icon }}</div><div class="bold">{{ badge.name }}</div>
+        <div class="small muted" style="margin-top:4px">{{ badge.description }}</div>
+        {% if badge.xp_bonus %}<div class="tiny bold xp" style="margin-top:8px">+{{ badge.xp_bonus }} XP</div>{% endif %}</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card card-lg stack-sm">
+    <h2>Halollik qoidalari 🤝</h2>
+    <p class="small muted">• Bitta ish uchun ball faqat bir marta beriladi. • O'z yechimingiz yoki yutug'ingizni o'zingiz tasdiqlay olmaysiz. • Katta yutuqlar faqat hujjat bilan, o'qituvchi tasdig'idan keyin hisoblanadi. • Kunlik limit ballni sun'iy ko'paytirishdan himoya qiladi.</p>
+  </div>
+</main>
+{% endblock %}

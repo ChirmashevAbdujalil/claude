@@ -82,6 +82,7 @@ class Submission(models.Model):
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
     xp_awarded = models.PositiveIntegerField(default=0)
+    ai_suggestion = models.JSONField("AI taklifi", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
