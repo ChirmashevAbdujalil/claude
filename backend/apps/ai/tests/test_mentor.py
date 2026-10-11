@@ -109,3 +109,15 @@ def test_cannot_access_others_conversation(api, make_user, conversation, fake_cl
         f"/api/v1/ai/conversations/{conversation.id}/messages/", {"text": "x"}, format="json"
     )
     assert response.status_code == 404
+
+
+def test_missing_api_key_gives_friendly_error(api, student, conversation, monkeypatch):
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("ANTHROPIC_AUTH_TOKEN", raising=False)
+    monkeypatch.setattr(services, "_client", None)
+    response = api(student).post(
+        f"/api/v1/ai/conversations/{conversation.id}/messages/", {"text": "Salom"}, format="json"
+    )
+    assert response.status_code == 503
+    assert response.data["detail"] == services.NOT_CONFIGURED
+    assert Message.objects.count() == 0

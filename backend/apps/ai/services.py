@@ -1,6 +1,7 @@
 """AI Mentor: Claude API bilan ishlash."""
 
 import logging
+import os
 
 import anthropic
 from django.conf import settings
@@ -34,8 +35,18 @@ class AiUnavailable(AiError):
     pass
 
 
+NOT_CONFIGURED = "AI Mentor hali sozlanmagan: administrator .env fayliga ANTHROPIC_API_KEY kalitini yozishi kerak."
+
+
+def is_configured() -> bool:
+    """Claude API kaliti o'rnatilganmi. Bo'sh qiymat (.env.example dagi kabi) hisobga olinmaydi."""
+    return bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN"))
+
+
 def get_client():
     global _client
+    if not is_configured():
+        raise AiUnavailable(NOT_CONFIGURED)
     if _client is None:
         _client = anthropic.Anthropic()
     return _client

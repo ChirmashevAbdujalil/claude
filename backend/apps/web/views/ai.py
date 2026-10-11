@@ -41,7 +41,13 @@ def ai_home(request):
     return render(
         request,
         "web/ai/index.html",
-        {"modes": MODES, "conversations": conversations, "used": used, "limit": settings.AI_DAILY_MESSAGE_LIMIT},
+        {
+            "modes": MODES,
+            "conversations": conversations,
+            "used": used,
+            "limit": settings.AI_DAILY_MESSAGE_LIMIT,
+            "ai_ready": services.is_configured(),
+        },
     )
 
 

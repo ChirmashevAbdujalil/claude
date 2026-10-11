@@ -335,3 +335,13 @@ def test_telegram_web_login(web, settings):
 def test_404_page(web):
     response = web().get("/mavjud-emas/")
     assert response.status_code == 404
+
+
+def test_ai_without_api_key_shows_message(web, student, monkeypatch):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "")
+    monkeypatch.delenv("ANTHROPIC_AUTH_TOKEN", raising=False)
+    client = web(student)
+    assert "AI Mentor hali ulanmagan" in client.get(reverse("web:ai")).content.decode()
+    response = client.post(reverse("web:ai-start"), {"mode": "mentor", "text": "Salom"}, follow=True)
+    assert response.status_code == 200
+    assert ai_services.NOT_CONFIGURED in response.content.decode().replace("&#x27;", "'")
