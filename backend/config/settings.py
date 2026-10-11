@@ -25,7 +25,10 @@ DEBUG = env_bool("DJANGO_DEBUG", False)
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
 if not SECRET_KEY:
     if not DEBUG:
-        raise RuntimeError("DJANGO_SECRET_KEY o'rnatilmagan")
+        raise RuntimeError(
+            "DJANGO_SECRET_KEY o'rnatilmagan. Lokal ishga tushirish uchun backend papkasida .env faylini yarating: "
+            "Windows'da 'copy .env.example .env', Mac/Linux'da 'cp .env.example .env'"
+        )
     SECRET_KEY = "dev-only-insecure-key"
 
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
