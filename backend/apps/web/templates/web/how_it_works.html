@@ -4,7 +4,7 @@
 
 {% block body %}
 <header class="landing-nav">
-  <a href="{% if user.is_authenticated %}{% url 'web:dashboard' %}{% else %}{% url 'web:landing' %}{% endif %}" class="brand"><span class="brand-mark">★</span><span>Talent Hub<small>ADTI iqtidorlar platformasi</small></span></a>
+  <a href="{% if user.is_authenticated %}{% url 'web:dashboard' %}{% else %}{% url 'web:landing' %}{% endif %}" class="brand">{% brand_logo 40 %}<span>ADTI Talent Hub<small>Andijon davlat texnika instituti</small></span></a>
   {% if user.is_authenticated %}<a href="{% url 'web:dashboard' %}" class="btn btn-ghost btn-sm">{% icon "arrow-left" "icon-sm" %} Platformaga qaytish</a>
   {% else %}<a href="{% url 'web:login' %}" class="btn btn-ghost btn-sm">Kirish</a>{% endif %}
 </header>

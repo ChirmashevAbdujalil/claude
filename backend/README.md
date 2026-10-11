@@ -33,6 +33,22 @@ cp backend/.env.example backend/.env   # DJANGO_DEBUG=0 va DJANGO_SECRET_KEY ni 
 POSTGRES_PASSWORD=maxfiy docker compose up --build
 ```
 
+## Fakultetlar va brend
+
+`python manage.py seed` institutning 5 ta fakultetini yaratadi:
+
+| Fakultet | Qisqa nomi |
+|---|---|
+| Iqtisodiyot va boshqaruv fakulteti | IB |
+| Intellektual boshqaruv va kompyuter tizimlari fakulteti | IBKT |
+| Qurilish muhandisligi va elektroenergetika fakulteti | QMEE |
+| Mexanika va kimyo muhandisligi fakulteti | MKM |
+| Avtomobilsozlik va transport fakulteti | AT |
+
+Qisqa nomlar reyting va ro'yxatlarda ko'rinadi, ularni admin panelda o'zgartirish mumkin. Oldingi versiyadagi demo fakultetlar `seed` ishga tushganda haqiqiylariga avtomatik ko'chiriladi.
+
+Logotip fayllari `apps/web/static/web/img/` papkasida. Brend rangi (`#062d3b`) `app.css` faylidagi `--brand` va `--primary` o'zgaruvchilarida.
+
 ## Veb-interfeys
 
 | Sahifa | Manzil | Kim uchun |

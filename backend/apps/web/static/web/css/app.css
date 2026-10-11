@@ -4,19 +4,21 @@
    ========================================================================== */
 
 :root {
-  --bg: #f5f6fb;
+  /* ADTI brendi: logotipdagi to'q ko'k-yashil (#062d3b) asosida */
+  --brand: #062d3b;
+  --bg: #f3f6f7;
   --surface: #ffffff;
-  --surface-2: #f0f2f8;
-  --surface-3: #e7eaf3;
-  --border: #e3e6ef;
-  --text: #0f172a;
-  --text-2: #334155;
-  --muted: #64748b;
+  --surface-2: #edf2f4;
+  --surface-3: #e0e8eb;
+  --border: #dbe4e7;
+  --text: #0b1d24;
+  --text-2: #2f4650;
+  --muted: #5f747c;
 
-  --primary: #4f46e5;
-  --primary-strong: #4338ca;
-  --primary-soft: #eef0ff;
-  --primary-text: #3730a3;
+  --primary: #0e5a73;
+  --primary-strong: #062d3b;
+  --primary-soft: #e2f0f4;
+  --primary-text: #0a4256;
 
   --accent: #f59e0b;
   --accent-soft: #fff6e0;
@@ -29,7 +31,7 @@
   --info: #0284c7;
   --info-soft: #e5f3fb;
 
-  --gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 55%, #c026d3 100%);
+  --gradient: linear-gradient(135deg, #062d3b 0%, #0e5a73 55%, #168a9c 100%);
   --gradient-warm: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
 
   --radius-sm: 10px;
@@ -37,7 +39,7 @@
   --radius-lg: 24px;
   --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
   --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 6px 20px rgba(15, 23, 42, 0.06);
-  --shadow-lg: 0 12px 40px rgba(79, 70, 229, 0.18);
+  --shadow-lg: 0 12px 40px rgba(6, 45, 59, 0.2);
 
   --font: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --sidebar-w: 260px;
@@ -47,18 +49,18 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0b0e17;
-    --surface: #141927;
-    --surface-2: #1b2133;
-    --surface-3: #252c42;
-    --border: #262d42;
-    --text: #eef1f8;
-    --text-2: #cbd2e1;
-    --muted: #8b95ab;
-    --primary: #818cf8;
-    --primary-strong: #a5b4fc;
-    --primary-soft: #1f2347;
-    --primary-text: #c7d2fe;
+    --bg: #071318;
+    --surface: #0f1f25;
+    --surface-2: #15292f;
+    --surface-3: #1e363e;
+    --border: #1f363e;
+    --text: #e9f2f4;
+    --text-2: #c3d3d8;
+    --muted: #84a0a8;
+    --primary: #5cc6d9;
+    --primary-strong: #8ad8e6;
+    --primary-soft: #0f2d36;
+    --primary-text: #a9e3ee;
     --accent-soft: #33260c;
     --accent-text: #fcd34d;
     --success-soft: #0d2b22;
@@ -71,18 +73,18 @@
 }
 
 :root[data-theme="dark"] {
-  --bg: #0b0e17;
-  --surface: #141927;
-  --surface-2: #1b2133;
-  --surface-3: #252c42;
-  --border: #262d42;
-  --text: #eef1f8;
-  --text-2: #cbd2e1;
-  --muted: #8b95ab;
-  --primary: #818cf8;
-  --primary-strong: #a5b4fc;
-  --primary-soft: #1f2347;
-  --primary-text: #c7d2fe;
+  --bg: #071318;
+  --surface: #0f1f25;
+  --surface-2: #15292f;
+  --surface-3: #1e363e;
+  --border: #1f363e;
+  --text: #e9f2f4;
+  --text-2: #c3d3d8;
+  --muted: #84a0a8;
+  --primary: #5cc6d9;
+  --primary-strong: #8ad8e6;
+  --primary-soft: #0f2d36;
+  --primary-text: #a9e3ee;
   --accent-soft: #33260c;
   --accent-text: #fcd34d;
   --success-soft: #0d2b22;
@@ -173,6 +175,11 @@ html, body { overflow-x: clip; }
 }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; color: var(--text); letter-spacing: -0.02em; }
 .brand:hover { color: var(--text); }
+.brand-logo { border-radius: 50%; background: #fff; flex: none; box-shadow: 0 2px 8px rgba(6, 45, 59, 0.18); }
+.brand-hero { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text); font-weight: 800; font-size: 20px; letter-spacing: -0.02em; }
+.brand-hero:hover { color: var(--text); }
+.brand-hero .brand-logo { margin-bottom: 6px; }
+.brand-hero small { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0; }
 .brand-mark {
   width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
   background: var(--gradient); color: #fff; font-size: 16px; font-weight: 800; box-shadow: var(--shadow-lg);
@@ -274,8 +281,8 @@ html, body { overflow-x: clip; }
 .btn-ghost:hover { background: var(--surface-2); color: var(--text); }
 .btn-danger { background: var(--danger-soft); color: var(--danger); }
 .btn-success { background: var(--success); color: #fff; }
-.btn-white { background: #fff; color: #312e81; }
-.btn-white:hover { color: #312e81; background: #f5f3ff; }
+.btn-white { background: #fff; color: var(--brand); }
+.btn-white:hover { color: var(--brand); background: #eaf4f7; }
 .btn-sm { min-height: 34px; padding: 0 12px; font-size: 13px; border-radius: 10px; }
 .btn-lg { min-height: 52px; padding: 0 26px; font-size: 16px; border-radius: 14px; }
 .btn-block { width: 100%; }
@@ -408,7 +415,7 @@ html, body { overflow-x: clip; }
 /* ---------- Challenge / loyiha kartalari ---------- */
 .kind-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 .kind-daily { background: #10b981; }
-.kind-weekly { background: #6366f1; }
+.kind-weekly { background: #168a9c; }
 .kind-monthly { background: #f59e0b; }
 .meta { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--muted); font-weight: 600; }
 .meta span { display: inline-flex; align-items: center; gap: 5px; }

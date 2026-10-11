@@ -1,6 +1,7 @@
 import math
 
 from django import template
+from django.templatetags.static import static
 from django.utils.html import format_html
 
 from apps.arena.levels import level_for_xp
@@ -150,3 +151,20 @@ def stepper(kind, status, compact=False):
         "hint": hint,
         "compact": compact,
     }
+
+
+@register.simple_tag
+def brand_logo(size=40, extra_class=""):
+    """Institut logotipi: oddiy va retina ekranlar uchun."""
+    small = static("web/img/adti-logo-64.png")
+    large = static("web/img/adti-logo-128.png") if size <= 64 else static("web/img/adti-logo-256.webp")
+    classes = f"brand-logo {extra_class}".strip()
+    return format_html(
+        '<img src="{}" srcset="{} 2x" width="{}" height="{}" class="{}" '
+        'alt="Andijon davlat texnika instituti logotipi">',
+        small if size <= 32 else large,
+        large,
+        size,
+        size,
+        classes,
+    )

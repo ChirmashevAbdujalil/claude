@@ -112,12 +112,17 @@ DEMO_STUDENTS = [
     ("Otabek", "Nazarov", "Energetika va quyosh panellari.", [("Energetika", 3)], 120),
 ]
 
-DEMO_FACULTIES = [
-    ("Kompyuter injiniringi (demo)", "KI"),
-    ("Energetika (demo)", "EN"),
-    ("Mashinasozlik (demo)", "MSH"),
-    ("Avtomobilsozlik va transport (demo)", "AT"),
+# Andijon davlat texnika instituti fakultetlari (qisqa nomlarni admin panelda o'zgartirish mumkin)
+FACULTIES = [
+    ("Iqtisodiyot va boshqaruv fakulteti", "IB"),
+    ("Intellektual boshqaruv va kompyuter tizimlari fakulteti", "IBKT"),
+    ("Qurilish muhandisligi va elektroenergetika fakulteti", "QMEE"),
+    ("Mexanika va kimyo muhandisligi fakulteti", "MKM"),
+    ("Avtomobilsozlik va transport fakulteti", "AT"),
 ]
+
+# Oldingi versiyadagi demo fakultetlar → haqiqiy fakultet (qisqa nomi bo'yicha)
+LEGACY_DEMO_FACULTIES = {"KI": "IBKT", "EN": "QMEE", "MSH": "MKM", "AT": "AT"}
 
 
 class Command(BaseCommand):
@@ -145,14 +150,37 @@ class Command(BaseCommand):
             )
         )
 
+        self._faculties()
         if options["demo"]:
             self._demo()
 
+    def _faculties(self):
+        """Haqiqiy fakultetlarni yaratadi; eski demo fakultetlarni ularga ko'chiradi."""
+        names = dict((short, name) for name, short in FACULTIES)
+        for legacy in Faculty.objects.filter(name__endswith="(demo)"):
+            target_short = LEGACY_DEMO_FACULTIES.get(legacy.short_name)
+            if target_short is None:
+                continue
+            target = Faculty.objects.filter(short_name=target_short).exclude(pk=legacy.pk).first()
+            if target is None:
+                # Shu fakultetni o'zini haqiqiy nomga o'zgartiramiz: barcha bog'lanishlar saqlanadi
+                legacy.name, legacy.short_name = names[target_short], target_short
+                legacy.save()
+                continue
+            for model in (User, Challenge):
+                model.objects.filter(faculty=legacy).update(faculty=target)
+            legacy.delete()
+        for name, short in FACULTIES:
+            faculty = Faculty.objects.filter(short_name=short).first() or Faculty.objects.filter(name=name).first()
+            if faculty is None:
+                Faculty.objects.create(name=name, short_name=short)
+            elif faculty.name != name or faculty.short_name != short:
+                faculty.name, faculty.short_name = name, short
+                faculty.save()
+        self.stdout.write(self.style.SUCCESS(f"Fakultetlar: {Faculty.objects.count()}"))
+
     def _demo(self):
-        faculties = [
-            Faculty.objects.get_or_create(short_name=short, defaults={"name": name})[0]
-            for name, short in DEMO_FACULTIES
-        ]
+        faculties = [Faculty.objects.get(short_name=short) for _, short in FACULTIES]
         teacher, created = User.objects.get_or_create(
             username="demo_teacher",
             defaults={

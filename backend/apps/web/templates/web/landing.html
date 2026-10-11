@@ -5,7 +5,7 @@
 
 {% block body %}
 <header class="landing-nav">
-  <a href="{% url 'web:landing' %}" class="brand"><span class="brand-mark">★</span><span>Talent Hub<small>ADTI iqtidorlar platformasi</small></span></a>
+  <a href="{% url 'web:landing' %}" class="brand">{% brand_logo 40 %}<span>ADTI Talent Hub<small>Andijon davlat texnika instituti</small></span></a>
   <div class="row-sm">
     <a href="{% url 'web:login' %}" class="btn btn-ghost btn-sm">Kirish</a>
     {% if registration_open %}<a href="{% url 'web:register' %}" class="btn btn-primary btn-sm">Ro'yxatdan o'tish</a>{% endif %}
@@ -14,7 +14,7 @@
 
 <section class="landing-hero">
   <div>
-    <span class="chip chip-primary">🎓 Andijon davlat texnika instituti</span>
+    <span class="chip chip-primary" style="padding:4px 12px 4px 4px">{% brand_logo 28 %} Andijon davlat texnika instituti</span>
     <h1 style="margin-top:18px">Iqtidoringizni <span class="gradient-text">kashf qiling</span>, rivojlantiring va dunyoga ko'rsating</h1>
     <p class="lead">Challenge'lar yeching, loyihalar quring, AI mentor bilan o'sing va har bir yutug'ingiz uchun ball, nishon va real mukofotlar oling.</p>
     <div class="form-actions">
@@ -33,7 +33,7 @@
     <div class="card card-lg hero-card stack">
       <div class="row-between">
         <div class="row"><span class="avatar avatar-lg" style="--hue:280;background:rgba(255,255,255,.2)">AK</span>
-          <div><div class="bold" style="font-size:18px">Aziza K.</div><div class="muted small">Kompyuter injiniringi · 2-kurs</div></div></div>
+          <div><div class="bold" style="font-size:18px">Aziza K.</div><div class="muted small">Intellektual boshqaruv va kompyuter tizimlari · 2-kurs</div></div></div>
         <span class="chip" style="background:rgba(255,255,255,.18);color:#fff">💡 Ixtirochi</span>
       </div>
       <div>
@@ -100,5 +100,9 @@
   </div>
 </section>
 
-<footer class="landing-footer">© Andijon davlat texnika instituti · ADTI Talent Hub</footer>
+<footer class="landing-footer stack-sm" style="align-items:center">
+  {% brand_logo 64 %}
+  <div>© Andijon davlat texnika instituti · ADTI Talent Hub</div>
+  <div class="tiny">Ta'lim · Fan · Ishlab chiqarish</div>
+</footer>
 {% endblock %}
