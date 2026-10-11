@@ -10,6 +10,8 @@
 
 <div class="nav-section">Imkoniyatlar</div>
 <a href="{% url 'web:opportunities' %}" class="nav-link {% active 'opportunities' 'opportunity' %}">{% icon "briefcase" %} Imkoniyatlar</a>
+<a href="{% url 'web:coins' %}" class="nav-link {% active 'coins' %}">{% icon "coin" %} Tangalarim
+  <span class="chip chip-accent count">{{ user.coins }}</span></a>
 <a href="{% url 'web:shop' %}" class="nav-link {% active 'shop' %}">{% icon "gift" %} Mukofotlar do'koni</a>
 <a href="{% url 'web:events' %}" class="nav-link {% active 'events' 'event' %}">{% icon "calendar" %} Tadbirlar</a>
 <a href="{% url 'web:feed' %}" class="nav-link {% active 'feed' 'post' %}">{% icon "message" %} Lenta</a>

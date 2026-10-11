@@ -51,7 +51,7 @@
         </div>
         <div class="grid-3" style="grid-template-columns:repeat(3,1fr); gap:12px">
           <div><div class="stat-value" style="font-size:22px">🔥 {{ streak.current|default:0 }}</div><div class="muted small">kunlik streak</div></div>
-          <div><div class="stat-value" style="font-size:22px">🪙 {{ user.coins }}</div><div class="muted small">tanga</div></div>
+          <a href="{% url 'web:coins' %}" style="color:inherit"><div class="stat-value" style="font-size:22px">🪙 {{ user.coins }}</div><div class="muted small">tanga →</div></a>
           <div><div class="stat-value" style="font-size:22px">🏅 {{ user.badges.count }}</div><div class="muted small">nishon</div></div>
         </div>
       </div>
@@ -86,7 +86,7 @@
         <a href="{% url 'web:ai' %}" class="card card-link stack-sm"><span class="stat-icon tone-primary">{% icon "sparkles" %}</span><div class="bold">AI Mentor</div><div class="small muted">Shaxsiy yo'l xaritasi</div></a>
         <a href="{% url 'web:projects' %}" class="card card-link stack-sm"><span class="stat-icon tone-success">{% icon "rocket" %}</span><div class="bold">Loyihalar</div><div class="small muted">Jamoa toping</div></a>
         <a href="{% url 'web:opportunities' %}" class="card card-link stack-sm"><span class="stat-icon tone-info">{% icon "briefcase" %}</span><div class="bold">Imkoniyatlar</div><div class="small muted">Grant va stajirovka</div></a>
-        <a href="{% url 'web:shop' %}" class="card card-link stack-sm"><span class="stat-icon tone-accent">{% icon "gift" %}</span><div class="bold">Do'kon</div><div class="small muted">{{ user.coins }} tanga bor</div></a>
+        <a href="{% url 'web:coins' %}" class="card card-link stack-sm"><span class="stat-icon tone-accent">{% icon "coin" %}</span><div class="bold">Tangalarim</div><div class="small muted">{{ user.coins }} tanga: nimaga ishlataman?</div></a>
       </div>
     </div>
 

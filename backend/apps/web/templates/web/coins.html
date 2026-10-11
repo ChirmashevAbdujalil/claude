@@ -1,0 +1,152 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Tangalar{% endblock %}
+
+{% block content %}
+<div class="stack-lg">
+  <!-- Balans -->
+  <div class="card card-lg hero-card stack">
+    <div class="row-between wrap" style="align-items:flex-start">
+      <div class="stack-sm" style="max-width:620px">
+        <span class="chip" style="background:rgba(255,255,255,.18);color:#fff;align-self:flex-start">🪙 Tangalar</span>
+        <h1>Tangalar nima va ular nima beradi?</h1>
+        <p class="muted">Tanga: platformadagi faolligingiz uchun beriladigan ichki valyuta. Har safar XP olganingizda, unga qo'shimcha tanga ham olasiz. Tangalarni <b style="color:#fff">real sovg'alarga</b> almashtirasiz: tushlik, kitob, kurs, merch va hatto rektor bilan uchrashuv.</p>
+      </div>
+      <div class="center">
+        <div class="muted small bold">Balansingiz</div>
+        <div style="font-size:44px; font-weight:800; line-height:1.1">🪙 {{ balance }}</div>
+        <div class="small muted">jami yig'ilgan: {{ earned }} · sarflangan: {{ spent }}</div>
+      </div>
+    </div>
+    <div class="row wrap">
+      <a href="{% url 'web:shop' %}" class="btn btn-white">{% icon "gift" %} Do'konga o'tish</a>
+      <a href="#earn" class="btn btn-ghost" style="color:#fff;border-color:rgba(255,255,255,.4)">Qanday yig'aman?</a>
+    </div>
+  </div>
+
+  <!-- Keyingi maqsad -->
+  {% if goal %}
+  <div class="card card-lg stack" style="border:2px solid color-mix(in srgb, var(--accent) 45%, var(--border))">
+    <div class="row-between wrap">
+      <div class="row">
+        <span class="stat-icon tone-accent" style="width:52px;height:52px;font-size:26px">🎯</span>
+        <div><div class="eyebrow" style="color:var(--accent-text)">Keyingi maqsadingiz</div>
+          <h2 style="margin-top:2px">{{ goal.reward.name }}</h2></div>
+      </div>
+      <div class="bold" style="font-size:20px">🪙 {{ balance }} / {{ goal.reward.price }}</div>
+    </div>
+    <div class="progress" style="height:12px"><span style="width:{{ goal.percent }}%"></span></div>
+    <p class="muted">Yana <b>{{ goal.missing }} tanga</b> kerak. Bu taxminan <b>{{ goal.weekly }} ta haftalik challenge</b> yoki <b>{{ goal.daily }} kunlik savol</b> degani.</p>
+    <div class="row wrap">
+      <a href="{% url 'web:challenges' %}" class="btn btn-accent">{% icon "target" %} Challenge yechish</a>
+      <a href="{% url 'web:events' %}" class="btn btn-ghost">{% icon "calendar" %} Tadbirlar</a>
+    </div>
+  </div>
+  {% elif rewards and affordable_count %}
+  <div class="card card-lg row" style="border:2px solid color-mix(in srgb, var(--success) 45%, var(--border))">
+    <span style="font-size:32px">🎉</span>
+    <div class="grow"><h3>Barcha mukofotlarga tangangiz yetadi!</h3><p class="small muted">Do'konga o'tib, sovg'angizni tanlang.</p></div>
+    <a href="{% url 'web:shop' %}" class="btn btn-success">Tanlash</a>
+  </div>
+  {% endif %}
+
+  <!-- Tanga va XP farqi -->
+  <div class="grid-2">
+    <div class="card card-lg stack-sm">
+      <div class="row"><span class="stat-icon tone-primary">{% icon "bolt" %}</span><h3>XP: obro'yingiz</h3></div>
+      <p class="small muted">Darajangiz va reytingdagi o'rningizni belgilaydi. <b>Hech qachon kamaymaydi.</b> Yuqori daraja grant, stajirovka va maxsus imkoniyatlarni ochadi.</p>
+    </div>
+    <div class="card card-lg stack-sm">
+      <div class="row"><span class="stat-icon tone-accent">{% icon "coin" %}</span><h3>Tanga: hamyoningiz</h3></div>
+      <p class="small muted">Sovg'alarga almashtiriladi. <b>Sarflasangiz kamayadi, lekin XP, darajangiz va reytingingizga ta'sir qilmaydi.</b> Shuning uchun tanga sarflashdan qo'rqmang.</p>
+    </div>
+  </div>
+
+  <!-- Nima foyda -->
+  <div class="card card-lg">
+    <h2 style="margin-bottom:14px">Tanga yig'ishdan nima foyda?</h2>
+    <div class="grid-3">
+      <div class="stack-sm"><span class="feature-icon tone-accent" style="margin:0">🍽️</span><div class="bold">Kundalik foyda</div><p class="small muted">Oshxona talonlari va kitoblar: o'qish bilan birga real yordam.</p></div>
+      <div class="stack-sm"><span class="feature-icon tone-primary" style="margin:0">📚</span><div class="bold">Bilimga sarmoya</div><p class="small muted">Pullik onlayn kurslar va sertifikatlar: rezyumengizni kuchaytiradi.</p></div>
+      <div class="stack-sm"><span class="feature-icon tone-success" style="margin:0">🤝</span><div class="bold">Noyob imkoniyatlar</div><p class="small muted">Rektor bilan uchrashuv va boshqa hech qayerda sotilmaydigan sovg'alar.</p></div>
+    </div>
+  </div>
+
+  <!-- Qanday yig'iladi -->
+  <div class="card card-lg" id="earn">
+    <div class="card-header"><div><h2>Qanday tanga yig'aman?</h2>
+      <p class="small muted">Qoida oddiy: <b>har 10 XP uchun {{ coins_per_10 }} tanga</b>. XP beradigan har bir harakat tanga ham beradi.</p></div></div>
+    <div class="list">
+      {% for icon, title, amount in earn_rows %}
+      <div class="list-item"><span style="font-size:22px; width:32px; text-align:center">{{ icon }}</span>
+        <div class="grow bold">{{ title }}</div><span class="chip chip-accent">+{{ amount }} 🪙</span></div>
+      {% endfor %}
+      {% if achievement_range %}
+      <div class="list-item"><span style="font-size:22px; width:32px; text-align:center">🏅</span>
+        <div class="grow"><div class="bold">Tasdiqlangan yutuq</div><div class="small muted">Olimpiada, sertifikat, maqola, patent</div></div>
+        <span class="chip chip-accent">+{{ achievement_range.0 }}–{{ achievement_range.1 }} 🪙</span></div>
+      {% endif %}
+      {% if badge_range %}
+      <div class="list-item"><span style="font-size:22px; width:32px; text-align:center">🎖️</span>
+        <div class="grow"><div class="bold">Yangi nishon bonusi</div><div class="small muted">Ayrim nishonlar qo'shimcha XP va tanga beradi</div></div>
+        <span class="chip chip-accent">+{{ badge_range.0 }}–{{ badge_range.1 }} 🪙</span></div>
+      {% endif %}
+    </div>
+    <p class="tiny muted" style="margin-top:10px">Kunlik limit: faollik uchun kuniga eng ko'pi bilan {{ daily_cap_coins }} tanga. Tasdiqlangan yutuqlar limitga kirmaydi.</p>
+  </div>
+
+  <!-- Nimaga ishlataman -->
+  <div class="card card-lg">
+    <div class="card-header"><div><h2>Tangalarni nimaga ishlataman?</h2>
+      <p class="small muted">Do'kondagi barcha mukofotlar va ularga yetishingiz uchun qancha qolgani.</p></div>
+      <a href="{% url 'web:shop' %}" class="btn btn-soft btn-sm">Do'kon {% icon "arrow-right" "icon-sm" %}</a></div>
+    <div class="list">
+      {% for reward in rewards %}
+      <div class="list-item">
+        <span class="stat-icon {% if reward.affordable %}tone-success{% else %}tone-accent{% endif %}" style="font-size:20px">🎁</span>
+        <div class="grow">
+          <div class="row-between"><span class="bold">{{ reward.name }}</span><span class="bold">🪙 {{ reward.price }}</span></div>
+          {% if reward.description %}<div class="small muted">{{ reward.description }}</div>{% endif %}
+          {% if not reward.available %}<div class="tiny muted" style="margin-top:4px">Hozircha tugagan</div>
+          {% elif reward.affordable %}<div class="tiny bold" style="margin-top:4px; color:var(--success)">✓ Tangangiz yetadi</div>
+          {% else %}
+          <div class="progress" style="height:6px; margin-top:6px"><span style="width:{{ balance|ratio:reward.price }}%"></span></div>
+          <div class="tiny muted" style="margin-top:4px">Yana {{ reward.missing }} tanga kerak</div>
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <p class="muted small">Do'kon tez orada ochiladi.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="grid-2" style="align-items:start">
+    <!-- Tarix -->
+    <div class="card card-lg">
+      <div class="card-header"><h2>Tangalarim tarixi</h2><a href="{% url 'web:arena' %}?tab=history" class="small bold">Hammasi</a></div>
+      <div class="list">
+        {% for tx in history %}
+        <div class="list-item">
+          <div class="grow"><div class="bold small truncate">{{ tx.get_reason_display }}</div><div class="tiny muted truncate">{{ tx.note|default:"" }} · {{ tx.created_at|date:"d.m.Y" }}</div></div>
+          <span class="bold small" style="color:{% if tx.coins < 0 %}var(--danger){% else %}var(--success){% endif %}">{% if tx.coins > 0 %}+{% endif %}{{ tx.coins }} 🪙</span>
+        </div>
+        {% empty %}
+        <p class="muted small">Hali tanga yo'q. Birinchi challenge'ni yeching!</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="card card-lg">
+      <h2 style="margin-bottom:8px">Ko'p beriladigan savollar</h2>
+      {% for question, answer in faq %}
+      <details class="faq">
+        <summary>{{ question }}</summary>
+        <p class="small muted">{{ answer }}</p>
+      </details>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

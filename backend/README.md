@@ -50,6 +50,7 @@ POSTGRES_PASSWORD=maxfiy docker compose up --build
 | Portfolio | `/u/<slug>/` | Ommaviy sahifa. O'qituvchi shu yerda ko'nikmani tasdiqlaydi va «uchqun» belgisi qo'yadi |
 | Loyihalar | `/projects/` | Yaratish, qo'shilish, bosqichlar, jamoadosh tavsiyasi |
 | Imkoniyatlar | `/opportunities/` | Ariza topshirish. Hamkorlar e'lon joylaydi |
+| Tangalarim | `/coins/` | Tanga nima beradi, qanday yig'iladi, nimaga sarflanadi, keyingi maqsad va savol-javob |
 | Do'kon | `/shop/` | Tangalarni sovg'aga almashtirish |
 | Lenta | `/feed/` | Postlar, layk, izohlar |
 | Tadbirlar | `/events/` | Ro'yxatdan o'tish, tashkilotchi uchun QR kod, `/events/check-in/` |

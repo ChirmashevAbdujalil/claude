@@ -26,7 +26,7 @@
       <a href="{% url 'web:dashboard' %}" class="brand"><span class="brand-mark">★</span><span>Talent Hub</span></a>
       <div class="row-sm">
         <a href="{% url 'web:notifications' %}" class="bell" aria-label="Bildirishnomalar">{% icon "bell" %}{% if unread_notifications %}<span class="dot">{{ unread_notifications }}</span>{% endif %}</a>
-        <a href="{% url 'web:shop' %}" class="chip chip-accent" title="Tangalar">{% icon "coin" "icon-sm" %} {{ user.coins }}</a>
+        <a href="{% url 'web:coins' %}" class="chip chip-accent" title="Tangalar: nima beradi va qanday ishlatiladi">{% icon "coin" "icon-sm" %} {{ user.coins }}</a>
         <a href="{% url 'web:arena' %}" class="chip chip-primary" title="XP">{% icon "bolt" "icon-sm" %} {{ user.xp }} XP</a>
         <a href="{% url 'web:profile' %}" aria-label="Profil">{% avatar user "sm" %}</a>
       </div>
@@ -42,7 +42,7 @@
     <a href="{% url 'web:challenges' %}" class="{% active 'challenges' 'challenge' %}">{% icon "target" %}Challenge</a>
     <a href="{% url 'web:ai' %}" class="{% active 'ai' %}">{% icon "sparkles" %}AI Mentor</a>
     <a href="{% url 'web:arena' %}" class="{% active 'arena' %}">{% icon "trophy" %}Arena</a>
-    <a href="{% url 'web:menu' %}" class="{% active 'menu' 'profile' 'projects' 'project' 'feed' 'post' 'events' 'event' 'opportunities' 'opportunity' 'shop' 'review' 'insights' %}">{% icon "compass" %}Menyu</a>
+    <a href="{% url 'web:menu' %}" class="{% active 'menu' 'coins' 'notifications' 'profile' 'projects' 'project' 'feed' 'post' 'events' 'event' 'opportunities' 'opportunity' 'shop' 'review' 'insights' %}">{% icon "compass" %}Menyu</a>
   </nav>
 </div>
 {% endblock %}

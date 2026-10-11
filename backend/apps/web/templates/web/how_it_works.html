@@ -17,7 +17,7 @@
 
   <div class="grid-3">
     <div class="card stat"><span class="stat-icon tone-accent">{% icon "bolt" %}</span><div><div class="bold">XP</div><div class="stat-label">Daraja va reyting uchun. Hech qachon kamaymaydi</div></div></div>
-    <div class="card stat"><span class="stat-icon tone-accent">{% icon "coin" %}</span><div><div class="bold">Har 10 XP = {{ coins_per_10 }} tanga</div><div class="stat-label">Mukofotlar do'konida sarflanadi</div></div></div>
+    <a href="{% if user.is_authenticated %}{% url 'web:coins' %}{% else %}{% url 'web:login' %}{% endif %}" class="card card-link stat"><span class="stat-icon tone-accent">{% icon "coin" %}</span><div><div class="bold">Har 10 XP = {{ coins_per_10 }} tanga</div><div class="stat-label">Nimaga ishlatiladi? Batafsil →</div></div></a>
     <div class="card stat"><span class="stat-icon tone-primary">{% icon "shield" %}</span><div><div class="bold">Kunlik limit: {{ daily_cap }} XP</div><div class="stat-label">Tasdiqlangan yutuqlar limitga kirmaydi</div></div></div>
   </div>
 

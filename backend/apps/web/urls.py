@@ -1,6 +1,19 @@
 from django.urls import path
 
-from .views import ai, arena, challenges, community, home, onboarding, opportunities, profile, projects, public, staff
+from .views import (
+    ai,
+    arena,
+    challenges,
+    coins,
+    community,
+    home,
+    onboarding,
+    opportunities,
+    profile,
+    projects,
+    public,
+    staff,
+)
 
 app_name = "web"
 
@@ -44,6 +57,7 @@ urlpatterns = [
     path("opportunities/", opportunities.opportunity_list, name="opportunities"),
     path("opportunities/new/", opportunities.opportunity_form, name="opportunity-create"),
     path("opportunities/<int:pk>/", opportunities.opportunity_detail, name="opportunity-detail"),
+    path("coins/", coins.coins, name="coins"),
     path("shop/", opportunities.shop, name="shop"),
     path("shop/<int:pk>/redeem/", opportunities.redeem, name="shop-redeem"),
     # Hamjamiyat
