@@ -25,6 +25,9 @@
     <header class="topbar">
       <a href="{% url 'web:dashboard' %}" class="brand">{% brand_logo 34 %}<span class="nowrap">Talent Hub</span></a>
       <div class="row-sm">
+        <button type="button" class="bell theme-toggle" data-theme-toggle aria-label="Yorug' yoki qorong'i rejimni almashtirish" title="Rejimni almashtirish">
+          <span class="when-light">{% icon "moon" %}</span><span class="when-dark">{% icon "sun" %}</span>
+        </button>
         <a href="{% url 'web:notifications' %}" class="bell" aria-label="Bildirishnomalar">{% icon "bell" %}{% if unread_notifications %}<span class="dot">{{ unread_notifications }}</span>{% endif %}</a>
         <a href="{% url 'web:coins' %}" class="chip chip-accent" title="Tangalar: nima beradi va qanday ishlatiladi">{% icon "coin" "icon-sm" %} {{ user.coins }}</a>
         <a href="{% url 'web:arena' %}" class="chip chip-primary" title="XP">{% icon "bolt" "icon-sm" %} {{ user.xp }} XP</a>

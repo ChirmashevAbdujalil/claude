@@ -548,3 +548,16 @@ html, body { overflow-x: clip; }
 .faq summary::after { content: "+"; color: var(--muted); font-weight: 800; }
 .faq[open] summary::after { content: "–"; }
 .faq p { margin-top: 8px; }
+
+/* ---------- Rejim almashtirgich ---------- */
+.theme-toggle { border: 0; background: none; cursor: pointer; font: inherit; }
+.theme-toggle > span { display: inline-grid; }
+.theme-toggle .when-dark { display: none; }
+:root[data-theme="dark"] .theme-toggle .when-dark { display: inline-grid; }
+:root[data-theme="dark"] .theme-toggle .when-light { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle .when-dark { display: inline-grid; }
+  :root:not([data-theme="light"]) .theme-toggle .when-light { display: none; }
+}
+.theme-toggle .icon { transition: transform .3s ease; }
+.theme-toggle:hover .icon { transform: rotate(-20deg); }

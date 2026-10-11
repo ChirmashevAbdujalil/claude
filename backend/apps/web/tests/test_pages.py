@@ -346,3 +346,13 @@ def test_ai_without_api_key_shows_message(web, student, monkeypatch):
     response = client.post(reverse("web:ai-start"), {"mode": "mentor", "text": "Salom"}, follow=True)
     assert response.status_code == 200
     assert ai_services.NOT_CONFIGURED in response.content.decode().replace("&#x27;", "'")
+
+
+def test_theme_toggle_in_top_bar(web, student):
+    html = web(student).get(reverse("web:dashboard")).content.decode()
+    assert "data-theme-toggle" in html
+    assert 'href="#i-moon"' in html and 'href="#i-sun"' in html
+    # Toggle bildirishnoma belgisidan oldin turadi
+    assert html.index("data-theme-toggle") < html.index('aria-label="Bildirishnomalar"')
+    # Saqlangan tanlov sahifa chizilishidan oldin qo'llanadi
+    assert html.index('localStorage.getItem("theme")') < html.index("app.css")

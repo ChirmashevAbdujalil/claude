@@ -9,6 +9,36 @@
     return input ? input.value : "";
   }
 
+  /* ---------- Yorug' / qorong'i rejim ---------- */
+  function storedTheme() {
+    try {
+      var value = localStorage.getItem("theme");
+      return value === "dark" || value === "light" ? value : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function currentTheme() {
+    var attr = document.documentElement.getAttribute("data-theme");
+    if (attr === "dark" || attr === "light") return attr;
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+
+  document.querySelectorAll("[data-theme-toggle]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var next = currentTheme() === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      try {
+        localStorage.setItem("theme", next);
+      } catch (e) {
+        /* Shaxsiy rejimda saqlab bo'lmasa ham almashtirish ishlayveradi */
+      }
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute("content", next === "dark" ? "#0f1f25" : "#062d3b");
+    });
+  });
+
   /* ---------- Toast xabarlar ---------- */
   document.querySelectorAll(".toast").forEach(function (toast) {
     var close = toast.querySelector("button");
@@ -25,7 +55,9 @@
   if (tg && tg.initData) {
     tg.ready();
     tg.expand();
-    document.documentElement.setAttribute("data-theme", tg.colorScheme === "dark" ? "dark" : "light");
+    if (!storedTheme()) {
+      document.documentElement.setAttribute("data-theme", tg.colorScheme === "dark" ? "dark" : "light");
+    }
     var body = document.body;
     if (body.dataset.authenticated !== "1" && body.dataset.telegramLogin) {
       fetch(body.dataset.telegramLogin, {
