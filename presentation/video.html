@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>ADTI Talent Hub: taqdimot videosi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=block" rel="stylesheet">
+<style>
+  :root {
+    --brand: #062d3b; --primary: #0e5a73; --teal: #168a9c; --mint: #5cc6d9;
+    --gold: #f59e0b; --orange: #f97316; --bg: #f3f6f7; --text: #0b1d24; --muted: #5f747c;
+    --card: #ffffff; --border: #dbe4e7;
+    --grad: linear-gradient(135deg, #062d3b 0%, #0e5a73 55%, #168a9c 100%);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #000; }
+  body { font-family: "Manrope", system-ui, sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; }
+  #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+  .scene { position: absolute; inset: 0; visibility: hidden; opacity: 0; }
+  .dark { background: radial-gradient(circle at 70% 30%, #0e5a73 0%, #062d3b 55%, #03161d 100%); color: #fff; }
+  .light { background: var(--bg); }
+  .light::before { content: ""; position: absolute; width: 900px; height: 900px; right: -300px; top: -350px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(22,138,156,.16), transparent 65%); }
+  .light::after { content: ""; position: absolute; width: 700px; height: 700px; left: -250px; bottom: -320px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(245,158,11,.10), transparent 65%); }
+  .abs { position: absolute; }
+  .center { text-align: center; }
+  h1 { font-size: 104px; font-weight: 800; letter-spacing: -0.04em; line-height: 1.02; }
+  h2 { font-size: 72px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.08; }
+  h3 { font-size: 38px; font-weight: 800; letter-spacing: -0.02em; }
+  .lead { font-size: 36px; font-weight: 500; line-height: 1.4; color: var(--muted); }
+  .dark .lead { color: rgba(255,255,255,.78); }
+  .eyebrow { display: inline-flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--teal); }
+  .eyebrow b { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: var(--grad); color: #fff; letter-spacing: 0; font-size: 20px; }
+  .grad-text { background: linear-gradient(90deg, #168a9c, #5cc6d9); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .gold-text { background: linear-gradient(90deg, #f59e0b, #f97316); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  /* Qurilma ramkalari */
+  .browser { position: absolute; border-radius: 22px; overflow: hidden; background: #fff; box-shadow: 0 40px 100px rgba(6,45,59,.28), 0 0 0 1px rgba(6,45,59,.08); }
+  .browser .bar { height: 46px; background: #e9eff1; display: flex; align-items: center; gap: 10px; padding: 0 18px; }
+  .browser .bar i { width: 14px; height: 14px; border-radius: 50%; background: #f87171; }
+  .browser .bar i:nth-child(2) { background: #fbbf24; } .browser .bar i:nth-child(3) { background: #34d399; }
+  .browser .bar span { margin-left: 18px; height: 28px; flex: 1; max-width: 520px; border-radius: 8px; background: #fff; font-size: 16px; font-weight: 600; color: var(--muted); display: flex; align-items: center; padding: 0 14px; }
+  .browser .view { position: relative; overflow: hidden; }
+  .browser .view img { position: absolute; left: 0; top: 0; width: 100%; display: block; transform-origin: 50% 0; }
+  .phone { position: absolute; width: 400px; height: 840px; border-radius: 60px; background: #0b1d24; padding: 14px; box-shadow: 0 40px 100px rgba(6,45,59,.35); }
+  .phone .screen { position: relative; width: 100%; height: 100%; border-radius: 47px; overflow: hidden; background: #f3f6f7; }
+  .phone .screen img { position: absolute; left: 0; top: 40px; width: 100%; display: block; }
+  .phone .notch { position: absolute; left: 50%; top: 26px; transform: translateX(-50%); width: 120px; height: 32px; border-radius: 20px; background: #0b1d24; z-index: 2; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 28px; box-shadow: 0 10px 40px rgba(6,45,59,.08); }
+  .pill { display: inline-flex; align-items: center; gap: 12px; padding: 14px 26px; border-radius: 999px; font-size: 28px; font-weight: 800; background: #fff; box-shadow: 0 16px 40px rgba(6,45,59,.18); }
+  .xp-pill { background: linear-gradient(135deg, #f59e0b, #f97316); color: #fff; }
+  .icon-tile { width: 92px; height: 92px; border-radius: 26px; display: grid; place-items: center; font-size: 46px; }
+  .t-teal { background: #e2f0f4; } .t-gold { background: #fff4dc; } .t-green { background: #e3f6ee; } .t-rose { background: #fdeaea; } .t-blue { background: #e6f1fb; } .t-violet { background: #efeafc; }
+
+  /* Progress va belgi */
+  #progress { position: absolute; left: 0; bottom: 0; height: 6px; background: linear-gradient(90deg, #f59e0b, #168a9c); z-index: 50; }
+  #watermark { position: absolute; left: 48px; bottom: 30px; display: flex; align-items: center; gap: 14px; font-size: 22px; font-weight: 800; color: var(--brand); z-index: 40; opacity: 0; }
+  #watermark img { width: 48px; height: 48px; border-radius: 50%; background: #fff; box-shadow: 0 2px 10px rgba(6,45,59,.2); }
+
+  /* 1. Kirish */
+  #s1 .ring { position: absolute; left: 50%; top: 50%; border-radius: 50%; border: 2px solid rgba(92,198,217,.35); transform: translate(-50%,-50%); }
+  #s1 .logo { position: absolute; left: 50%; top: 300px; width: 300px; height: 300px; margin-left: -150px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 14px rgba(255,255,255,.08), 0 30px 80px rgba(0,0,0,.4); }
+  #s1 .title { position: absolute; left: 0; right: 0; top: 650px; }
+  #s1 .sub { position: absolute; left: 0; right: 0; top: 790px; font-size: 40px; font-weight: 600; color: rgba(255,255,255,.85); }
+  #s1 .tag { position: absolute; left: 0; right: 0; top: 880px; font-size: 26px; font-weight: 700; letter-spacing: .3em; text-transform: uppercase; color: var(--mint); }
+
+  /* 2. Muammo */
+  #s2 .dots { position: absolute; right: 120px; top: 190px; width: 760px; height: 700px; display: grid; grid-template-columns: repeat(12, 1fr); gap: 22px; }
+  #s2 .dot { width: 40px; height: 40px; border-radius: 50%; background: #cfdbe0; }
+  #s2 .dot.star { background: #cfdbe0; }
+  #s2 .pain { display: flex; align-items: center; gap: 26px; padding: 26px 32px; margin-top: 22px; width: 820px; }
+  #s2 .pain .icon-tile { width: 76px; height: 76px; font-size: 38px; border-radius: 22px; }
+  #s2 .pain div { font-size: 30px; font-weight: 700; line-height: 1.3; }
+
+  /* 3. Yechim tsikli */
+  #s3 .node { position: absolute; width: 360px; height: 360px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #fff; box-shadow: 0 30px 80px rgba(6,45,59,.3); }
+  #s3 .node .e { font-size: 84px; } #s3 .node .n { font-size: 40px; font-weight: 800; margin-top: 10px; } #s3 .node .d { font-size: 22px; font-weight: 600; opacity: .85; margin-top: 8px; padding: 0 40px; }
+  #s3 svg { position: absolute; left: 0; top: 0; }
+
+  /* 4. Talaba yo'li */
+  #s4 .step { display: flex; align-items: center; gap: 26px; padding: 24px 30px; width: 700px; margin-bottom: 20px; border-radius: 26px; background: #fff; border: 2px solid var(--border); }
+  #s4 .step .num { width: 66px; height: 66px; border-radius: 20px; display: grid; place-items: center; font-size: 30px; font-weight: 800; background: #e2f0f4; color: var(--primary); flex: none; }
+  #s4 .step .tt { font-size: 32px; font-weight: 800; } #s4 .step .dd { font-size: 22px; font-weight: 600; color: var(--muted); margin-top: 4px; }
+
+  /* 5. Ball iqtisodiyoti */
+  #s5 .lvl { display: flex; align-items: center; gap: 22px; margin-bottom: 18px; }
+  #s5 .lvl .b { height: 64px; border-radius: 18px; background: var(--grad); color: #fff; display: flex; align-items: center; padding: 0 26px; font-size: 26px; font-weight: 800; white-space: nowrap; }
+  #s5 .lvl .x { font-size: 24px; font-weight: 700; color: var(--muted); }
+  #s5 .flow { display: flex; align-items: center; gap: 26px; }
+  #s5 .flow .box { padding: 28px 34px; border-radius: 28px; background: #fff; border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(6,45,59,.08); font-size: 30px; font-weight: 800; text-align: center; }
+  #s5 .flow .box small { display: block; font-size: 20px; font-weight: 600; color: var(--muted); margin-top: 6px; }
+  #s5 .flow .box { flex: 1; white-space: nowrap; }
+  #s5 .flow .box .e { display: block; font-size: 44px; margin-bottom: 6px; }
+  #s5 .flow .arr { font-size: 48px; color: var(--teal); font-weight: 800; }
+
+  /* 6. Imkoniyatlar */
+  #s6 .feat { position: absolute; width: 520px; padding: 34px; }
+  #s6 .feat h3 { margin-top: 22px; font-size: 34px; } #s6 .feat p { margin-top: 10px; font-size: 24px; font-weight: 600; color: var(--muted); line-height: 1.4; }
+
+  /* 7-8. O'qituvchi va rektor */
+  .callout { position: absolute; display: flex; align-items: center; gap: 20px; padding: 22px 28px; border-radius: 24px; background: #fff; box-shadow: 0 20px 60px rgba(6,45,59,.2); font-size: 27px; font-weight: 800; max-width: 600px; line-height: 1.3; }
+  .callout .em { font-size: 40px; }
+  .stat-big { font-size: 96px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+
+  /* 9. Ishonch */
+  #s9 .trust { position: absolute; width: 320px; text-align: center; }
+  #s9 .trust .icon-tile { margin: 0 auto; width: 130px; height: 130px; font-size: 64px; border-radius: 36px; }
+  #s9 .trust h3 { margin-top: 26px; font-size: 32px; } #s9 .trust p { margin-top: 10px; font-size: 22px; font-weight: 600; color: var(--muted); line-height: 1.4; }
+
+  /* 10. Yo'l xaritasi */
+  #s10 .line { position: absolute; left: 240px; top: 610px; height: 8px; width: 1440px; border-radius: 4px; background: #dbe4e7; overflow: hidden; }
+  #s10 .line i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #168a9c, #f59e0b); transform-origin: 0 50%; }
+  #s10 .ms { position: absolute; top: 560px; width: 380px; margin-left: -190px; text-align: center; }
+  #s10 .ms .dotm { width: 108px; height: 108px; margin: 0 auto; border-radius: 50%; background: #fff; border: 8px solid #168a9c; display: grid; place-items: center; font-size: 46px; box-shadow: 0 16px 40px rgba(6,45,59,.18); }
+  #s10 .ms h3 { margin-top: 30px; font-size: 34px; } #s10 .ms p { margin-top: 8px; font-size: 23px; font-weight: 600; color: var(--muted); line-height: 1.4; }
+
+  /* 11. Yakun */
+  #s11 .logo { position: absolute; left: 50%; top: 180px; width: 260px; height: 260px; margin-left: -130px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 14px rgba(255,255,255,.08), 0 30px 80px rgba(0,0,0,.4); }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- 1. Kirish -->
+  <section class="scene dark" id="s1">
+    <div class="ring" style="width:520px;height:520px;top:450px"></div>
+    <div class="ring" style="width:760px;height:760px;top:450px"></div>
+    <div class="ring" style="width:1040px;height:1040px;top:450px"></div>
+    <img class="logo" src="assets/logo.webp" alt="">
+    <h1 class="title center">ADTI <span class="grad-text">Talent Hub</span></h1>
+    <p class="sub center">Iqtidorli talabalarni kashf qilish va rivojlantirish platformasi</p>
+    <p class="tag center">Andijon davlat texnika instituti</p>
+  </section>
+
+  <!-- 2. Muammo -->
+  <section class="scene light" id="s2">
+    <div class="abs" style="left:140px;top:150px;width:900px">
+      <div class="eyebrow"><b>01</b> Muammo</div>
+      <h2 style="margin-top:26px">Iqtidorli talabalar <span class="gold-text">ko'rinmay</span> qolmoqda</h2>
+      <div class="pain card"><span class="icon-tile t-rose">📂</span><div>Yutuqlar tarqoq: qog'ozda, chatlarda, xotirada</div></div>
+      <div class="pain card"><span class="icon-tile t-gold">👀</span><div>O'qituvchi iqtidorni ko'radi, rahbariyat ko'rmaydi</div></div>
+      <div class="pain card"><span class="icon-tile t-blue">🎯</span><div>Grant va stajirovkalar kerakli talabaga yetib bormaydi</div></div>
+    </div>
+    <div class="dots" id="dots"></div>
+  </section>
+
+  <!-- 3. Yechim -->
+  <section class="scene light" id="s3">
+    <div class="abs center" style="left:0;right:0;top:110px">
+      <div class="eyebrow"><b>02</b> Yechim</div>
+      <h2 style="margin-top:22px">Bitta platforma: uch bosqichli tsikl</h2>
+    </div>
+    <svg width="1920" height="1080" viewBox="0 0 1920 1080">
+      <defs><marker id="ah" markerUnits="userSpaceOnUse" markerWidth="26" markerHeight="26" refX="13" refY="13" orient="auto"><path d="M0,0 L26,13 L0,26 z" fill="#168a9c"/></marker><marker id="ahg" markerUnits="userSpaceOnUse" markerWidth="26" markerHeight="26" refX="13" refY="13" orient="auto"><path d="M0,0 L26,13 L0,26 z" fill="#f59e0b"/></marker></defs>
+      <path class="arc" d="M 632 470 Q 700 420 760 445" stroke="#168a9c" stroke-width="7" fill="none" stroke-linecap="round" marker-end="url(#ah)" stroke-dasharray="400" stroke-dashoffset="400"/>
+      <path class="arc" d="M 1160 445 Q 1220 420 1288 470" stroke="#168a9c" stroke-width="7" fill="none" stroke-linecap="round" marker-end="url(#ah)" stroke-dasharray="400" stroke-dashoffset="400"/>
+      <path class="arc" d="M 1480 700 C 1340 830 580 830 440 715" stroke="#f59e0b" stroke-width="7" fill="none" stroke-linecap="round" stroke-dasharray="14 16" marker-end="url(#ahg)" opacity="0"/>
+    </svg>
+    <div class="node" style="left:260px;top:330px;background:linear-gradient(135deg,#062d3b,#0e5a73)"><div class="e">🔍</div><div class="n">Kashf qilish</div><div class="d">Challenge'lar, o'qituvchi belgisi, statistika</div></div>
+    <div class="node" style="left:780px;top:290px;background:linear-gradient(135deg,#0e5a73,#168a9c)"><div class="e">🌱</div><div class="n">Rivojlantirish</div><div class="d">AI Mentor, loyihalar, jamoa</div></div>
+    <div class="node" style="left:1300px;top:330px;background:linear-gradient(135deg,#168a9c,#2bb3c4)"><div class="e">🚀</div><div class="n">Imkoniyat</div><div class="d">Grant, stajirovka, mukofotlar</div></div>
+    <div class="pill" id="s3pill" style="position:absolute;left:50%;top:880px;transform:translateX(-50%);font-size:30px">⚡ XP · 🪙 Tanga · 🏅 Nishon: har bir qadam rag'batlantiriladi</div>
+  </section>
+
+  <!-- 4. Talaba yo'li -->
+  <section class="scene light" id="s4">
+    <div class="abs" style="left:130px;top:130px">
+      <div class="eyebrow"><b>03</b> Talaba yo'li</div>
+      <h2 style="margin-top:22px;margin-bottom:46px">Birinchi daqiqadan<br>aniq yo'nalish</h2>
+      <div class="step"><div class="num">1</div><div><div class="tt">Ro'yxatdan o'tadi</div><div class="dd">Sayt yoki Telegram orqali, bir daqiqada</div></div></div>
+      <div class="step"><div class="num">2</div><div><div class="tt">Ko'nikmalarini belgilaydi</div><div class="dd">Fakultet, kurs va qiziqishlar</div></div></div>
+      <div class="step"><div class="num">3</div><div><div class="tt">Challenge yechadi</div><div class="dd">Kunlik savol avtomatik tekshiriladi</div></div></div>
+      <div class="step"><div class="num">4</div><div><div class="tt">«Keyingi qadam»ni ko'radi</div><div class="dd">Platforma o'zi yo'l ko'rsatadi</div></div></div>
+    </div>
+    <div class="phone" id="s4phone" style="left:1220px;top:120px"><div class="notch"></div><div class="screen">
+      <img src="assets/m-register.webp" id="s4p1" alt=""><img src="assets/m-skills.webp" id="s4p2" alt="" style="opacity:0">
+    </div></div>
+    <div class="browser" id="s4browser" style="left:900px;top:190px;width:900px"><div class="bar"><i></i><i></i><i></i><span id="s4url">talent.adti.uz/challenges</span></div>
+      <div class="view" style="height:562px"><img src="assets/celebrate.webp" id="s4b1" alt=""><img src="assets/dashboard.webp" id="s4b2" alt="" style="opacity:0"></div></div>
+    <div class="pill xp-pill" id="s4xp" style="position:absolute;left:1560px;top:150px">+10 XP 🎉</div>
+    <div class="pill" id="s4badge" style="position:absolute;left:1520px;top:820px">🎯 «Birinchi qadam» nishoni</div>
+  </section>
+
+  <!-- 5. Ball iqtisodiyoti -->
+  <section class="scene light" id="s5">
+    <div class="abs" style="left:130px;top:120px;width:820px">
+      <div class="eyebrow"><b>04</b> Motivatsiya</div>
+      <h2 style="margin-top:22px">O'qish <span class="gold-text">o'yin</span> kabi qiziqarli</h2>
+      <p class="lead" style="margin-top:18px">Har bir foydali harakat XP va tanga beradi</p>
+      <div style="margin-top:44px" id="levels">
+        <div class="lvl"><div class="b" style="width:390px">1 · Yangi boshlovchi</div><span class="x">0 XP</span></div>
+        <div class="lvl"><div class="b" style="width:430px">2 · Izlanuvchi</div><span class="x">500 XP</span></div>
+        <div class="lvl"><div class="b" style="width:470px">3 · Ixtirochi</div><span class="x">2 000 XP</span></div>
+        <div class="lvl"><div class="b" style="width:510px">4 · Innovator</div><span class="x">5 000 XP</span></div>
+        <div class="lvl"><div class="b" style="width:550px;background:linear-gradient(135deg,#f59e0b,#f97316)">5 · Afsona 👑</div><span class="x">12 000 XP</span></div>
+      </div>
+    </div>
+    <div class="abs" style="left:1040px;top:200px;width:760px">
+      <div class="flow" id="flow">
+        <div class="box"><span class="e">⚡</span>10 XP<small>harakat</small></div><div class="arr">→</div>
+        <div class="box"><span class="e">🪙</span>2 tanga<small>hamyon</small></div><div class="arr">→</div>
+        <div class="box"><span class="e">🎁</span>Sovg'a<small>do'kon</small></div>
+      </div>
+      <div class="browser" id="s5browser" style="left:0;top:220px;width:780px"><div class="bar"><i></i><i></i><i></i><span>talent.adti.uz/coins</span></div>
+        <div class="view" style="height:487px"><img src="assets/coins.webp" id="s5img" alt=""></div></div>
+    </div>
+  </section>
+
+  <!-- 6. Imkoniyatlar -->
+  <section class="scene light" id="s6">
+    <div class="abs center" style="left:0;right:0;top:90px">
+      <div class="eyebrow"><b>05</b> Imkoniyatlar</div>
+      <h2 style="margin-top:22px">Talabaga kerakli hamma narsa bir joyda</h2>
+    </div>
+    <div class="feat card" style="left:150px;top:330px"><span class="icon-tile t-gold">🏆</span><h3>Arena va reyting</h3><p>Haftalik reyting, fakultetlar ligasi, 14 xil nishon va streak</p></div>
+    <div class="feat card" style="left:700px;top:330px"><span class="icon-tile t-green">🚀</span><h3>Loyihalar va jamoa</h3><p>G'oyadan startupgacha. Platforma mos jamoadosh topib beradi</p></div>
+    <div class="feat card" style="left:1250px;top:330px"><span class="icon-tile t-violet">🤖</span><h3>AI Mentor 24/7</h3><p>O'quv yo'l xaritasi, startup g'oya tahlili, karyera maslahati</p></div>
+    <div class="feat card" style="left:150px;top:660px"><span class="icon-tile t-blue">📅</span><h3>Tadbirlar va QR</h3><p>Ro'yxatdan o'tish va QR orqali check-in, qatnashganga XP</p></div>
+    <div class="feat card" style="left:700px;top:660px"><span class="icon-tile t-rose">🔔</span><h3>Bildirishnomalar</h3><p>Saytda va Telegram botda: natija, nishon, jamoa so'rovi</p></div>
+    <div class="feat card" style="left:1250px;top:660px"><span class="icon-tile t-teal">🧬</span><h3>Talent Passport</h3><p>Ko'nikmalar radari va havola bilan ulashiladigan portfolio</p></div>
+  </section>
+
+  <!-- 7. O'qituvchi -->
+  <section class="scene light" id="s7">
+    <div class="abs" style="left:130px;top:140px;width:640px">
+      <div class="eyebrow"><b>06</b> O'qituvchi uchun</div>
+      <h2 style="margin-top:22px">Baholash tez, qaror o'qituvchida</h2>
+      <p class="lead" style="margin-top:24px">Yechimlar, yutuqlar va ko'nikma tasdiqlari bitta tekshiruv navbatida</p>
+    </div>
+    <div class="browser" id="s7browser" style="left:820px;top:170px;width:1000px"><div class="bar"><i></i><i></i><i></i><span>talent.adti.uz/review</span></div>
+      <div class="view" style="height:625px"><img src="assets/review.webp" alt=""></div></div>
+    <div class="callout" id="s7c1" style="left:130px;top:600px"><span class="em">🤖</span>AI baho va izoh qoralamasini tayyorlaydi</div>
+    <div class="callout" id="s7c2" style="left:130px;top:740px"><span class="em">✨</span>«Bu talabada uchqun bor» belgisi rahbariyatga yetadi</div>
+    <div class="callout" id="s7c3" style="left:130px;top:880px"><span class="em">🔒</span>Talabaning ismi AI'ga yuborilmaydi</div>
+  </section>
+
+  <!-- 8. Rektorat -->
+  <section class="scene light" id="s8">
+    <div class="abs" style="left:130px;top:130px;width:700px">
+      <div class="eyebrow"><b>07</b> Rektorat uchun</div>
+      <h2 style="margin-top:22px">Institutning iqtidor xaritasi real vaqtda</h2>
+    </div>
+    <div class="browser" id="s8browser" style="left:880px;top:130px;width:940px"><div class="bar"><i></i><i></i><i></i><span>talent.adti.uz/insights</span></div>
+      <div class="view" style="height:588px"><img src="assets/insights.webp" id="s8img" alt=""></div></div>
+    <div class="abs" style="left:130px;top:520px;display:grid;grid-template-columns:repeat(2,330px);gap:26px" id="s8stats">
+      <div class="card" style="padding:30px"><div class="stat-big grad-text" data-count="5">0</div><div style="font-size:24px;font-weight:700;margin-top:10px">fakultet bitta reytingda</div></div>
+      <div class="card" style="padding:30px"><div class="stat-big gold-text" data-count="5">0</div><div style="font-size:24px;font-weight:700;margin-top:10px">daraja: kim qayerda</div></div>
+      <div class="card" style="padding:30px;grid-column:span 2"><div style="font-size:30px;font-weight:800">📈 Tez o'sayotganlar = <span class="grad-text">yashirin iqtidorlar</span></div><div style="font-size:23px;font-weight:600;color:var(--muted);margin-top:8px">Olimpiada va grantlar uchun nomzodlar oldindan ko'rinadi</div></div>
+    </div>
+  </section>
+
+  <!-- 9. Ishonch -->
+  <section class="scene light" id="s9">
+    <div class="abs center" style="left:0;right:0;top:120px">
+      <div class="eyebrow"><b>08</b> Qulay va ishonchli</div>
+      <h2 style="margin-top:22px">Har bir talabaning cho'ntagida</h2>
+    </div>
+    <div class="trust" style="left:120px;top:440px"><span class="icon-tile t-blue">📱</span><h3>Telefon va kompyuter</h3><p>Har qanday ekranga moslashadi</p></div>
+    <div class="trust" style="left:460px;top:440px"><span class="icon-tile t-teal">✈️</span><h3>Telegram Mini App</h3><p>Botdan bir tugma bilan kirish</p></div>
+    <div class="trust" style="left:800px;top:440px"><span class="icon-tile t-violet">🌗</span><h3>Yorug' va qorong'i</h3><p>Ko'zga qulay rejim</p></div>
+    <div class="trust" style="left:1140px;top:440px"><span class="icon-tile t-green">🛡️</span><h3>Halol ball tizimi</h3><p>Limitlar va o'qituvchi tasdig'i</p></div>
+    <div class="trust" style="left:1480px;top:440px"><span class="icon-tile t-gold">✅</span><h3>130+ test</h3><p>Har bir o'zgarish avtomatik tekshiriladi</p></div>
+  </section>
+
+  <!-- 10. Yo'l xaritasi -->
+  <section class="scene light" id="s10">
+    <div class="abs center" style="left:0;right:0;top:120px">
+      <div class="eyebrow"><b>09</b> Joriy etish</div>
+      <h2 style="margin-top:22px">Bosqichma-bosqich, xavfsiz boshlash</h2>
+    </div>
+    <div class="line"><i id="s10line"></i></div>
+    <div class="ms" style="left:330px"><div class="dotm">🧪</div><h3>Pilot</h3><p>1–2 fakultetda sinov va talabalar fikri</p></div>
+    <div class="ms" style="left:750px"><div class="dotm">⚡</div><h3>Launch Hackathon</h3><p>Rasmiy ochilish: birinchi kundan faol talabalar</p></div>
+    <div class="ms" style="left:1170px"><div class="dotm">🏛️</div><h3>Butun institut</h3><p>5 fakultet, korxonalar bilan hamkorlik</p></div>
+    <div class="ms" style="left:1590px"><div class="dotm" style="border-color:#f59e0b">🌍</div><h3>Kengayish</h3><p>Boshqa OTMlar uchun tayyor yechim</p></div>
+  </section>
+
+  <!-- 11. Yakun -->
+  <section class="scene dark" id="s11">
+    <img class="logo" src="assets/logo.webp" alt="">
+    <h1 class="center abs" style="left:0;right:0;top:500px">Iqtidoringizni <span class="grad-text">kashf qiling</span></h1>
+    <p class="center abs lead" style="left:0;right:0;top:650px;font-size:40px">ADTI Talent Hub · Andijon davlat texnika instituti</p>
+    <p class="center abs" style="left:0;right:0;top:780px;font-size:28px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--mint)">Ta'lim · Fan · Ishlab chiqarish</p>
+  </section>
+
+  <div id="watermark"><img src="assets/logo.webp" alt="">ADTI Talent Hub</div>
+  <div id="progress"></div>
+</div>
+
+<script src="assets/gsap.min.js"></script>
+<script>
+  // Kadr-kadr yozib olish uchun: hamma narsa bitta to'xtatilgan timeline'da, vaqt bo'yicha aniq hisoblanadi.
+  const S = [
+    ["s1", 0, 7.5], ["s2", 7.5, 16.5], ["s3", 16.5, 26.5], ["s4", 26.5, 45], ["s5", 45, 57],
+    ["s6", 57, 69], ["s7", 69, 79], ["s8", 79, 91], ["s9", 91, 99], ["s10", 99, 108], ["s11", 108, 116],
+  ];
+  const DURATION = 116;
+  const tl = gsap.timeline({ paused: true });
+  const ease = "power3.out";
+  const q = (sel) => document.querySelectorAll(sel);
+
+  // Sahnalar: kirish va chiqish
+  S.forEach(([id, a, b], i) => {
+    tl.fromTo("#" + id, { autoAlpha: 0 }, { autoAlpha: 1, duration: i === 0 ? 0.01 : 0.7, ease: "power1.inOut" }, a);
+    if (i < S.length - 1) tl.to("#" + id, { autoAlpha: 0, duration: 0.7, ease: "power1.inOut" }, b - 0.35);
+  });
+  tl.fromTo("#watermark", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 7.8);
+  tl.to("#watermark", { opacity: 0, duration: 0.6 }, 107.5);
+
+  // 1. Kirish
+  tl.fromTo("#s1 .ring", { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 2.2, stagger: 0.25, ease }, 0.2);
+  tl.to("#s1 .ring", { scale: 1.06, duration: 4, yoyo: true, repeat: 1, ease: "sine.inOut" }, 2.4);
+  tl.fromTo("#s1 .logo", { scale: 0.3, opacity: 0, rotate: -40 }, { scale: 1, opacity: 1, rotate: 0, duration: 1.4, ease: "back.out(1.6)" }, 0.4);
+  tl.fromTo("#s1 .title", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 1.1, ease }, 1.6);
+  tl.fromTo("#s1 .sub", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 1, ease }, 2.3);
+  tl.fromTo("#s1 .tag", { opacity: 0, letterSpacing: "0.6em" }, { opacity: 1, letterSpacing: "0.3em", duration: 1.4, ease }, 3);
+
+  // 2. Muammo: nuqtalar ichida bir nechtasi yonadi
+  const dots = document.getElementById("dots");
+  const stars = [14, 29, 41, 58, 66, 83, 95, 110, 121, 137];
+  for (let i = 0; i < 144; i++) {
+    const d = document.createElement("i");
+    d.className = "dot" + (stars.includes(i) ? " star" : "");
+    dots.appendChild(d);
+  }
+  tl.fromTo("#s2 .eyebrow, #s2 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 7.9);
+  tl.fromTo("#s2 .dot", { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, stagger: { each: 0.008, from: "random" }, ease }, 8.2);
+  tl.fromTo("#s2 .pain", { x: -60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.8, stagger: 1.1, ease }, 9.4);
+  tl.to("#s2 .dot.star", { backgroundColor: "#f59e0b", scale: 1.35, boxShadow: "0 0 30px rgba(245,158,11,.8)", duration: 0.6, stagger: 0.15, ease: "back.out(2)" }, 12.6);
+
+  // 3. Yechim tsikli
+  tl.fromTo("#s3 .eyebrow, #s3 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 16.9);
+  tl.fromTo("#s3 .node", { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.9, stagger: 1.2, ease: "back.out(1.5)" }, 17.6);
+  tl.to("#s3 .arc:nth-of-type(1)", { strokeDashoffset: 0, duration: 0.8, ease: "power2.inOut" }, 18.4);
+  tl.to("#s3 .arc:nth-of-type(2)", { strokeDashoffset: 0, duration: 0.8, ease: "power2.inOut" }, 19.6);
+  tl.to("#s3 .arc:nth-of-type(3)", { opacity: 1, duration: 0.8 }, 21);
+  tl.fromTo("#s3pill", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, ease }, 21.6);
+  tl.to("#s3 .node", { y: -12, duration: 1.4, yoyo: true, repeat: 2, stagger: 0.3, ease: "sine.inOut" }, 22.4);
+
+  // 4. Talaba yo'li
+  tl.fromTo("#s4 .eyebrow, #s4 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 26.9);
+  tl.fromTo("#s4 .step", { x: -50, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, stagger: 0.25, ease }, 27.6);
+  const stepOn = (i, t) => tl.to(`#s4 .step:nth-of-type(${i})`, { borderColor: "#168a9c", boxShadow: "0 16px 40px rgba(14,90,115,.18)", duration: 0.4 }, t)
+    .to(`#s4 .step:nth-of-type(${i}) .num`, { background: "linear-gradient(135deg,#062d3b,#168a9c)", color: "#fff", duration: 0.4 }, t);
+  const stepOff = (i, t) => tl.to(`#s4 .step:nth-of-type(${i})`, { borderColor: "#dbe4e7", boxShadow: "0 0 0 rgba(0,0,0,0)", duration: 0.4 }, t)
+    .to(`#s4 .step:nth-of-type(${i}) .num`, { background: "#e2f0f4", color: "#0e5a73", duration: 0.4 }, t);
+  tl.fromTo("#s4phone", { y: 120, opacity: 0 }, { y: 0, opacity: 1, duration: 1, ease }, 28.4);
+  tl.set("#s4browser", { opacity: 0 }, 26.5);
+  stepOn(2, 29.2); // birinchi qadam (h2 dan keyingi 2-element = 1-qadam)
+  tl.fromTo("#s4p1", { scale: 1 }, { scale: 1.05, duration: 3, ease: "sine.inOut" }, 30);
+  stepOff(2, 33); stepOn(3, 33);
+  tl.to("#s4p2", { opacity: 1, duration: 0.6 }, 33).to("#s4p1", { opacity: 0, duration: 0.6 }, 33);
+  tl.fromTo("#s4p2", { scale: 1 }, { scale: 1.05, duration: 3, ease: "sine.inOut" }, 34);
+  stepOff(3, 37); stepOn(4, 37);
+  tl.to("#s4phone", { x: 120, opacity: 0, duration: 0.7, ease: "power2.in" }, 37);
+  tl.fromTo("#s4browser", { y: 60, opacity: 0, scale: 0.96 }, { y: 0, opacity: 1, scale: 1, duration: 0.9, ease }, 37.3);
+  tl.fromTo("#s4xp", { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, ease: "back.out(2.4)" }, 38.3);
+  tl.fromTo("#s4badge", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "back.out(1.8)" }, 39);
+  tl.to("#s4xp", { y: -16, duration: 0.8, yoyo: true, repeat: 3, ease: "sine.inOut" }, 39);
+  stepOff(4, 41); stepOn(5, 41);
+  tl.to("#s4b2", { opacity: 1, duration: 0.7 }, 41).to("#s4b1", { opacity: 0, duration: 0.7 }, 41);
+  tl.to("#s4xp, #s4badge", { opacity: 0, duration: 0.5 }, 41);
+  tl.fromTo("#s4b2", { scale: 1, transformOrigin: "60% 30%" }, { scale: 1.1, duration: 3.6, ease: "sine.inOut" }, 41.3);
+
+  // 5. Motivatsiya
+  tl.fromTo("#s5 .eyebrow, #s5 h2, #s5 .lead", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 45.4);
+  tl.fromTo("#s5 .lvl .b", { scaleX: 0, transformOrigin: "0 50%" }, { scaleX: 1, duration: 0.7, stagger: 0.35, ease }, 46.6);
+  tl.fromTo("#s5 .lvl .x", { opacity: 0 }, { opacity: 1, duration: 0.4, stagger: 0.35 }, 47);
+  tl.fromTo("#flow > *", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, stagger: 0.3, ease }, 48.2);
+  tl.fromTo("#s5browser", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 1, ease }, 49.6);
+  tl.fromTo("#s5img", { scale: 1, transformOrigin: "60% 25%" }, { scale: 1.14, duration: 6, ease: "sine.inOut" }, 50.8);
+
+  // 6. Imkoniyatlar
+  tl.fromTo("#s6 .eyebrow, #s6 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 57.4);
+  tl.fromTo("#s6 .feat", { y: 70, opacity: 0, scale: 0.94 }, { y: 0, opacity: 1, scale: 1, duration: 0.8, stagger: 0.55, ease }, 58.4);
+  tl.to("#s6 .feat .icon-tile", { rotate: 8, duration: 0.5, yoyo: true, repeat: 1, stagger: 0.25, ease: "sine.inOut" }, 63.5);
+
+  // 7. O'qituvchi
+  tl.fromTo("#s7 .eyebrow, #s7 h2, #s7 .lead", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 69.4);
+  tl.fromTo("#s7browser", { x: 120, opacity: 0 }, { x: 0, opacity: 1, duration: 1, ease }, 70);
+  tl.fromTo("#s7 .callout", { x: -60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, stagger: 1.4, ease }, 72);
+  tl.fromTo("#s7browser .view img", { scale: 1, transformOrigin: "65% 25%" }, { scale: 1.12, duration: 7, ease: "sine.inOut" }, 71);
+
+  // 8. Rektorat
+  tl.fromTo("#s8 .eyebrow, #s8 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 79.4);
+  tl.fromTo("#s8browser", { x: 120, opacity: 0 }, { x: 0, opacity: 1, duration: 1, ease }, 80);
+  tl.fromTo("#s8stats > *", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.5, ease }, 81);
+  tl.fromTo("#s8img", { scale: 1, transformOrigin: "60% 30%" }, { scale: 1.12, duration: 7, ease: "sine.inOut" }, 82.5);
+
+  // 9. Ishonch
+  tl.fromTo("#s9 .eyebrow, #s9 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 91.4);
+  tl.fromTo("#s9 .trust", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.45, ease: "back.out(1.6)" }, 92.3);
+
+  // 10. Yo'l xaritasi
+  tl.fromTo("#s10 .eyebrow, #s10 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 99.4);
+  tl.fromTo("#s10line", { scaleX: 0 }, { scaleX: 1, duration: 5, ease: "power1.inOut" }, 100.3);
+  tl.fromTo("#s10 .ms", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 1.15, ease: "back.out(1.6)" }, 100.4);
+
+  // 11. Yakun
+  tl.fromTo("#s11 .logo", { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.2, ease: "back.out(1.6)" }, 108.3);
+  tl.fromTo("#s11 h1, #s11 p", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 1, stagger: 0.35, ease }, 109.2);
+  tl.to("#s11", { autoAlpha: 0, duration: 0.8 }, DURATION - 0.8);
+
+  // Vaqtga bog'liq qo'shimcha holatlar (hisoblagich va progress)
+  function custom(t) {
+    document.getElementById("progress").style.width = (t / DURATION) * 100 + "%";
+    document.getElementById("s4url").textContent = t < 41.3 ? "talent.adti.uz/challenges" : "talent.adti.uz/app";
+    const k = Math.min(Math.max((t - 81.3) / 1.5, 0), 1);
+    q("#s8stats [data-count]").forEach((el) => { el.textContent = Math.round(+el.dataset.count * k); });
+  }
+
+  window.DURATION = DURATION;
+  window.seek = (t) => { tl.seek(t, true); custom(t); };
+  window.ready = Promise.all([
+    document.fonts.ready,
+    ...Array.from(document.images).map((img) => img.decode().catch(() => null)),
+  ]).then(() => { window.seek(0); return true; });
+
+  // Brauzerda oddiy ochilganda o'zi o'ynaydi
+  if (!/[?&]render=1/.test(location.search)) {
+    window.ready.then(() => {
+      const start = performance.now();
+      const loop = () => {
+        const t = ((performance.now() - start) / 1000) % DURATION;
+        window.seek(t);
+        requestAnimationFrame(loop);
+      };
+      loop();
+    });
+  }
+</script>
+</body>
+</html>
