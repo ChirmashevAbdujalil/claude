@@ -103,6 +103,14 @@ def create_admin(institution, username="", contact_name="", contact_email=""):
     return admin, password
 
 
+def reset_password(user) -> str:
+    """Yangi tasodifiy parol o'rnatadi va uni qaytaradi (bazada faqat hash saqlanadi)."""
+    password = secrets.token_urlsafe(9)
+    user.set_password(password)
+    user.save(update_fields=["password"])
+    return password
+
+
 def reset_admin_password(institution):
     """OTMning birinchi administratori parolini yangilaydi: (admin, parol) yoki None."""
     User = get_user_model()
@@ -114,10 +122,22 @@ def reset_admin_password(institution):
         )
     if admin is None:
         return None
-    password = secrets.token_urlsafe(9)
-    admin.set_password(password)
-    admin.save(update_fields=["password"])
-    return admin, password
+    return admin, reset_password(admin)
+
+
+def staff_accounts() -> dict:
+    """OTM id -> rahbariyat va o'qituvchilar hisoblari (platforma paneli uchun)."""
+    User = get_user_model()
+    result = {}
+    with unscoped():
+        rows = (
+            User.objects.filter(role__in=User.REVIEWER_ROLES, is_superuser=False)
+            .select_related("faculty")
+            .order_by("institution_id", "role", "username")
+        )
+        for user in rows:
+            result.setdefault(user.institution_id, []).append(user)
+    return result
 
 
 @transaction.atomic
@@ -190,6 +210,13 @@ def platform_overview() -> dict:
     stats = _student_stats(since=timezone.now() - timedelta(days=7))
     empty = {"students": 0, "total_xp": 0, "active": 0}
     institutions = []
+    staff = staff_accounts()
+    from apps.accounts.models import Faculty
+
+    with unscoped():
+        faculties = dict(
+            Faculty.objects.values("institution_id").annotate(n=Count("id")).values_list("institution_id", "n")
+        )
     for inst in Institution.objects.all():
         row = stats.get(inst.pk, empty)
         limit = inst.student_limit
@@ -202,6 +229,8 @@ def platform_overview() -> dict:
                 "limit": limit,
                 "usage": round(row["students"] * 100 / limit) if limit else None,
                 "price": inst.plan_info["price"] if inst.is_active else 0,
+                "staff": staff.get(inst.pk, []),
+                "faculties": faculties.get(inst.pk, 0),
             }
         )
     institutions.sort(key=lambda r: (-r["students"], r["obj"].name))

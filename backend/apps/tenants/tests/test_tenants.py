@@ -368,3 +368,29 @@ def test_superuser_adds_institution_from_admin_panel(client, make_user):
     )
     admin.refresh_from_db()
     assert admin.password != old_hash and "paroli yangilandi" in response.content.decode()
+
+
+def test_platform_shows_institution_details_and_resets_passwords(client, make_user, tatu, tatu_user):
+    owner = make_user(username="owner", is_superuser=True, is_staff=True)
+    teacher = tatu_user("tatu_teacher", role=User.Role.TEACHER)
+    host(client, "localhost:8000").force_login(owner)
+    page = client.get("/platform/").content.decode()
+    assert "tatu_admin" in page and "tatu_teacher" in page
+    assert "http://tatu.localhost:8000/login/" in page  # lokal sinovda OTM o'z subdomenida
+    assert "tatu_student" not in page  # talabalar ro'yxatga chiqmaydi
+
+    old_hash = teacher.password
+    page = client.post(f"/platform/users/{teacher.pk}/reset-password/", follow=True).content.decode()
+    with unscoped():
+        teacher.refresh_from_db()
+    assert teacher.password != old_hash and "parol yangilandi" in page
+    # Parol faqat bir marta ko'rsatiladi
+    assert "Faqat hozir" not in client.get("/platform/").content.decode()
+
+    # Platforma egasining o'z paroli va talabalar paroli bu yerdan o'zgartirilmaydi
+    assert client.post(f"/platform/users/{owner.pk}/reset-password/").status_code == 404
+    assert client.post(f"/platform/users/{tatu_user().pk}/reset-password/").status_code == 404
+    client.force_login(teacher)
+    assert client.post(f"/platform/users/{teacher.pk}/reset-password/").status_code == 302
+    with unscoped():
+        assert User.objects.get(pk=teacher.pk).password == teacher.password

@@ -78,6 +78,11 @@ class Institution(models.Model):
         if settings.SAAS_BASE_DOMAIN:
             return f"https://{self.slug}.{settings.SAAS_BASE_DOMAIN}"
         if request is not None:
+            hostname, _, port = request.get_host().partition(":")
+            if hostname in ("localhost", "127.0.0.1") or hostname.endswith(".localhost"):
+                # Lokal sinov: har bir OTM o'z <manzil>.localhost subdomenida
+                name = "localhost" if self.is_default else f"{self.slug}.localhost"
+                return f"{request.scheme}://{name}{':' + port if port else ''}"
             return request.build_absolute_uri("/").rstrip("/")
         return settings.SITE_URL.rstrip("/")
 

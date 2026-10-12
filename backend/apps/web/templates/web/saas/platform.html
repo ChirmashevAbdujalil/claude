@@ -12,6 +12,22 @@
 </header>
 
 <main style="max-width:1180px; margin:0 auto; padding:0 16px 48px" class="stack-lg">
+  {% if credentials %}
+  <div class="card card-lg stack credentials-box">
+    <div class="row-between wrap"><h2>🔑 {{ credentials.title }}</h2><span class="chip chip-danger">Faqat hozir ko'rinadi</span></div>
+    <p class="small muted">Parol bazada shifrlangan holda saqlanadi, shuning uchun uni keyin qayta ko'rib bo'lmaydi. Hozir nusxa olib, OTMga yetkazing.</p>
+    <div class="cred-grid">
+      <span class="muted small">Kirish linki</span><a href="{{ credentials.url }}" class="mono" target="_blank" rel="noopener">{{ credentials.url }}</a>
+      <span class="muted small">Login</span><b class="mono">{{ credentials.username }}</b>
+      <span class="muted small">Parol</span><b class="mono">{{ credentials.password }}</b>
+    </div>
+    <div><button type="button" class="btn btn-primary btn-sm" data-copy="{{ credentials.institution }} · Talent Hub
+Kirish: {{ credentials.url }}
+Login: {{ credentials.username }}
+Parol: {{ credentials.password }}">{% icon "check" "icon-sm" %} <span data-label>Hammasini nusxalash</span></button></div>
+  </div>
+  {% endif %}
+
   <div class="kpi-grid">
     <div class="card stat"><span class="stat-icon tone-primary">{% icon "home" %}</span><div><div class="stat-value">{{ totals.active }} / {{ totals.institutions }}</div><div class="stat-label">faol OTM</div></div></div>
     <div class="card stat"><span class="stat-icon tone-info">{% icon "users" %}</span><div><div class="stat-value">{{ totals.students }}</div><div class="stat-label">talaba</div></div></div>
@@ -38,6 +54,54 @@
         </tbody>
       </table>
     </div>
+  </div>
+
+  <div class="card card-lg stack">
+    <h2>OTM ma'lumotlari va kirish</h2>
+    <p class="small muted">Har bir OTMning to'liq ma'lumoti, kirish linki va xodimlar loginlari. Parollar shifrlangan, ko'rish uchun «Yangi parol» tugmasini bosing: eski parol ishlamay qoladi.</p>
+    {% for row in institutions %}
+    <details class="faq otm-details">
+      <summary><span>{{ row.obj.short_name }} <span class="muted small" style="font-weight:500">· {{ row.obj.name }}</span></span></summary>
+      <div class="stack" style="margin-top:12px">
+        <div class="grid-2">
+          <div class="cred-grid">
+            <span class="muted small">Kirish linki</span><a href="{{ row.url }}/login/" class="mono" target="_blank" rel="noopener">{{ row.url }}/login/</a>
+            <span class="muted small">Manzil (slug)</span><span class="mono">{{ row.obj.slug }}</span>
+            <span class="muted small">O'z domeni</span><span>{{ row.obj.domain|default:"—" }}</span>
+            <span class="muted small">Shior</span><span>{{ row.obj.tagline|default:"—" }}</span>
+            <span class="muted small">Ulangan sana</span><span>{{ row.obj.created_at|date:"d.m.Y" }}</span>
+          </div>
+          <div class="cred-grid">
+            <span class="muted small">Tarif</span><span>{{ row.obj.plan_info.name }}{% if row.obj.paid_until %} · {{ row.obj.paid_until|date:"d.m.Y" }} gacha{% endif %}</span>
+            <span class="muted small">Talabalar</span><span>{{ row.students }}{% if row.limit %} / {{ row.limit }}{% endif %} · fakultetlar: {{ row.faculties }}</span>
+            <span class="muted small">Ro'yxatdan o'tish</span><span>{% if row.obj.registration_open %}Ochiq{% else %}Yopiq{% endif %} · liga: {% if row.obj.show_in_league %}ha{% else %}yo'q{% endif %}</span>
+            <span class="muted small">Mas'ul shaxs</span><span>{{ row.obj.contact_name|default:"—" }}</span>
+            <span class="muted small">Aloqa</span><span>{{ row.obj.contact_phone|default:"—" }}{% if row.obj.contact_email %} · {{ row.obj.contact_email }}{% endif %}</span>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Login</th><th>Ism</th><th>Rol</th><th>Oxirgi kirish</th><th>Parol</th></tr></thead>
+            <tbody>
+              {% for user in row.staff %}
+              <tr>
+                <td class="mono bold">{{ user.username }}</td>
+                <td>{{ user.get_full_name|default:"—" }}{% if user.email %}<div class="tiny muted">{{ user.email }}</div>{% endif %}</td>
+                <td><span class="chip {% if user.role == 'rector' or user.role == 'admin' %}chip-primary{% endif %}">{{ user.get_role_display }}</span>{% if not user.is_active %} <span class="chip chip-danger">bloklangan</span>{% endif %}</td>
+                <td class="small">{{ user.last_login|date:"d.m.Y H:i"|default:"hali kirmagan" }}</td>
+                <td><form method="post" action="{% url 'web:platform-reset-password' user.pk %}" onsubmit="return confirm('{{ user.username }} uchun yangi parol yaratilsinmi? Eski parol ishlamay qoladi.')">{% csrf_token %}<button class="btn btn-ghost btn-sm">🔑 Yangi parol</button></form></td>
+              </tr>
+              {% empty %}<tr><td colspan="5" class="muted small">Xodim hisobi yo'q.</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="row-sm wrap">
+          <a href="{{ row.url }}/login/" class="btn btn-ghost btn-sm" target="_blank" rel="noopener">Saytni ochish</a>
+          <a href="{% url 'admin:tenants_institution_change' row.obj.pk %}" class="btn btn-ghost btn-sm">Tahrirlash</a>
+        </div>
+      </div>
+    </details>
+    {% endfor %}
   </div>
 
   <div class="card card-lg stack">

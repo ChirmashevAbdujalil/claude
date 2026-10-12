@@ -627,3 +627,10 @@ html, body { overflow-x: clip; }
 .pay-payme { background: #33cccc; }
 .pay-click { background: #0072ff; }
 .pay-btn:hover { filter: brightness(0.95); color: #fff; }
+
+/* ---------- Platforma paneli: OTM tafsilotlari va kirish ma'lumotlari ---------- */
+.cred-grid { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 14px; align-items: baseline; }
+.cred-grid > * { overflow-wrap: anywhere; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.credentials-box { border: 2px solid var(--primary); }
+.otm-details summary { font-size: 1.05rem; }

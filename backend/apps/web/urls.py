@@ -34,6 +34,7 @@ urlpatterns = [
     path("saas/", saas.saas_landing, name="saas"),
     path("platform/", saas.platform_dashboard, name="platform"),
     path("platform/requests/<int:pk>/approve/", saas.platform_approve, name="platform-approve"),
+    path("platform/users/<int:pk>/reset-password/", saas.platform_reset_password, name="platform-reset-password"),
     path("settings/otm/", saas.institution_settings, name="institution-settings"),
     path("settings/otm/faculties/<int:pk>/delete/", saas.faculty_delete, name="faculty-delete"),
     path("arena/otm-ligasi/", saas.league, name="league"),

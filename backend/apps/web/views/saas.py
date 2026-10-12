@@ -56,6 +56,10 @@ def saas_landing(request):
 def platform_dashboard(request):
     """Platforma egasi uchun: barcha OTMlar, tariflar, faollik va yangi arizalar."""
     context = branding(None) | tenant_services.platform_overview()
+    for row in context["institutions"]:
+        row["url"] = row["obj"].base_url(request)
+    # Yangi yaratilgan yoki yangilangan parol: faqat bir marta ko'rsatiladi
+    context["credentials"] = request.session.pop("platform_credentials", None)
     context["requests"] = InstitutionRequest.objects.filter(status=InstitutionRequest.Status.NEW)[:20]
     context["payments"] = Invoice.objects.filter(status=Invoice.Status.PAID).select_related("institution")[:10]
     month_start = timezone.localdate().replace(day=1)
@@ -76,11 +80,30 @@ def platform_approve(request, pk):
     except tenant_services.TenantError as exc:
         messages.error(request, str(exc))
     else:
-        messages.success(
-            request,
-            f"«{institution.short_name}» ulandi. Manzil: {institution.base_url(request)} · "
-            f"Login: {admin.username} · Parol: {password} (faqat hozir ko'rinadi, OTMga yetkazing)",
+        _show_credentials(request, institution, admin, password, f"«{institution.short_name}» ulandi")
+    return redirect("web:platform")
+
+
+def _show_credentials(request, institution, user, password, title):
+    request.session["platform_credentials"] = {
+        "title": title,
+        "institution": institution.short_name,
+        "url": f"{institution.base_url(request)}/login/",
+        "username": user.username,
+        "password": password,
+    }
+
+
+@user_passes_test(lambda u: u.is_active and u.is_superuser, login_url="web:login")
+@require_POST
+def platform_reset_password(request, pk):
+    """OTM xodimiga yangi parol: eski parolni ko'rsatib bo'lmaydi, chunki bazada faqat hash saqlanadi."""
+    with unscoped():
+        user = get_object_or_404(
+            User.objects.select_related("institution"), pk=pk, role__in=User.REVIEWER_ROLES, is_superuser=False
         )
+    password = tenant_services.reset_password(user)
+    _show_credentials(request, user.institution, user, password, f"{user.username}: parol yangilandi")
     return redirect("web:platform")
 
 
