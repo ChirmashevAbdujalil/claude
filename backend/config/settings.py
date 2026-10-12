@@ -32,6 +32,9 @@ if not SECRET_KEY:
     SECRET_KEY = "dev-only-insecure-key"
 
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,.localhost")
+if DEBUG and ".localhost" not in ALLOWED_HOSTS:
+    # Lokal SaaS sinovi: <otm>.localhost:8000 subdomenlari doim ochiq
+    ALLOWED_HOSTS.append(".localhost")
 CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
 
 INSTALLED_APPS = [
