@@ -122,7 +122,7 @@ def success(gain=0.28):
 def shimmer(gain=0.18, count=14, spread=1.2):
     out = silence(spread + 1.5)
     scale = ["C6", "D6", "E6", "G6", "A6", "C7", "D7", "E7"]
-    for i in range(count):
+    for _ in range(count):
         b = bell(note(scale[rng.integers(len(scale))]), 1.0, gain * rng.uniform(0.5, 1), pan=rng.uniform(-0.8, 0.8))
         start = int(rng.uniform(0, spread) * SR)
         out[start : start + len(b)] += b[: len(out) - start]
