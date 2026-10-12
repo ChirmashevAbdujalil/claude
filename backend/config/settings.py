@@ -178,7 +178,7 @@ TELEGRAM_WEBHOOK_SECRET = os.environ.get("TELEGRAM_WEBHOOK_SECRET", "")
 # Saytning tashqi manzili: Telegram tugmalari va xabarlardagi havolalar uchun
 SITE_URL = os.environ.get("SITE_URL", "")
 # Homiylar sahifasidagi aloqa: email, @telegram yoki to'liq havola
-SPONSOR_CONTACT = os.environ.get("SPONSOR_CONTACT", "")
+SPONSOR_CONTACT = os.environ.get("SPONSOR_CONTACT", "@chirmashev")
 
 # Talabalar o'zlari ro'yxatdan o'ta oladimi
 REGISTRATION_OPEN = env_bool("REGISTRATION_OPEN", True)
