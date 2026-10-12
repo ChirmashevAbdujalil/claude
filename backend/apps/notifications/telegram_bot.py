@@ -56,7 +56,7 @@ def send_message(chat_id: int, text: str, path: str = "") -> bool:
 
 WELCOME_TEXT = (
     "Assalomu alaykum! 👋\n\n"
-    "Bu ADTI Talent Hub: iqtidoringizni kashf qiluvchi platforma.\n\n"
+    "Bu ANDTI Talent Hub: iqtidoringizni kashf qiluvchi platforma.\n\n"
     "🎯 Challenge'lar yeching va XP to'plang\n"
     "🚀 Loyihalar quring va jamoa toping\n"
     "🤖 AI Mentor bilan o'z yo'lingizni tuzing\n"

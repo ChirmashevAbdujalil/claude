@@ -1,4 +1,4 @@
-"""ADTI Talent Hub sozlamalari.
+"""ANDTI Talent Hub sozlamalari.
 
 Barcha maxfiy qiymatlar muhit o'zgaruvchilaridan (.env) olinadi.
 """
@@ -163,7 +163,7 @@ SIMPLE_JWT = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "ADTI Talent Hub API",
+    "TITLE": "ANDTI Talent Hub API",
     "DESCRIPTION": "Iqtidorli talabalarni kashf qilish, rivojlantirish va imkoniyatlarga ulash platformasi",
     "VERSION": "0.1.0",
     "SERVE_INCLUDE_SCHEMA": False,

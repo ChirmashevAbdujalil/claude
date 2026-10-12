@@ -1,4 +1,4 @@
-# ADTI Talent Hub
+# ANDTI Talent Hub
 
 Andijon davlat texnika instituti iqtidorli talabalarini bir joyga jamlovchi, ularni kashf qiluvchi va rivojlantiruvchi platforma.
 

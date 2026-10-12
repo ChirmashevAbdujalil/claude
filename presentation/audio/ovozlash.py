@@ -5,8 +5,8 @@ matnlarni o'qitadi, har birini o'z sahnasiga joylaydi, gapirilayotganda musiqani
 pasaytiradi va yakuniy MP4 hamda subtitr (.srt) faylini yaratadi. Internet kerak.
 
 O'rnatish:   pip install edge-tts imageio-ffmpeg
-Ishlatish:   python ovozlash.py --video ADTI-Talent-Hub-taqdimot.mp4
-             python ovozlash.py --video ADTI-Talent-Hub-taqdimot.mp4 --ovoz sardor
+Ishlatish:   python ovozlash.py --video ANDTI-Talent-Hub-taqdimot.mp4
+             python ovozlash.py --video ANDTI-Talent-Hub-taqdimot.mp4 --ovoz sardor
 """
 
 import argparse
@@ -86,7 +86,7 @@ def build_filter(clips, voice_gain):
 
 def main():
     parser = argparse.ArgumentParser(description="Taqdimot videosini o'zbekcha ovozlash")
-    parser.add_argument("--video", default="ADTI-Talent-Hub-taqdimot.mp4", help="musiqali video (kirish)")
+    parser.add_argument("--video", default="ANDTI-Talent-Hub-taqdimot.mp4", help="musiqali video (kirish)")
     parser.add_argument("--chiqish", help="natija fayli (standart: <video>-ovozli.mp4)")
     parser.add_argument("--ovoz", choices=sorted(VOICES), default="madina", help="diktor ovozi")
     parser.add_argument("--tezlik", default="+0%", help="nutq tezligi, masalan +5%% yoki -5%%")

@@ -112,7 +112,7 @@ class AchievementViewSet(
 
 
 class PortfolioView(APIView):
-    """Ommaviy portfolio sahifasi: talent.adti.uz/u/<slug>"""
+    """Ommaviy portfolio sahifasi: talent.andti.uz/u/<slug>"""
 
     permission_classes = [AllowAny]
 

@@ -135,9 +135,9 @@ def test_webhook_requires_secret(settings, monkeypatch):
 def test_open_button_only_for_https(settings):
     settings.SITE_URL = "http://localhost:8000"
     assert telegram_bot.open_button("Ochish") is None
-    settings.SITE_URL = "https://talent.adti.uz/"
+    settings.SITE_URL = "https://talent.andti.uz/"
     button = telegram_bot.open_button("Ochish", "/arena/")
-    assert button["inline_keyboard"][0][0]["web_app"]["url"] == "https://talent.adti.uz/arena/"
+    assert button["inline_keyboard"][0][0]["web_app"]["url"] == "https://talent.andti.uz/arena/"
 
 
 def test_submission_without_reviewer_does_not_notify(student, teacher):

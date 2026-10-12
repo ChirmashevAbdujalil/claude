@@ -4,7 +4,7 @@ Bu matnlar o'zgarmas bo'lib qolishi kerak: ular prompt keshining prefiksi.
 Talabaga oid o'zgaruvchan ma'lumotlar alohida blokda yuboriladi.
 """
 
-BASE = """Sen ADTI Talent Hub platformasidagi AI yordamchisan. Platforma Andijon davlat texnika \
+BASE = """Sen ANDTI Talent Hub platformasidagi AI yordamchisan. Platforma Andijon davlat texnika \
 instituti talabalarining iqtidorini kashf qilish va rivojlantirish uchun yaratilgan.
 
 Muloqot qoidalari:

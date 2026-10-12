@@ -1,4 +1,4 @@
-# ADTI Talent Hub: taqdimot videosi
+# ANDTI Talent Hub: taqdimot videosi
 
 16:9 (1920×1080), taxminan 116 soniyali animatsion video. Ovozsiz, o'zbekcha matnlar bilan.
 
@@ -12,7 +12,7 @@ Kerak bo'ladi: Node.js, Playwright (`npm i playwright` va `npx playwright instal
 
 ```bash
 cd presentation
-node render.js adti-talent-hub.mp4 30
+node render.js andti-talent-hub.mp4 30
 ```
 
 Shrift (Manrope) Google Fonts'dan yuklanadi, shuning uchun internet kerak.
@@ -33,15 +33,15 @@ va `tl` timeline'idagi animatsiyalarni tahrirlang.
 Musiqani videoga qo'shish:
 
 ```bash
-ffmpeg -i adti-talent-hub.mp4 -i soundtrack.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k -shortest ADTI-Talent-Hub-taqdimot.mp4
+ffmpeg -i andti-talent-hub.mp4 -i soundtrack.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k -shortest ANDTI-Talent-Hub-taqdimot.mp4
 ```
 
 Diktor ovozini qo'shish (internet kerak):
 
 ```bash
 pip install edge-tts imageio-ffmpeg
-python audio/ovozlash.py --video ADTI-Talent-Hub-taqdimot.mp4               # Madina (ayol ovozi)
-python audio/ovozlash.py --video ADTI-Talent-Hub-taqdimot.mp4 --ovoz sardor # Sardor (erkak ovozi)
+python audio/ovozlash.py --video ANDTI-Talent-Hub-taqdimot.mp4               # Madina (ayol ovozi)
+python audio/ovozlash.py --video ANDTI-Talent-Hub-taqdimot.mp4 --ovoz sardor # Sardor (erkak ovozi)
 ```
 
 Matnni o'zgartirsangiz, har bir gap `start`–`end` oralig'iga sig'ishi kerak (taxminan 14 belgi/soniya).

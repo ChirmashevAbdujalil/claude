@@ -5,7 +5,7 @@
 
 {% block body %}
 <header class="landing-nav">
-  <a href="{% url 'web:landing' %}" class="brand">{% brand_logo 40 %}<span>ADTI Talent Hub<small>Andijon davlat texnika instituti</small></span></a>
+  <a href="{% url 'web:landing' %}" class="brand">{% brand_logo 40 %}<span>ANDTI Talent Hub<small>Andijon davlat texnika instituti</small></span></a>
   <div class="row-sm">
     <a href="{% url 'web:login' %}" class="btn btn-ghost btn-sm">Kirish</a>
     {% if registration_open %}<a href="{% url 'web:register' %}" class="btn btn-primary btn-sm">Ro'yxatdan o'tish</a>{% endif %}
@@ -102,7 +102,7 @@
 
 <footer class="landing-footer stack-sm" style="align-items:center">
   {% brand_logo 64 %}
-  <div>© Andijon davlat texnika instituti · ADTI Talent Hub</div>
+  <div>© Andijon davlat texnika instituti · ANDTI Talent Hub</div>
   <div class="tiny">Ta'lim · Fan · Ishlab chiqarish</div>
 </footer>
 {% endblock %}

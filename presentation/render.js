@@ -5,7 +5,7 @@ const path = require("path");
 const { spawn } = require("child_process");
 const { chromium } = require(process.env.PLAYWRIGHT_PATH || "playwright");
 
-const out = path.resolve(process.argv[2] || "adti-talent-hub.mp4");
+const out = path.resolve(process.argv[2] || "andti-talent-hub.mp4");
 const fps = Number(process.argv[3] || 30);
 const ffmpegPath = process.env.FFMPEG_PATH || "ffmpeg";
 

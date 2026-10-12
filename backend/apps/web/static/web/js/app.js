@@ -1,4 +1,4 @@
-/* ADTI Talent Hub: kichik progressiv yaxshilanishlar. JS o'chiq bo'lsa ham barcha formalar ishlaydi. */
+/* ANDTI Talent Hub: kichik progressiv yaxshilanishlar. JS o'chiq bo'lsa ham barcha formalar ishlaydi. */
 (function () {
   "use strict";
 

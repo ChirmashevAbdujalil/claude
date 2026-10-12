@@ -1,7 +1,7 @@
 [project]
-name = "adti-talent-hub"
+name = "andti-talent-hub"
 version = "0.1.0"
-description = "ADTI iqtidorli talabalar platformasi (backend)"
+description = "ANDTI iqtidorli talabalar platformasi (backend)"
 requires-python = ">=3.11"
 
 [tool.pytest.ini_options]

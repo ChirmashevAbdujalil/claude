@@ -6,8 +6,8 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from apps.notifications.views import telegram_webhook
 
-admin.site.site_header = "ADTI Talent Hub boshqaruvi"
-admin.site.site_title = "ADTI Talent Hub"
+admin.site.site_header = "ANDTI Talent Hub boshqaruvi"
+admin.site.site_title = "ANDTI Talent Hub"
 admin.site.index_title = "Boshqaruv paneli"
 
 api_patterns = [

@@ -1,4 +1,4 @@
-# ADTI Talent Hub: backend
+# ANDTI Talent Hub: backend
 
 Python, Django va Django REST Framework. Ikki qismdan iborat:
 

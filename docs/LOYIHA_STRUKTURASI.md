@@ -1,4 +1,4 @@
-# ADTI Talent Hub: loyiha strukturasi
+# ANDTI Talent Hub: loyiha strukturasi
 
 > Andijon davlat texnika instituti iqtidorli talabalarini bir joyga jamlovchi, ularni kashf qiluvchi, rivojlantiruvchi va imkoniyatlarga ulovchi platforma.
 
@@ -50,7 +50,7 @@ Talabaning raqamli iqtidor portreti.
 | Ko'nikmalar xaritasi (radar diagramma) | MVP |
 | O'qituvchi tasdiqlashi (endorsement) | MVP |
 | HEMIS integratsiyasi: baholar avtomatik | v2 |
-| AI rezyume va portfolio sayt (`talent.adti.uz/ism`) | v2 |
+| AI rezyume va portfolio sayt (`talent.andti.uz/ism`) | v2 |
 | QR bilan tekshiriladigan raqamli sertifikatlar | v2 |
 | Raqamli talaba ID | v3 |
 
@@ -267,7 +267,7 @@ Notification
 ## 8. Repozitoriy strukturasi
 
 ```
-adti-talent-hub/
+andti-talent-hub/
 ├── backend/                  # Python, Django + DRF (ishlab chiqilmoqda, batafsil: backend/README.md)
 │   ├── config/               # sozlamalar, URL'lar
 │   └── apps/
