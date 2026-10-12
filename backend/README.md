@@ -120,6 +120,28 @@ Serverga joylashtirish: DNS'da `*.talenthub.uz` yozuvini serverga yo'naltiring, 
 `SAAS_BASE_DOMAIN=talenthub.uz` va `DJANGO_ALLOWED_HOSTS=.talenthub.uz,talenthub.uz` qiling, wildcard SSL sertifikati oling.
 Telegram bot hozircha butun platforma uchun bitta.
 
+### Obuna to'lovi: Payme va Click
+
+OTM rektorati `/settings/otm/` sahifasida tarif va muddatni (1, 3, 6 yoki 12 oy; yillik to'lovda 2 oy bepul)
+tanlab hisob yaratadi va Payme yoki Click orqali to'laydi. To'lov tasdiqlangach, tarif va `paid_until` avtomatik
+yangilanadi, muddat joriy obuna tugaydigan kundan boshlab uzaytiriladi. To'lov qaytarilsa (Payme `CancelTransaction`),
+OTMning oldingi tarifi va muddati tiklanadi.
+
+| Tizim | Kabinetga yoziladigan manzil | `.env` |
+|---|---|---|
+| Payme (Merchant API) | `https://<domen>/billing/payme/`, hisob maydoni: `order_id` | `PAYME_MERCHANT_ID`, `PAYME_KEY`, `PAYME_TEST` |
+| Click (SHOP API) | Prepare: `https://<domen>/billing/click/prepare/`, Complete: `https://<domen>/billing/click/complete/` | `CLICK_SERVICE_ID`, `CLICK_MERCHANT_ID`, `CLICK_SECRET_KEY` |
+
+Kodlar `apps/billing/` ichida: `payme.py` (JSON-RPC, 12 soatlik timeout, idempotent), `click.py` (MD5 imzo tekshiruvi),
+`services.py` (hisob, to'lov, qaytarish). Barcha to'lovlar `/admin/` va `/platform/` panelida ko'rinadi.
+Ishga tushirishdan oldin Payme sinov kassasida (test.paycom.uz) kabinetdagi barcha sinov ssenariylaridan o'ting.
+
+Muddati o'tgan OTMlarni 3 kunlik imtiyozdan keyin to'xtatish uchun buyruqni har kuni ishga tushiring (cron):
+
+```bash
+python manage.py check_subscriptions            # --dry-run: faqat ro'yxatni ko'rsatadi
+```
+
 ## Bildirishnomalar va Telegram bot
 
 Muhim hodisalarda (yechim tekshirildi, yutuq tasdiqlandi, nishon olindi, jamoaga qabul qilindi, izoh yozildi) bildirishnoma saytda saqlanadi. Talaba Telegram orqali kirgan bo'lsa, botga ham xabar boradi.

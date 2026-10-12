@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "django_filters",
     "drf_spectacular",
     "apps.tenants",
+    "apps.billing",
     "apps.accounts",
     "apps.profiles",
     "apps.arena",
@@ -186,6 +187,16 @@ SAAS_BASE_DOMAIN = os.environ.get("SAAS_BASE_DOMAIN", "")
 DEFAULT_INSTITUTION_SLUG = os.environ.get("DEFAULT_INSTITUTION_SLUG", "andti")
 DEFAULT_INSTITUTION_NAME = os.environ.get("DEFAULT_INSTITUTION_NAME", "Andijon davlat texnika instituti")
 DEFAULT_INSTITUTION_SHORT = os.environ.get("DEFAULT_INSTITUTION_SHORT", "ANDTI")
+
+# To'lov tizimlari (OTM obunasi uchun). Kalitlar kassa kabinetidan olinadi; bo'sh bo'lsa tugma ko'rinmaydi.
+PAYME_MERCHANT_ID = os.environ.get("PAYME_MERCHANT_ID", "")
+PAYME_KEY = os.environ.get("PAYME_KEY", "")
+PAYME_TEST = env_bool("PAYME_TEST", True)
+PAYME_ACCOUNT_FIELD = os.environ.get("PAYME_ACCOUNT_FIELD", "order_id")
+CLICK_SERVICE_ID = os.environ.get("CLICK_SERVICE_ID", "")
+CLICK_MERCHANT_ID = os.environ.get("CLICK_MERCHANT_ID", "")
+CLICK_SECRET_KEY = os.environ.get("CLICK_SECRET_KEY", "")
+CLICK_MERCHANT_USER_ID = os.environ.get("CLICK_MERCHANT_USER_ID", "")
 # Homiylar sahifasidagi aloqa: email, @telegram yoki to'liq havola
 SPONSOR_CONTACT = os.environ.get("SPONSOR_CONTACT", "@chirmashev")
 

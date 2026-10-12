@@ -623,3 +623,7 @@ html, body { overflow-x: clip; }
 .pricing-list li::before { content: "✓"; color: var(--success); font-weight: 800; margin-right: 8px; }
 .usage-bar { height: 10px; }
 .list-item.is-me { background: var(--primary-soft); border-radius: 12px; padding-left: 10px; padding-right: 10px; }
+.pay-btn { color: #fff; font-weight: 800; justify-content: center; }
+.pay-payme { background: #33cccc; }
+.pay-click { background: #0072ff; }
+.pay-btn:hover { filter: brightness(0.95); color: #fff; }

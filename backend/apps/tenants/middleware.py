@@ -6,6 +6,7 @@ from .context import activate, default_institution
 from .models import Institution
 
 PLATFORM_PATHS = (
+    "/billing/",
     "/saas/",
     "/platform/",
     "/admin/",
@@ -16,7 +17,8 @@ PLATFORM_PATHS = (
     "/api/docs",
     "/api/schema",
 )
-ALWAYS_OPEN = ("/static/", "/media/", "/admin/")
+# Obunasi to'xtagan OTM ham kirib, to'lov qila olishi kerak
+ALWAYS_OPEN = ("/static/", "/media/", "/admin/", "/billing/", "/settings/otm/", "/login/", "/logout/")
 
 
 class UnknownInstitution(Exception):

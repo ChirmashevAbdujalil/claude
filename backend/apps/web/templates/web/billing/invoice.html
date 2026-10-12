@@ -1,0 +1,43 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}To'lov hisobi #{{ invoice.pk }}{% endblock %}
+
+{% block content %}
+<a href="{% url 'web:institution-settings' %}" class="back-link">{% icon "arrow-left" "icon-sm" %} OTM sozlamalari</a>
+<div class="page-header"><div><h1>To'lov hisobi #{{ invoice.pk }}</h1><p>{{ invoice.institution.name }}</p></div></div>
+
+<div class="grid-2" style="align-items:start">
+  <div class="card card-lg stack">
+    <div class="row-between"><h2>{{ invoice.get_plan_display }} tarifi</h2>
+      <span class="chip {% if invoice.status == 'paid' %}chip-success{% elif invoice.status == 'pending' %}chip-info{% else %}chip-danger{% endif %}">{{ invoice.get_status_display }}</span></div>
+    <div class="list">
+      <div class="list-item"><span class="grow muted small">Muddat</span><b>{{ invoice.months }} oy</b></div>
+      <div class="list-item"><span class="grow muted small">To'lov summasi</span><b style="font-size:1.3rem">{{ invoice.amount|money }} so'm</b></div>
+      <div class="list-item"><span class="grow muted small">Yaratilgan</span><span class="small">{{ invoice.created_at|date:"d.m.Y H:i" }}</span></div>
+      {% if invoice.status == 'paid' %}
+      <div class="list-item"><span class="grow muted small">To'langan</span><span class="small">{{ invoice.paid_at|date:"d.m.Y H:i" }} · {{ invoice.get_provider_display }}</span></div>
+      <div class="list-item"><span class="grow muted small">Obuna muddati</span><b>{{ invoice.new_paid_until|date:"d.m.Y" }} gacha</b></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card card-lg stack">
+    {% if invoice.status == 'pending' %}
+    <h2>To'lov usulini tanlang</h2>
+    <p class="small muted">To'lov tasdiqlangach, tarif va obuna muddati avtomatik yangilanadi. To'lovdan keyin shu sahifaga qaytasiz.</p>
+    {% if payme_url %}<a href="{{ payme_url }}" class="btn btn-lg btn-block pay-btn pay-payme">Payme orqali to'lash</a>{% endif %}
+    {% if click_url %}<a href="{{ click_url }}" class="btn btn-lg btn-block pay-btn pay-click">Click orqali to'lash</a>{% endif %}
+    {% if not payme_url and not click_url %}<p class="small">To'lov tizimlari hali ulanmagan. Platforma administratori bilan bog'laning.</p>{% endif %}
+    {% if test_mode %}<p class="tiny muted">⚠️ Payme sinov rejimida (test.paycom.uz): haqiqiy pul yechilmaydi.</p>{% endif %}
+    <button type="button" class="btn btn-ghost btn-sm" onclick="location.reload()">{% icon "check" "icon-sm" %} To'lovni tekshirish</button>
+    {% elif invoice.status == 'paid' %}
+    <div class="center stack-sm"><div style="font-size:48px">✅</div><h2>To'lov qabul qilindi</h2>
+      <p class="muted small">Rahmat! {{ invoice.get_plan_display }} tarifi {{ invoice.new_paid_until|date:"d.m.Y" }} gacha faol.</p>
+      <a href="{% url 'web:institution-settings' %}" class="btn btn-primary">OTM sozlamalariga qaytish</a></div>
+    {% else %}
+    <h2>Hisob yopilgan</h2><p class="small muted">Bu hisob bo'yicha to'lov qabul qilinmaydi. Yangi hisob yarating.</p>
+    <a href="{% url 'web:institution-settings' %}" class="btn btn-primary">Yangi hisob</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -6,8 +6,8 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from apps.notifications.views import telegram_webhook
 
-admin.site.site_header = "ANDTI Talent Hub boshqaruvi"
-admin.site.site_title = "ANDTI Talent Hub"
+admin.site.site_header = "Talent Hub boshqaruvi"
+admin.site.site_title = "Talent Hub"
 admin.site.index_title = "Boshqaruv paneli"
 
 api_patterns = [
@@ -29,6 +29,7 @@ urlpatterns = [
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="docs"),
     path("telegram/webhook/", telegram_webhook, name="telegram-webhook"),
+    path("billing/", include("apps.billing.urls")),
     path("", include("apps.web.urls")),
 ]
 

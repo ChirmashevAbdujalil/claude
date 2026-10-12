@@ -22,7 +22,30 @@
         <div class="grow"><div class="bold small">{{ p.name }} · {% if p.price %}{{ p.price|money }} so'm/oy{% else %}bepul{% endif %}</div><div class="tiny muted">{{ p.note }}</div></div></div>
       {% endfor %}
     </div>
+    {% if payments_on %}
+    <form method="post" action="{% url 'billing:invoice-create' %}" class="form stack-sm" style="border-top:1px solid var(--border); padding-top:14px">
+      {% csrf_token %}
+      <div class="bold">💳 Tarifni to'lash</div>
+      <div class="grid-2">
+        <div class="field"><label for="pay-plan">Tarif</label>
+          <select name="plan" id="pay-plan">{% for p in paid_plans %}<option value="{{ p.key }}" {% if p.key == institution.plan %}selected{% endif %}>{{ p.name }} · {{ p.price|money }} so'm/oy</option>{% endfor %}</select></div>
+        <div class="field"><label for="pay-months">Muddat</label>
+          <select name="months" id="pay-months">{% for months, paid in periods.items %}<option value="{{ months }}" {% if months == 12 %}selected{% endif %}>{{ months }} oy{% if paid < months %} ({{ months|minus:paid }} oy bepul){% endif %}</option>{% endfor %}</select></div>
+      </div>
+      <button class="btn btn-gradient">{% icon "coin" "icon-sm" %} Payme yoki Click orqali to'lash</button>
+    </form>
+    {% else %}
     <p class="tiny muted">Tarifni o'zgartirish uchun platforma bilan bog'laning: <a href="/saas/#ariza">talenthub</a>.</p>
+    {% endif %}
+    {% if invoices %}
+    <div class="list">
+      {% for inv in invoices %}
+      <a href="{% url 'billing:invoice' inv.pk %}" class="list-item"><span class="tiny muted">#{{ inv.pk }}</span>
+        <div class="grow small"><b>{{ inv.get_plan_display }}</b> · {{ inv.months }} oy · {{ inv.amount|money }} so'm</div>
+        <span class="chip {% if inv.status == 'paid' %}chip-success{% elif inv.status == 'pending' %}chip-info{% else %}chip-danger{% endif %}">{{ inv.get_status_display }}</span></a>
+      {% endfor %}
+    </div>
+    {% endif %}
   </div>
 
   <div class="card card-lg stack">

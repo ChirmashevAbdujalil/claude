@@ -6,9 +6,12 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from apps.accounts.models import Faculty
+from apps.billing import services as billing_services
+from apps.billing.models import Invoice
 from apps.tenants import plans
 from apps.tenants import services as tenant_services
 from apps.tenants.context import unscoped
@@ -54,6 +57,13 @@ def platform_dashboard(request):
     """Platforma egasi uchun: barcha OTMlar, tariflar, faollik va yangi arizalar."""
     context = branding(None) | tenant_services.platform_overview()
     context["requests"] = InstitutionRequest.objects.filter(status=InstitutionRequest.Status.NEW)[:20]
+    context["payments"] = Invoice.objects.filter(status=Invoice.Status.PAID).select_related("institution")[:10]
+    month_start = timezone.localdate().replace(day=1)
+    context["revenue_month"] = sum(
+        Invoice.objects.filter(status=Invoice.Status.PAID, paid_at__date__gte=month_start).values_list(
+            "amount", flat=True
+        )
+    )
     return render(request, "web/saas/platform.html", context)
 
 
@@ -110,6 +120,10 @@ def institution_settings(request):
         "limit": limit,
         "usage": round(students * 100 / limit) if limit else None,
         "site_url": institution.base_url(request),
+        "periods": billing_services.PERIODS,
+        "paid_plans": [p for p in _plans() if p["price"]],
+        "invoices": Invoice.objects.filter(institution=institution)[:10],
+        "payments_on": billing_services.payme_enabled() or billing_services.click_enabled(),
     }
     return render(request, "web/saas/settings.html", context)
 

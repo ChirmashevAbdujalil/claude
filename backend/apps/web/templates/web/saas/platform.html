@@ -41,6 +41,18 @@
   </div>
 
   <div class="card card-lg stack">
+    <div class="row-between wrap"><h2>So'nggi to'lovlar</h2><span class="chip chip-success">Shu oy: {{ revenue_month|money }} so'm</span></div>
+    <div class="list">
+      {% for inv in payments %}
+      <div class="list-item"><span class="chip {% if inv.provider == 'payme' %}chip-info{% else %}chip-success{% endif %}">{{ inv.get_provider_display }}</span>
+        <div class="grow"><div class="bold small">{{ inv.institution.short_name }} · {{ inv.get_plan_display }} × {{ inv.months }} oy</div>
+          <div class="tiny muted">{{ inv.paid_at|date:"d.m.Y H:i" }} · {{ inv.new_paid_until|date:"d.m.Y" }} gacha</div></div>
+        <b>{{ inv.amount|money }} so'm</b></div>
+      {% empty %}<p class="muted small">Hali to'lov yo'q.</p>{% endfor %}
+    </div>
+  </div>
+
+  <div class="card card-lg stack">
     <h2>Yangi ulanish arizalari {% if totals.requests %}<span class="chip chip-danger">{{ totals.requests }}</span>{% endif %}</h2>
     <div class="list">
       {% for r in requests %}
