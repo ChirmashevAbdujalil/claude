@@ -96,6 +96,22 @@
   #s5 .flow .box .e { display: block; font-size: 44px; margin-bottom: 6px; }
   #s5 .flow .arr { font-size: 48px; color: var(--teal); font-weight: 800; }
 
+  /* 5a. Nishonlar */
+  #badges .track { position: absolute; left: 200px; top: 520px; width: 1520px; height: 14px; border-radius: 7px; background: #dbe4e7; }
+  #badges .track i { position: absolute; left: 0; top: 0; height: 100%; width: 0; border-radius: 7px; background: linear-gradient(90deg, #168a9c, #f59e0b); }
+  #badges .xp { position: absolute; top: 556px; left: 200px; transform: translateX(-50%); padding: 10px 20px; border-radius: 999px; background: linear-gradient(135deg, #f59e0b, #f97316); color: #fff; font-size: 26px; font-weight: 800; white-space: nowrap; box-shadow: 0 12px 30px rgba(249,115,22,.35); }
+  #badges .start { position: absolute; left: 200px; top: 412px; transform: translateX(-50%); text-align: center; font-size: 20px; font-weight: 700; color: var(--muted); width: 200px; }
+  #badges .lv { position: absolute; top: 300px; width: 240px; margin-left: -120px; text-align: center; }
+  #badges .lv .medal { position: relative; width: 132px; height: 132px; margin: 0 auto; border-radius: 50%; display: grid; place-items: center; font-size: 64px; background: #fff; border: 6px solid #dbe4e7; filter: grayscale(1); opacity: .5; }
+  #badges .lv .medal .lock { position: absolute; right: -6px; bottom: -6px; width: 46px; height: 46px; border-radius: 50%; background: #0b1d24; display: grid; place-items: center; font-size: 22px; }
+  #badges .lv .nm { margin-top: 14px; font-size: 26px; font-weight: 800; }
+  #badges .lv .th { font-size: 20px; font-weight: 700; color: var(--muted); }
+  #badges .box { position: absolute; top: 690px; padding: 26px 30px; }
+  #badges .box h3 { font-size: 28px; display: flex; align-items: center; gap: 12px; }
+  #badges .chips { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+  #badges .chip { display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 16px; background: #f3f6f7; border: 1px solid var(--border); font-size: 21px; font-weight: 700; white-space: nowrap; }
+  #badges .chip b { font-size: 26px; } #badges .chip em { font-style: normal; color: #d97706; font-weight: 800; }
+
   /* 5b. Tanga do'koni */
   #shop .wallet { position: absolute; left: 1470px; top: 104px; width: 330px; padding: 22px 30px; border-radius: 28px; background: var(--grad); color: #fff; box-shadow: 0 24px 60px rgba(6,45,59,.3); }
   #shop .wallet small { display: block; font-size: 20px; font-weight: 700; opacity: .8; }
@@ -237,10 +253,28 @@
     </div>
   </section>
 
+  <!-- 5a. Nishonlar -->
+  <section class="scene light" id="badges">
+    <div class="abs" style="left:130px;top:110px">
+      <div class="eyebrow"><b>05</b> Nishonlar</div>
+      <h2 style="margin-top:22px">Nishonlar avtomatik beriladi</h2>
+    </div>
+    <div class="track"><i id="bdFill"></i></div>
+    <div class="start">Yangi boshlovchi</div>
+    <div class="lv" id="lv0" style="left:580px"><div class="medal">🔍<span class="lock">🔒</span></div><div class="nm">Izlanuvchi</div><div class="th">500 XP</div></div>
+    <div class="lv" id="lv1" style="left:960px"><div class="medal">💡<span class="lock">🔒</span></div><div class="nm">Ixtirochi</div><div class="th">2 000 XP</div></div>
+    <div class="lv" id="lv2" style="left:1340px"><div class="medal">🚀<span class="lock">🔒</span></div><div class="nm">Innovator</div><div class="th">5 000 XP</div></div>
+    <div class="lv" id="lv3" style="left:1720px"><div class="medal">👑<span class="lock">🔒</span></div><div class="nm">Afsona</div><div class="th">12 000 XP</div></div>
+    <div class="xp" id="bdXp">⚡ 0 XP</div>
+    <div class="abs" id="bdNote" style="left:130px;top:632px;font-size:24px;font-weight:700;color:var(--muted)">🔔 Har bir yangi nishon haqida saytda va Telegramda xabar keladi</div>
+    <div class="box card" style="left:118px;width:700px"><h3>🔥 Faollik seriyasi</h3><div class="chips"><span class="chip"><b>🔥</b>7 kun</span><span class="chip"><b>💪</b>30 kun <em>+100 XP</em></span><span class="chip"><b>🏆</b>100 kun <em>+300 XP</em></span></div></div>
+    <div class="box card" style="left:850px;width:952px"><h3>🏅 Muhim harakatlar uchun</h3><div class="chips"><span class="chip"><b>👋</b>Xush kelibsiz <em>+20</em></span><span class="chip"><b>🎯</b>Birinchi qadam <em>+20</em></span><span class="chip"><b>✅</b>Tan olingan <em>+20</em></span><span class="chip"><b>🤝</b>Jamoa o'yinchisi <em>+20</em></span><span class="chip"><b>⚡</b>Hakaton qahramoni <em>+50</em></span><span class="chip"><b>🧪</b>Ixtirochi <em>+100</em></span><span class="chip"><b>🦄</b>Startap asoschisi <em>+200</em></span></div></div>
+  </section>
+
   <!-- 5b. Tanga do'koni -->
   <section class="scene light" id="shop">
     <div class="abs" style="left:130px;top:110px">
-      <div class="eyebrow"><b>05</b> Tanga do'koni</div>
+      <div class="eyebrow"><b>06</b> Tanga do'koni</div>
       <h2 style="margin-top:22px">Tangalar real sovg'aga aylanadi</h2>
     </div>
     <div class="wallet"><small>Balansingiz</small><b>🪙 <span id="walletNum">488</span></b></div>
@@ -271,7 +305,7 @@
   <!-- 6. Imkoniyatlar -->
   <section class="scene light" id="s6">
     <div class="abs center" style="left:0;right:0;top:90px">
-      <div class="eyebrow"><b>06</b> Imkoniyatlar</div>
+      <div class="eyebrow"><b>07</b> Imkoniyatlar</div>
       <h2 style="margin-top:22px">Talabaga kerakli hamma narsa bir joyda</h2>
     </div>
     <div class="feat card" style="left:150px;top:330px"><span class="icon-tile t-gold">🏆</span><h3>Arena va reyting</h3><p>Haftalik reyting, fakultetlar ligasi, 14 xil nishon va streak</p></div>
@@ -285,7 +319,7 @@
   <!-- 7. O'qituvchi -->
   <section class="scene light" id="s7">
     <div class="abs" style="left:130px;top:140px;width:640px">
-      <div class="eyebrow"><b>07</b> O'qituvchi uchun</div>
+      <div class="eyebrow"><b>08</b> O'qituvchi uchun</div>
       <h2 style="margin-top:22px">Baholash tez, qaror o'qituvchida</h2>
       <p class="lead" style="margin-top:24px">Yechimlar, yutuqlar va ko'nikma tasdiqlari bitta tekshiruv navbatida</p>
     </div>
@@ -299,7 +333,7 @@
   <!-- 8. Rektorat -->
   <section class="scene light" id="s8">
     <div class="abs" style="left:130px;top:130px;width:700px">
-      <div class="eyebrow"><b>08</b> Rektorat uchun</div>
+      <div class="eyebrow"><b>09</b> Rektorat uchun</div>
       <h2 style="margin-top:22px">Institutning iqtidor xaritasi real vaqtda</h2>
     </div>
     <div class="browser" id="s8browser" style="left:880px;top:130px;width:940px"><div class="bar"><i></i><i></i><i></i><span>talent.andti.uz/insights</span></div>
@@ -314,7 +348,7 @@
   <!-- 9. Ishonch -->
   <section class="scene light" id="s9">
     <div class="abs center" style="left:0;right:0;top:120px">
-      <div class="eyebrow"><b>09</b> Qulay va ishonchli</div>
+      <div class="eyebrow"><b>10</b> Qulay va ishonchli</div>
       <h2 style="margin-top:22px">Har bir talabaning cho'ntagida</h2>
     </div>
     <div class="trust" style="left:120px;top:440px"><span class="icon-tile t-blue">📱</span><h3>Telefon va kompyuter</h3><p>Har qanday ekranga moslashadi</p></div>
@@ -327,7 +361,7 @@
   <!-- 10. Yo'l xaritasi -->
   <section class="scene light" id="s10">
     <div class="abs center" style="left:0;right:0;top:120px">
-      <div class="eyebrow"><b>10</b> Joriy etish</div>
+      <div class="eyebrow"><b>11</b> Joriy etish</div>
       <h2 style="margin-top:22px">Bosqichma-bosqich, xavfsiz boshlash</h2>
     </div>
     <div class="line"><i id="s10line"></i></div>
@@ -354,10 +388,14 @@
   // Kadr-kadr yozib olish uchun: hamma narsa bitta to'xtatilgan timeline'da, vaqt bo'yicha aniq hisoblanadi.
   const S = [
     ["s1", 0, 7.5], ["s2", 7.5, 16.5], ["s3", 16.5, 26.5], ["s4", 26.5, 45], ["s5", 45, 57],
-    ["shop", 57, 77], ["s6", 77, 89], ["s7", 89, 99], ["s8", 99, 111], ["s9", 111, 119], ["s10", 119, 128], ["s11", 128, 136],
+    ["badges", 57, 71], ["shop", 71, 91], ["s6", 91, 103], ["s7", 103, 113], ["s8", 113, 125], ["s9", 125, 133],
+    ["s10", 133, 142], ["s11", 142, 150],
   ];
-  const DURATION = 136;
+  const DURATION = 150;
   const tl = gsap.timeline({ paused: true });
+  const BADGE_XP = [0, 500, 2000, 5000, 12000], BADGE_X = [200, 580, 960, 1340, 1720];
+  const BADGE_START = 58.8, BADGE_STEP = 1.2;
+  const BADGE_TIMES = [1, 2, 3, 4].map((i) => BADGE_START + i * BADGE_STEP);
   const ease = "power3.out";
   const q = (sel) => document.querySelectorAll(sel);
 
@@ -367,7 +405,7 @@
     if (i < S.length - 1) tl.to("#" + id, { autoAlpha: 0, duration: 0.7, ease: "power1.inOut" }, b - 0.35);
   });
   tl.fromTo("#watermark", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 7.8);
-  tl.to("#watermark", { opacity: 0, duration: 0.6 }, 127.5);
+  tl.to("#watermark", { opacity: 0, duration: 0.6 }, 141.5);
 
   // 1. Kirish
   tl.fromTo("#s1 .ring", { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 2.2, stagger: 0.25, ease }, 0.2);
@@ -432,79 +470,101 @@
   tl.fromTo("#s5browser", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 1, ease }, 49.6);
   tl.fromTo("#s5img", { scale: 1, transformOrigin: "60% 25%" }, { scale: 1.14, duration: 6, ease: "sine.inOut" }, 50.8);
 
+  // 5a. Nishonlar: XP o'sadi, chegaradan o'tganda daraja nishoni o'zi ochiladi
+  tl.fromTo("#badges .eyebrow, #badges h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 57.4);
+  tl.fromTo("#badges .track, #badges .start, #badges .xp", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 58.0);
+  tl.fromTo("#badges .lv", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, stagger: 0.15, ease }, 58.1);
+  BADGE_TIMES.forEach((t, i) => {
+    const lv = `#lv${i}`;
+    tl.to(`${lv} .medal`, { filter: "grayscale(0)", opacity: 1, borderColor: i === 3 ? "#f59e0b" : "#168a9c",
+      boxShadow: i === 3 ? "0 0 50px rgba(245,158,11,.6)" : "0 0 40px rgba(22,138,156,.45)", duration: 0.35 }, t)
+      .fromTo(`${lv} .medal`, { scale: 1 }, { scale: 1.22, duration: 0.25, yoyo: true, repeat: 1, ease: "power2.out" }, t)
+      .to(`${lv} .lock`, { scale: 0, opacity: 0, duration: 0.25 }, t);
+  });
+  tl.fromTo("#bdNote", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.6, ease }, 63.9);
+  tl.fromTo("#badges .box", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.3, ease }, 64.4);
+  tl.fromTo("#badges .chip", { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, stagger: 0.14, ease: "back.out(2)" }, 65.0);
+
   // 5b. Tanga do'koni
-  tl.fromTo("#shop .eyebrow, #shop h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 57.4);
-  tl.fromTo("#shop .wallet", { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.8, ease: "back.out(1.8)" }, 57.9);
-  tl.fromTo("#shop .item", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.45, ease }, 58.4);
-  tl.fromTo("#shop .item .buy", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, stagger: 0.2, ease: "back.out(2)" }, 61.4);
-  tl.fromTo("#shop .item .bar i", { scaleX: 0 }, { scaleX: 1, duration: 1.2, ease }, 62.4);
-  tl.fromTo("#shop .ombor", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease }, 63.2);
+  tl.fromTo("#shop .eyebrow, #shop h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 71.4);
+  tl.fromTo("#shop .wallet", { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.8, ease: "back.out(1.8)" }, 71.9);
+  tl.fromTo("#shop .item", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.45, ease }, 72.4);
+  tl.fromTo("#shop .item .buy", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, stagger: 0.2, ease: "back.out(2)" }, 75.4);
+  tl.fromTo("#shop .item .bar i", { scaleX: 0 }, { scaleX: 1, duration: 1.2, ease }, 76.4);
+  tl.fromTo("#shop .ombor", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease }, 77.2);
   // Xarid: "Olish" bosiladi, tangalar hamyondan uchib ketadi
-  tl.fromTo("#buyRing", { scale: 1.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "power2.out" }, 64.4);
-  tl.to("#kitobBtn", { scale: 0.92, duration: 0.12, yoyo: true, repeat: 1 }, 64.8);
-  tl.to("#shop .item:nth-child(2)", { y: -14, boxShadow: "0 30px 70px rgba(245,158,11,.35)", duration: 0.5, ease }, 64.8);
+  tl.fromTo("#buyRing", { scale: 1.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "power2.out" }, 78.4);
+  tl.to("#kitobBtn", { scale: 0.92, duration: 0.12, yoyo: true, repeat: 1 }, 78.8);
+  tl.to("#shop .item:nth-child(2)", { y: -14, boxShadow: "0 30px 70px rgba(245,158,11,.35)", duration: 0.5, ease }, 78.8);
   q("#shop .flycoin").forEach((c, i) => {
-    const t0 = 64.95 + i * 0.12;
+    const t0 = 78.95 + i * 0.12;
     tl.fromTo(c, { x: 0, y: 0, opacity: 0, scale: 1 }, { opacity: 1, duration: 0.08 }, t0)
       .to(c, { x: -900, duration: 0.75, ease: "power1.inOut" }, t0)
       .to(c, { y: 360, duration: 0.75, ease: "power2.in" }, t0)
       .to(c, { scale: 0.4, opacity: 0, duration: 0.2 }, t0 + 0.6);
   });
-  tl.to("#buyRing", { opacity: 0, duration: 0.4 }, 66.2);
-  tl.fromTo("#shopToast", { y: -120, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "back.out(1.8)" }, 66.1);
-  tl.to("#shopToast", { y: -120, opacity: 0, duration: 0.5, ease: "power2.in" }, 68.6);
+  tl.to("#buyRing", { opacity: 0, duration: 0.4 }, 80.2);
+  tl.fromTo("#shopToast", { y: -120, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "back.out(1.8)" }, 80.1);
+  tl.to("#shopToast", { y: -120, opacity: 0, duration: 0.5, ease: "power2.in" }, 82.6);
   // Keyin: xarid holati va haqiqiy do'kon sahifasi
-  tl.to("#shopItems, #shop .ombor", { y: 60, opacity: 0, duration: 0.6, ease: "power2.in" }, 67.6);
-  tl.to("#shop .wallet", { scale: 0.8, x: 40, y: -10, duration: 0.6, ease }, 67.6);
-  tl.fromTo("#shopBrowser", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, ease }, 68.2);
-  tl.fromTo("#shopImg", { scale: 1, transformOrigin: "100% 100%" }, { scale: 1.12, duration: 7.5, ease: "sine.inOut" }, 68.8);
-  tl.fromTo("#shopFlow .st", { x: -50, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, stagger: 1.3, ease }, 68.6);
+  tl.to("#shopItems, #shop .ombor", { y: 60, opacity: 0, duration: 0.6, ease: "power2.in" }, 81.6);
+  tl.to("#shop .wallet", { scale: 0.8, x: 40, y: -10, duration: 0.6, ease }, 81.6);
+  tl.fromTo("#shopBrowser", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, ease }, 82.2);
+  tl.fromTo("#shopImg", { scale: 1, transformOrigin: "100% 100%" }, { scale: 1.12, duration: 7.5, ease: "sine.inOut" }, 82.8);
+  tl.fromTo("#shopFlow .st", { x: -50, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, stagger: 1.3, ease }, 82.6);
   [0, 1, 2].forEach((i) => {
-    tl.to(`#shopFlow .st:nth-child(${i + 1})`, { borderColor: i === 2 ? "#10b981" : "#168a9c", duration: 0.4 }, 68.9 + i * 1.3)
-      .to(`#shopFlow .st:nth-child(${i + 1}) .em`, { background: i === 2 ? "#d1fae5" : "#e2f0f4", duration: 0.4 }, 68.9 + i * 1.3);
+    tl.to(`#shopFlow .st:nth-child(${i + 1})`, { borderColor: i === 2 ? "#10b981" : "#168a9c", duration: 0.4 }, 82.9 + i * 1.3)
+      .to(`#shopFlow .st:nth-child(${i + 1}) .em`, { background: i === 2 ? "#d1fae5" : "#e2f0f4", duration: 0.4 }, 82.9 + i * 1.3);
   });
 
   // 6. Imkoniyatlar
-  tl.fromTo("#s6 .eyebrow, #s6 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 77.4);
-  tl.fromTo("#s6 .feat", { y: 70, opacity: 0, scale: 0.94 }, { y: 0, opacity: 1, scale: 1, duration: 0.8, stagger: 0.55, ease }, 78.4);
-  tl.to("#s6 .feat .icon-tile", { rotate: 8, duration: 0.5, yoyo: true, repeat: 1, stagger: 0.25, ease: "sine.inOut" }, 83.5);
+  tl.fromTo("#s6 .eyebrow, #s6 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 91.4);
+  tl.fromTo("#s6 .feat", { y: 70, opacity: 0, scale: 0.94 }, { y: 0, opacity: 1, scale: 1, duration: 0.8, stagger: 0.55, ease }, 92.4);
+  tl.to("#s6 .feat .icon-tile", { rotate: 8, duration: 0.5, yoyo: true, repeat: 1, stagger: 0.25, ease: "sine.inOut" }, 97.5);
 
   // 7. O'qituvchi
-  tl.fromTo("#s7 .eyebrow, #s7 h2, #s7 .lead", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 89.4);
-  tl.fromTo("#s7browser", { x: 120, opacity: 0 }, { x: 0, opacity: 1, duration: 1, ease }, 90);
-  tl.fromTo("#s7 .callout", { x: -60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, stagger: 1.4, ease }, 92);
-  tl.fromTo("#s7browser .view img", { scale: 1, transformOrigin: "65% 25%" }, { scale: 1.12, duration: 7, ease: "sine.inOut" }, 91);
+  tl.fromTo("#s7 .eyebrow, #s7 h2, #s7 .lead", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 103.4);
+  tl.fromTo("#s7browser", { x: 120, opacity: 0 }, { x: 0, opacity: 1, duration: 1, ease }, 104);
+  tl.fromTo("#s7 .callout", { x: -60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, stagger: 1.4, ease }, 106);
+  tl.fromTo("#s7browser .view img", { scale: 1, transformOrigin: "65% 25%" }, { scale: 1.12, duration: 7, ease: "sine.inOut" }, 105);
 
   // 8. Rektorat
-  tl.fromTo("#s8 .eyebrow, #s8 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 99.4);
-  tl.fromTo("#s8browser", { x: 120, opacity: 0 }, { x: 0, opacity: 1, duration: 1, ease }, 100);
-  tl.fromTo("#s8stats > *", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.5, ease }, 101);
-  tl.fromTo("#s8img", { scale: 1, transformOrigin: "60% 30%" }, { scale: 1.12, duration: 7, ease: "sine.inOut" }, 102.5);
+  tl.fromTo("#s8 .eyebrow, #s8 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 113.4);
+  tl.fromTo("#s8browser", { x: 120, opacity: 0 }, { x: 0, opacity: 1, duration: 1, ease }, 114);
+  tl.fromTo("#s8stats > *", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.5, ease }, 115);
+  tl.fromTo("#s8img", { scale: 1, transformOrigin: "60% 30%" }, { scale: 1.12, duration: 7, ease: "sine.inOut" }, 116.5);
 
   // 9. Ishonch
-  tl.fromTo("#s9 .eyebrow, #s9 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 111.4);
-  tl.fromTo("#s9 .trust", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.45, ease: "back.out(1.6)" }, 112.3);
+  tl.fromTo("#s9 .eyebrow, #s9 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 125.4);
+  tl.fromTo("#s9 .trust", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.45, ease: "back.out(1.6)" }, 126.3);
 
   // 10. Yo'l xaritasi
-  tl.fromTo("#s10 .eyebrow, #s10 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 119.4);
-  tl.fromTo("#s10line", { scaleX: 0 }, { scaleX: 1, duration: 5, ease: "power1.inOut" }, 120.3);
-  tl.fromTo("#s10 .ms", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 1.15, ease: "back.out(1.6)" }, 120.4);
+  tl.fromTo("#s10 .eyebrow, #s10 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 133.4);
+  tl.fromTo("#s10line", { scaleX: 0 }, { scaleX: 1, duration: 5, ease: "power1.inOut" }, 134.3);
+  tl.fromTo("#s10 .ms", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 1.15, ease: "back.out(1.6)" }, 134.4);
 
   // 11. Yakun
-  tl.fromTo("#s11 .logo", { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.2, ease: "back.out(1.6)" }, 128.3);
-  tl.fromTo("#s11 h1, #s11 p", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 1, stagger: 0.35, ease }, 129.2);
+  tl.fromTo("#s11 .logo", { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.2, ease: "back.out(1.6)" }, 142.3);
+  tl.fromTo("#s11 h1, #s11 p", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 1, stagger: 0.35, ease }, 143.2);
   tl.to("#s11", { autoAlpha: 0, duration: 0.8 }, DURATION - 0.8);
 
   // Vaqtga bog'liq qo'shimcha holatlar (hisoblagich va progress)
   function custom(t) {
     document.getElementById("progress").style.width = (t / DURATION) * 100 + "%";
     document.getElementById("s4url").textContent = t < 41.3 ? "talent.andti.uz/challenges" : "talent.andti.uz/app";
-    const k = Math.min(Math.max((t - 101.3) / 1.5, 0), 1);
+    const k = Math.min(Math.max((t - 115.3) / 1.5, 0), 1);
     q("#s8stats [data-count]").forEach((el) => { el.textContent = Math.round(+el.dataset.count * k); });
-    const pay = Math.min(Math.max((t - 65.1) / 0.9, 0), 1);
+    const seg = Math.min(Math.max((t - BADGE_START) / BADGE_STEP, 0), 4);
+    const si = Math.min(Math.floor(seg), 3), sf = seg - si;
+    const xpNow = BADGE_XP[si] + (BADGE_XP[si + 1] - BADGE_XP[si]) * sf;
+    const xNow = BADGE_X[si] + (BADGE_X[si + 1] - BADGE_X[si]) * sf;
+    document.getElementById("bdXp").style.left = xNow + "px";
+    document.getElementById("bdXp").textContent = "⚡ " + Math.round(xpNow).toLocaleString("ru-RU") + " XP";
+    document.getElementById("bdFill").style.width = xNow - 200 + "px";
+    const pay = Math.min(Math.max((t - 79.1) / 0.9, 0), 1);
     document.getElementById("walletNum").textContent = Math.round(488 - 150 * pay);
-    document.getElementById("kitobStock").textContent = t < 65.9 ? 30 : 29;
-    document.getElementById("kitobBtnText").textContent = t < 65.9 ? "Olish" : "✓ Sizniki";
+    document.getElementById("kitobStock").textContent = t < 79.9 ? 30 : 29;
+    document.getElementById("kitobBtnText").textContent = t < 79.9 ? "Olish" : "✓ Sizniki";
   }
 
   window.DURATION = DURATION;
