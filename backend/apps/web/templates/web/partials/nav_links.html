@@ -26,6 +26,7 @@
 {% endif %}
 {% if user.is_management %}
 <a href="{% url 'web:insights' %}" class="nav-link {% active 'insights' %}">{% icon "chart" %} Statistika</a>
+<a href="{% url 'web:impact' %}" class="nav-link {% active 'impact' %}">{% icon "trophy" %} Natijalar (ochiq sahifa)</a>
 {% endif %}
 {% if user.is_institution_admin %}
 <a href="{% url 'web:institution-settings' %}" class="nav-link {% active 'institution-settings' %}">{% icon "edit" %} OTM sozlamalari</a>

@@ -31,6 +31,7 @@ urlpatterns = [
     path("welcome/skip/", onboarding.welcome_skip, name="welcome-skip"),
     path("how-it-works/", onboarding.how_it_works, name="how-it-works"),
     path("homiylar/", public.sponsors, name="sponsors"),
+    path("natijalar/", public.impact, name="impact"),
     path("saas/", saas.saas_landing, name="saas"),
     path("platform/", saas.platform_dashboard, name="platform"),
     path("platform/requests/<int:pk>/approve/", saas.platform_approve, name="platform-approve"),

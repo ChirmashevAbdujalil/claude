@@ -16,7 +16,9 @@ from apps.profiles.models import Achievement, UserSkill
 from apps.profiles.services import skill_map
 from apps.projects.models import Project
 
+from .. import impact as impact_service
 from ..forms import LoginForm, TalentFlagForm
+from ..qr import qr_svg
 
 User = get_user_model()
 
@@ -142,3 +144,22 @@ def sponsors(request):
         "contact_url": _contact_url(contact),
     }
     return render(request, "web/sponsors.html", context)
+
+
+def impact(request):
+    """«Natijalar»: OTMdagi o'sish va faollik real vaqtda. Ochiq sahifa, faqat umumlashgan raqamlar."""
+    if request.institution is None:
+        return render(request, "web/404.html", status=404)
+    data = impact_service.impact(request.institution)
+    chart = [{k: row[k] for k in ("label", "range", "total", "new", "active")} for row in data["weekly"]]
+    chart[-1]["partial"] = True  # joriy hafta hali tugamagan
+    weeks_with_data = sum(1 for row in data["weekly"] if row["total"])
+    page_url = request.build_absolute_uri(request.path)
+    context = {
+        "data": data,
+        "chart": chart,
+        "enough_history": weeks_with_data >= 3,
+        "page_url": page_url,
+        "qr": qr_svg(page_url, label="Natijalar sahifasining QR kodi"),
+    }
+    return render(request, "web/impact.html", context)

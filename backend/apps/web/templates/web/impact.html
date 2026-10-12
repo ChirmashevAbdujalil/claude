@@ -1,0 +1,125 @@
+{% extends "web/base.html" %}
+{% load static web_tags %}
+{% block title %}Natijalar{% endblock %}
+{% block description %}{{ brand_name }} natijalari real vaqtda: talabalar, faollik, yechimlar, nishonlar va sovg'alar.{% endblock %}
+
+{% block body %}
+<header class="landing-nav">
+  <a href="{% if user.is_authenticated %}{% url 'web:dashboard' %}{% else %}{% url 'web:landing' %}{% endif %}" class="brand">{% brand_logo 40 %}<span>{{ brand_name }}<small>{{ institution_name }}</small></span></a>
+  <div class="row-sm">
+    <a href="#ulashish" class="btn btn-ghost btn-sm">QR kod</a>
+    {% if user.is_authenticated %}<a href="{% url 'web:dashboard' %}" class="btn btn-primary btn-sm">Platformaga qaytish</a>
+    {% else %}<a href="{% url 'web:login' %}" class="btn btn-primary btn-sm">Kirish</a>{% endif %}
+  </div>
+</header>
+
+<main class="impact stack-lg">
+  <section class="card card-lg hero-card impact-hero">
+    <div class="stack-sm">
+      <span class="live-dot">Real vaqtda · {{ data.updated_at|date:"d.m.Y H:i" }} holatiga</span>
+      <h1>Natijalar</h1>
+      <p class="muted" style="max-width:560px">{{ institution_name }} talabalari platformada nima qilayotgani: raqamlar to'g'ridan-to'g'ri bazadan olinadi. Shaxsiy ma'lumot ko'rsatilmaydi.</p>
+    </div>
+    <div class="impact-hero-figure">
+      <div class="hero-number">{{ data.students|money }}</div>
+      <div>ro'yxatdan o'tgan talaba</div>
+      {% if data.new_week %}<div class="hero-delta">+{{ data.new_week }} shu hafta</div>{% endif %}
+    </div>
+  </section>
+
+  <section class="kpi-grid">
+    {% include "web/partials/impact_tile.html" with value=data.active_week label="7 kunda faol talaba" note=data.active_share|stringformat:"d"|add:"% talabalar" icon="flame" tone="tone-success" %}
+    {% if data.retention is not None %}
+      {% include "web/partials/impact_tile.html" with value=data.retention|stringformat:"d"|add:"%" label="qaytib keladi" note="o'tgan hafta faol bo'lganlardan" icon="chart" tone="tone-primary" %}
+    {% else %}
+      {% include "web/partials/impact_tile.html" with value=data.challenges label="faol topshiriq" note="kunlik, haftalik, oylik" icon="target" tone="tone-primary" %}
+    {% endif %}
+    {% include "web/partials/impact_tile.html" with value=data.submissions label="yechim yuborildi" note=data.reviewed|stringformat:"d"|add:" tasi o'qituvchi tekshirgan" icon="check" tone="tone-info" %}
+    {% include "web/partials/impact_tile.html" with value=data.badges label="nishon berildi" note="ball to'plangan sari avtomatik" icon="award" tone="tone-accent" %}
+    {% include "web/partials/impact_tile.html" with value=data.achievements label="tasdiqlangan yutuq" note=data.endorsements|stringformat:"d"|add:" ko'nikma tasdig'i" icon="star" tone="tone-primary" %}
+    {% include "web/partials/impact_tile.html" with value=data.gifts label="sovg'a olindi" note=data.coins_spent|stringformat:"d"|add:" tanga evaziga" icon="gift" tone="tone-accent" %}
+    {% include "web/partials/impact_tile.html" with value=data.projects label="talaba loyihasi" note=data.team_members|stringformat:"d"|add:" jamoa a'zosi" icon="rocket" tone="tone-info" %}
+    {% include "web/partials/impact_tile.html" with value=data.attended label="tadbirga keldi" note=data.events|stringformat:"d"|add:" ta tadbir o'tkazildi" icon="calendar" tone="tone-success" %}
+  </section>
+
+  {{ chart|json_script:"impact-weekly" }}
+  <section class="grid-2">
+    <article class="card card-lg stack">
+      <div><h2>O'sish</h2><p class="small muted">Ro'yxatdan o'tgan talabalar soni, so'nggi 12 hafta</p></div>
+      <div class="chart" data-chart="line" data-source="impact-weekly" data-key="total" data-unit="talaba" role="img" aria-label="Talabalar sonining haftalik o'sishi"></div>
+      {% if not enough_history %}<p class="tiny muted">Grafik platforma bir necha hafta ishlagach to'liq ko'rinadi.</p>{% endif %}
+      {% include "web/partials/impact_table.html" with rows=chart key="total" unit="Jami talabalar" %}
+    </article>
+    <article class="card card-lg stack">
+      <div><h2>Haftalik faollik</h2><p class="small muted">Ball olgan yoki yechim yuborgan talabalar, haftalar kesimida</p></div>
+      <div class="chart" data-chart="column" data-source="impact-weekly" data-key="active" data-unit="faol talaba" role="img" aria-label="Haftalik faol talabalar soni"></div>
+      <p class="tiny muted">Och rangli oxirgi ustun: joriy hafta, hali davom etmoqda.</p>
+      {% include "web/partials/impact_table.html" with rows=chart key="active" unit="Faol talabalar" %}
+    </article>
+  </section>
+
+  <section class="grid-2">
+    <article class="card card-lg stack">
+      <div><h2>Fakultetlar qamrovi</h2><p class="small muted">Talabalar soni va so'nggi 30 kunda faol bo'lganlar ulushi</p></div>
+      <div class="hbars">
+        {% for row in data.faculties %}
+        <div class="hbar" data-tip="{{ row.full }}: {{ row.students }} talaba, {{ row.rate }}% faol">
+          <span class="hbar-label" title="{{ row.full }}">{{ row.name }}</span>
+          <span class="hbar-track"><span class="hbar-fill" style="width:{{ row.width }}%"></span></span>
+          <span class="hbar-value">{{ row.students }} <span class="muted">· {{ row.rate }}% faol</span></span>
+        </div>
+        {% empty %}<p class="muted small">Talabalar fakultetini tanlagach, shu yerda ko'rinadi.</p>{% endfor %}
+      </div>
+    </article>
+    <article class="card card-lg stack">
+      <div><h2>Ball nima uchun berilmoqda</h2><p class="small muted">So'nggi 30 kunda to'plangan XP manbalari</p></div>
+      <div class="hbars hbars-wide">
+        {% for row in data.mix %}
+        <div class="hbar" data-tip="{{ row.label }}: {{ row.xp }} XP ({{ row.share }}%)">
+          <span class="hbar-label">{{ row.label }}</span>
+          <span class="hbar-track"><span class="hbar-fill" style="width:{{ row.width }}%"></span></span>
+          <span class="hbar-value">{{ row.share }}%</span>
+        </div>
+        {% empty %}<p class="muted small">So'nggi 30 kunda ball berilmagan.</p>{% endfor %}
+      </div>
+    </article>
+  </section>
+
+  {% if data.reviewed or data.accepted or data.applications or data.ai_dialogs or data.gifts_delivered or data.sponsors %}
+  <section class="card card-lg stack">
+    <h2>Platforma nimani o'zgartiryapti</h2>
+    <div class="impact-points">
+      {% if data.reviewed %}<div><b>{{ data.reviewed }}</b><span>ta yechimni {{ data.reviewers }} nafar o'qituvchi tekshirib, izoh qoldirdi</span></div>{% endif %}
+      {% if data.accepted %}<div><b>{{ data.accepted }}</b><span>ta yechim qabul qilinib, talabaga ball va tanga berildi</span></div>{% endif %}
+      {% if data.applications %}<div><b>{{ data.applications }}</b><span>ta ariza stajirovka, grant va tanlovlarga yuborildi</span></div>{% endif %}
+      {% if data.ai_dialogs %}<div><b>{{ data.ai_dialogs }}</b><span>ta suhbatda AI mentor talabaga yo'l ko'rsatdi</span></div>{% endif %}
+      {% if data.gifts_delivered %}<div><b>{{ data.gifts_delivered }}</b><span>ta sovg'a talabaning qo'liga topshirildi</span></div>{% endif %}
+      {% if data.sponsors %}<div><b>{{ data.sponsors }}</b><span>ta homiy talabalar mehnatini qo'llab-quvvatlaydi</span></div>{% endif %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="card card-lg impact-share" id="ulashish">
+    <div class="qr-box">{{ qr }}</div>
+    <div class="stack-sm">
+      <h2>Telefoningizda oching</h2>
+      <p class="small muted">QR kodni skanerlang: shu sahifa telefonda ochiladi va raqamlar real vaqtda yangilanib turadi.</p>
+      <div class="row-sm wrap">
+        <button type="button" class="btn btn-primary btn-sm" data-copy="{{ page_url }}">{% icon "link" "icon-sm" %} <span data-label>Havolani nusxalash</span></button>
+        <a href="{% url 'web:landing' %}" class="btn btn-ghost btn-sm">Platforma haqida</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="chart-tip" role="tooltip" hidden></div>
+<footer class="landing-footer stack-sm" style="align-items:center">
+  {% brand_logo 64 %}
+  <div>© {{ institution_name }} · {{ brand_name }}</div>
+  <div class="tiny">Raqamlar har 5 daqiqada yangilanadi</div>
+</footer>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'web/js/impact.js' %}"></script>
+{% endblock %}

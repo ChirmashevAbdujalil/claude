@@ -75,6 +75,7 @@ Logotip fayllari `apps/web/static/web/img/` papkasida. Brend rangi (`#062d3b`) `
 | AI Mentor | `/ai/` | Uch rejimli chat |
 | Tekshiruv | `/review/` | O'qituvchi: yechim va yutuqlarni baholash |
 | Statistika | `/insights/` | Dekanat va rektorat |
+| Natijalar | `/natijalar/` | Ommaviy sahifa (login shart emas): o'sish va haftalik faollik grafiklari, qaytib keluvchilar, fakultetlar qamrovi, ball manbalari va QR kod. Faqat umumlashgan raqamlar, 5 daqiqa keshlanadi. Pitch va hakamlar uchun |
 
 Dizayn tizimi bitta faylda: `apps/web/static/web/css/app.css`. Unda ranglar, tugmalar, kartalar va formalar bor, build bosqichi kerak emas. Sayt mobil qurilmalarga moslashgan, yorug' va qorong'i rejimni qo'llab-quvvatlaydi. Telegram ichida ochilganda Telegram mavzusiga moslashadi.
 

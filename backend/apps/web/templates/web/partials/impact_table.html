@@ -1,0 +1,5 @@
+<details class="chart-table"><summary class="tiny muted">Jadval ko'rinishi</summary>
+  <table class="table"><thead><tr><th>Hafta</th><th>{{ unit }}</th></tr></thead><tbody>
+    {% for row in rows %}<tr><td>{{ row.range }}</td><td>{% if key == "total" %}{{ row.total }}{% else %}{{ row.active }}{% endif %}</td></tr>{% endfor %}
+  </tbody></table>
+</details>
