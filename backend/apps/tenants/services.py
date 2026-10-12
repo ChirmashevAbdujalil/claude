@@ -71,6 +71,55 @@ def ensure_admin_group() -> Group:
     return group
 
 
+def pilot_until(plan: str, days: int = 90):
+    """Pilot tarifi bepul, lekin muddatli: odatda 90 kun."""
+    return timezone.localdate() + timedelta(days=days) if plan == "pilot" else None
+
+
+def check_admin_username(username: str) -> None:
+    User = get_user_model()
+    with unscoped():
+        if User.objects.filter(username=username).exists():
+            raise TenantError(f"«{username}» logini band")
+
+
+def create_admin(institution, username="", contact_name="", contact_email=""):
+    """OTM administratori (rektorat roli). Parol bir marta qaytariladi."""
+    User = get_user_model()
+    username = username or f"{institution.slug}_admin"
+    check_admin_username(username)
+    password = secrets.token_urlsafe(9)
+    with activate(institution):
+        admin = User.objects.create_user(
+            username=username,
+            password=password,
+            first_name=contact_name.split(" ")[0] if contact_name else "Administrator",
+            email=contact_email,
+            role=User.Role.RECTOR,
+            is_staff=True,
+            onboarded_at=timezone.now(),
+        )
+    admin.groups.add(ensure_admin_group())
+    return admin, password
+
+
+def reset_admin_password(institution):
+    """OTMning birinchi administratori parolini yangilaydi: (admin, parol) yoki None."""
+    User = get_user_model()
+    with unscoped():
+        admin = (
+            User.objects.filter(institution=institution, role=User.Role.RECTOR, is_active=True)
+            .order_by("date_joined")
+            .first()
+        )
+    if admin is None:
+        return None
+    password = secrets.token_urlsafe(9)
+    admin.set_password(password)
+    admin.save(update_fields=["password"])
+    return admin, password
+
+
 @transaction.atomic
 def create_institution(*, name, short_name, slug="", plan="pilot", contact_name="", contact_phone="", contact_email="",
                        admin_username="", pilot_days=90):  # fmt: skip
@@ -88,25 +137,9 @@ def create_institution(*, name, short_name, slug="", plan="pilot", contact_name=
         contact_name=contact_name,
         contact_phone=contact_phone,
         contact_email=contact_email,
-        paid_until=timezone.localdate() + timedelta(days=pilot_days) if plan == "pilot" else None,
+        paid_until=pilot_until(plan, pilot_days),
     )
-    User = get_user_model()
-    username = admin_username or f"{slug}_admin"
-    with unscoped():
-        if User.objects.filter(username=username).exists():
-            raise TenantError(f"«{username}» logini band")
-    password = secrets.token_urlsafe(9)
-    with activate(institution):
-        admin = User.objects.create_user(
-            username=username,
-            password=password,
-            first_name=contact_name.split(" ")[0] if contact_name else "Administrator",
-            email=contact_email,
-            role=User.Role.RECTOR,
-            is_staff=True,
-            onboarded_at=timezone.now(),
-        )
-    admin.groups.add(ensure_admin_group())
+    admin, password = create_admin(institution, admin_username, contact_name, contact_email)
     return institution, admin, password
 
 

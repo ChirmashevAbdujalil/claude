@@ -329,3 +329,42 @@ def test_api_token_is_rejected_on_other_institution(client, student, tatu):
     headers = {"HTTP_AUTHORIZATION": f"Bearer {token}"}
     assert host(client, "localhost").get("/api/v1/me/", **headers).status_code == 200
     assert host(client).get("/api/v1/me/", **headers).status_code == 401
+
+
+def test_superuser_adds_institution_from_admin_panel(client, make_user):
+    owner = make_user(username="owner", is_superuser=True, is_staff=True)
+    client.force_login(owner)
+    form = {
+        "name": "Farg'ona politexnika instituti",
+        "short_name": "FARPI",
+        "slug": "farpi",
+        "plan": "pilot",
+        "color_dark": "#062d3b",
+        "color_light": "#168a9c",
+        "registration_open": "on",
+        "show_in_league": "on",
+        "contact_name": "Ali Valiyev",
+    }
+    response = client.post("/admin/tenants/institution/add/", form, follow=True)
+    farpi = Institution.objects.get(slug="farpi")
+    assert farpi.paid_until == timezone.localdate() + timedelta(days=90)
+    with unscoped():
+        admin = User.objects.get(username="farpi_admin")
+    assert admin.institution == farpi and admin.role == User.Role.RECTOR and admin.first_name == "Ali"
+    assert "farpi_admin" in response.content.decode()
+
+    # Band manzil va band login rad etiladi
+    taken = client.post("/admin/tenants/institution/add/", {**form, "slug": "admin"})
+    assert taken.status_code == 200 and not Institution.objects.filter(slug="admin").exists()
+    dup = client.post("/admin/tenants/institution/add/", {**form, "slug": "farpi2", "admin_username": "farpi_admin"})
+    assert dup.status_code == 200 and not Institution.objects.filter(slug="farpi2").exists()
+
+    # Parolni yangilash amali
+    old_hash = admin.password
+    response = client.post(
+        "/admin/tenants/institution/",
+        {"action": "reset_admin_password", "_selected_action": [farpi.pk]},
+        follow=True,
+    )
+    admin.refresh_from_db()
+    assert admin.password != old_hash and "paroli yangilandi" in response.content.decode()

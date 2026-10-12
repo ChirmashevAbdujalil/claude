@@ -107,7 +107,13 @@ topshiriqlari, loyihalari, tadbirlari, do'koni va statistikasi boshqalaridan to'
 | OTM sozlamalari: logotip, ranglar, fakultetlar, tarif | `/settings/otm/` | Rektorat / OTM administratori |
 | OTMlararo liga | `/arena/otm-ligasi/` | Hamma |
 
-Yangi OTM ulash (ariza tasdiqlanganda ham shu ishlaydi):
+Yangi OTM ulashning uch yo'li bor, hammasida OTM bilan birga uning administratori (rektorat) hisobi yaratiladi
+va parol bir marta ko'rsatiladi:
+
+1. **Admin panel:** `/admin/` → OTMlar → «OTM qo'shish». Pilot tarifida muddat bo'sh qoldirilsa, 90 kun qo'yiladi.
+   Parol yo'qolsa, ro'yxatda OTMni belgilab «Administrator parolini yangilash» amalini tanlang.
+2. **Ariza:** OTM `/saas/` sahifasidan ariza qoldiradi, siz `/platform/` yoki admin paneldan tasdiqlaysiz.
+3. **Buyruq:**
 
 ```bash
 python manage.py create_institution "Toshkent axborot texnologiyalari universiteti" TATU --slug tatu --plan standart
