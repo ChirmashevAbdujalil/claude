@@ -18,6 +18,7 @@
         {% avatar profile "xl" %}
         <div class="row wrap">
           <button type="button" class="btn btn-ghost btn-sm" data-copy="{{ share_url }}">{% icon "copy" "icon-sm" %} <span data-label>Havolani nusxalash</span></button>
+          {% if profile.is_public %}<a href="{% url 'web:portfolio-resume' profile.portfolio_slug %}" class="btn btn-ghost btn-sm">{% icon "download" "icon-sm" %} Rezyume (PDF)</a>{% endif %}
           {% if is_owner %}<a href="{% url 'web:profile-edit' %}" class="btn btn-primary btn-sm">{% icon "edit" "icon-sm" %} Tahrirlash</a>{% endif %}
         </div>
       </div>

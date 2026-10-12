@@ -110,3 +110,43 @@ class Achievement(models.Model):
 
     def __str__(self):
         return f"{self.user}: {self.title}"
+
+
+class Resume(models.Model):
+    """Talabaning rezyume sozlamalari: sarlavha, xulosa (o'zbekcha va inglizcha) va aloqa ma'lumotlari.
+
+    Ko'nikmalar, yutuqlar, loyihalar va nishonlar rezyumega platformadan avtomatik olinadi.
+    """
+
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="resume")
+    headline = models.CharField(
+        "kasbiy yo'nalish",
+        max_length=120,
+        blank=True,
+        help_text="Masalan: IoT va robototexnika bo'yicha talaba-muhandis",
+    )
+    headline_en = models.CharField("kasbiy yo'nalish (inglizcha)", max_length=120, blank=True)
+    summary = models.TextField("qisqacha xulosa", max_length=1200, blank=True)
+    summary_en = models.TextField("qisqacha xulosa (inglizcha)", max_length=1200, blank=True)
+    phone = models.CharField("telefon", max_length=30, blank=True)
+    show_contacts_public = models.BooleanField(
+        "ommaviy rezyumeda telefon va emailni ko'rsatish",
+        default=False,
+        help_text="O'chiq bo'lsa, portfolio sahifasidan yuklangan rezyumeda telefon va email chiqmaydi",
+    )
+    ai_uses_date = models.DateField(null=True, blank=True, editable=False)
+    ai_uses = models.PositiveSmallIntegerField(default=0, editable=False)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "rezyume"
+        verbose_name_plural = "rezyumelar"
+
+    def __str__(self):
+        return f"{self.user} rezyumesi"
+
+    def text(self, lang: str) -> tuple[str, str]:
+        """(sarlavha, xulosa) tanlangan tilda."""
+        if lang == "en":
+            return self.headline_en, self.summary_en
+        return self.headline, self.summary

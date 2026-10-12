@@ -16,7 +16,8 @@ from apps.arena.models import Badge
 from apps.community.models import Event, Post
 from apps.discovery import services as discovery_services
 from apps.discovery.models import Challenge, TalentFlag
-from apps.opportunities.models import Opportunity, Reward
+from apps.opportunities import services as opportunity_services
+from apps.opportunities.models import Opportunity, Redemption, Reward, Sponsor
 from apps.profiles.models import Achievement, Skill, UserSkill
 from apps.projects import services as project_services
 from apps.projects.models import Project, ProjectMember
@@ -288,7 +289,43 @@ class Command(BaseCommand):
             },
         )
         self._demo_activity(teacher, students)
+        self._demo_sponsors(students)
         self.stdout.write(self.style.SUCCESS("Demo ma'lumotlar yaratildi (parol: demo12345)"))
+
+    def _demo_sponsors(self, students):
+        """Demo homiylar: nomlari to'qima, «(demo)» belgisi bilan. Haqiqiy homiylar admin paneldan qo'shiladi."""
+        demo = [
+            (
+                "TexnoSoft (demo)",
+                "texnosoft-demo",
+                "Dasturiy ta'minot kompaniyasi: kitob va kurslar orqali o'qishni rag'batlantiradi.",
+                ["Texnik kitob", "Onlayn kurs sertifikati"],
+            ),
+            (
+                "Andijon Mexanika Zavodi (demo)",
+                "mexanika-zavodi-demo",
+                "Ishlab chiqarish korxonasi: faol talabalarga brendli kiyim va tushlik sovg'a qiladi.",
+                ["Talent Hub futbolkasi", "Oshxona taloni"],
+            ),
+        ]
+        for order, (name, slug, description, rewards) in enumerate(demo):
+            sponsor, _ = Sponsor.objects.get_or_create(
+                slug=slug, defaults={"name": name, "description": description, "order": order}
+            )
+            Reward.objects.filter(name__in=rewards, sponsor__isnull=True).update(sponsor=sponsor)
+        # Homiylar sahifasi bo'sh ko'rinmasligi uchun bir nechta talaba homiy sovg'asini oladi
+        if not Redemption.objects.exists():
+            for student, reward_name in [
+                (students[2], "Oshxona taloni"),
+                (students[4], "Oshxona taloni"),
+                (students[1], "Texnik kitob"),
+            ]:
+                reward = Reward.objects.filter(name=reward_name).first()
+                if reward:
+                    try:
+                        opportunity_services.redeem(reward, student)
+                    except opportunity_services.OpportunityError:
+                        pass
 
     def _demo_activity(self, teacher, students):
         """Loyiha, postlar, yutuqlar va tekshiruv navbati: sahifalar bo'sh ko'rinmasligi uchun."""

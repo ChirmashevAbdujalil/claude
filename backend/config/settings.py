@@ -177,6 +177,8 @@ TELEGRAM_WEBHOOK_SECRET = os.environ.get("TELEGRAM_WEBHOOK_SECRET", "")
 
 # Saytning tashqi manzili: Telegram tugmalari va xabarlardagi havolalar uchun
 SITE_URL = os.environ.get("SITE_URL", "")
+# Homiylar sahifasidagi aloqa: email, @telegram yoki to'liq havola
+SPONSOR_CONTACT = os.environ.get("SPONSOR_CONTACT", "")
 
 # Talabalar o'zlari ro'yxatdan o'ta oladimi
 REGISTRATION_OPEN = env_bool("REGISTRATION_OPEN", True)
@@ -184,6 +186,7 @@ REGISTRATION_OPEN = env_bool("REGISTRATION_OPEN", True)
 # AI Mentor
 ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-opus-5-5")
 AI_DAILY_MESSAGE_LIMIT = int(os.environ.get("AI_DAILY_MESSAGE_LIMIT", 30))
+RESUME_AI_DAILY_LIMIT = int(os.environ.get("RESUME_AI_DAILY_LIMIT", 5))
 AI_HISTORY_MESSAGES = int(os.environ.get("AI_HISTORY_MESSAGES", 20))
 
 # Ball iqtisodiyoti

@@ -11,6 +11,8 @@ from django.views.decorators.http import require_POST
 from apps.accounts.telegram import TelegramAuthError, verify_init_data
 from apps.arena.levels import LEVELS
 from apps.discovery.models import Challenge, TalentFlag
+from apps.opportunities import services as opportunity_services
+from apps.opportunities.models import Sponsor
 from apps.profiles.models import Achievement, UserSkill
 from apps.profiles.services import skill_map
 from apps.projects.models import Project
@@ -36,7 +38,8 @@ def landing(request):
         "projects": Project.objects.count(),
         "achievements": Achievement.objects.filter(status=Achievement.Status.APPROVED).count(),
     }
-    return render(request, "web/landing.html", {"stats": stats, "levels": LEVELS})
+    sponsors = Sponsor.objects.filter(is_active=True)
+    return render(request, "web/landing.html", {"stats": stats, "levels": LEVELS, "sponsors": sponsors})
 
 
 def login_view(request):
@@ -124,3 +127,28 @@ def menu(request):
 
 def page_not_found(request, exception=None):
     return render(request, "web/404.html", status=404)
+
+
+def _contact_url(contact: str) -> str:
+    """SPONSOR_CONTACT dan havola yasaydi: email, @telegram yoki to'liq URL."""
+    contact = contact.strip()
+    if not contact:
+        return ""
+    if contact.startswith(("http://", "https://")):
+        return contact
+    if contact.startswith("@"):
+        return f"https://t.me/{contact[1:]}"
+    if "@" in contact:
+        return f"mailto:{contact}"
+    return ""
+
+
+def sponsors(request):
+    contact = settings.SPONSOR_CONTACT
+    context = {
+        "sponsors": opportunity_services.active_sponsors(),
+        "totals": opportunity_services.sponsor_totals(),
+        "contact": contact,
+        "contact_url": _contact_url(contact),
+    }
+    return render(request, "web/sponsors.html", context)

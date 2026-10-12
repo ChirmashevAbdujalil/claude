@@ -7,7 +7,8 @@
   <div class="stack-sm">
     <h1>Mukofotlar do'koni 🎁</h1>
     <p class="muted">Har 10 XP uchun 2 tanga olasiz. Tangalarni real sovg'alarga almashtiring.</p>
-    <div><a href="{% url 'web:coins' %}" class="btn btn-white btn-sm">{% icon "coin" "icon-sm" %} Tangalar qanday ishlaydi?</a></div>
+    <div class="row wrap" style="gap:8px"><a href="{% url 'web:coins' %}" class="btn btn-white btn-sm">{% icon "coin" "icon-sm" %} Tangalar qanday ishlaydi?</a>
+      {% if has_sponsors %}<a href="{% url 'web:sponsors' %}" class="btn btn-white btn-sm">🤝 Homiylarimiz</a>{% endif %}</div>
   </div>
   <div class="center"><div class="muted small bold">Balansingiz</div><div style="font-size:36px; font-weight:800">🪙 {{ user.coins }}</div></div>
 </div>
@@ -19,6 +20,10 @@
     {% else %}<div class="center" style="font-size:44px; padding:18px 0; background:var(--surface-2); border-radius:12px">{{ reward.emoji|default:"🎁" }}</div>{% endif %}
     <h3>{{ reward.name }}</h3>
     {% if reward.description %}<p class="small muted">{{ reward.description }}</p>{% endif %}
+    {% if reward.sponsor and reward.sponsor.is_active %}
+    <a href="{% url 'web:sponsors' %}#{{ reward.sponsor.slug }}" class="sponsor-chip" title="Bu sovg'a homiy hisobidan">
+      {% include "web/partials/sponsor_logo.html" with sponsor=reward.sponsor size="sm" %}<span><b>{{ reward.sponsor.name }}</b> homiyligida</span></a>
+    {% endif %}
     <div class="row-between" style="margin-top:auto; padding-top:8px">
       <div><div class="bold" style="font-size:18px">🪙 {{ reward.price }}</div><div class="tiny muted">{% if reward.stock %}{{ reward.stock }} ta qoldi{% else %}Tugagan{% endif %}</div></div>
       <form method="post" action="{% url 'web:shop-redeem' reward.pk %}">{% csrf_token %}
@@ -40,7 +45,7 @@
   <div class="list">
     {% for r in redemptions %}
     <div class="list-item"><span style="font-size:22px">{{ r.reward.emoji|default:"🎁" }}</span>
-      <div class="grow"><div class="bold">{{ r.reward.name }}</div><div class="small muted">{{ r.created_at|date:"d.m.Y" }} · 🪙 {{ r.price }}</div></div>
+      <div class="grow"><div class="bold">{{ r.reward.name }}</div><div class="small muted">{{ r.created_at|date:"d.m.Y" }} · 🪙 {{ r.price }}{% if r.reward.sponsor %} · {{ r.reward.sponsor.name }} homiyligida{% endif %}</div></div>
       <span class="chip {% if r.status == 'delivered' %}chip-success{% else %}chip-info{% endif %}">{{ r.get_status_display }}</span></div>
     {% endfor %}
   </div>

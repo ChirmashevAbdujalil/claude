@@ -63,11 +63,13 @@ Logotip fayllari `apps/web/static/web/img/` papkasida. Brend rangi (`#062d3b`) `
 | Challenge'lar | `/challenges/` | Yechim yuborish, kunlik savollar avtomatik tekshiriladi |
 | Arena | `/arena/` | Reyting (podium), fakultetlar ligasi, nishonlar, ball tarixi |
 | Profil | `/profile/` | Ko'nikmalar radari, yutuqlar, tahrirlash |
+| Rezyume | `/profile/resume/` | AI yozgan xulosa (o'zbekcha/inglizcha) va QR kodli PDF rezyume. Portfolio'dan ham yuklanadi: `/u/<slug>/resume.pdf` |
 | Portfolio | `/u/<slug>/` | Ommaviy sahifa. O'qituvchi shu yerda ko'nikmani tasdiqlaydi va «uchqun» belgisi qo'yadi |
 | Loyihalar | `/projects/` | Yaratish, qo'shilish, bosqichlar, jamoadosh tavsiyasi |
 | Imkoniyatlar | `/opportunities/` | Ariza topshirish. Hamkorlar e'lon joylaydi |
 | Tangalarim | `/coins/` | Tanga nima beradi, qanday yig'iladi, nimaga sarflanadi, keyingi maqsad va savol-javob |
-| Do'kon | `/shop/` | Tangalarni sovg'aga almashtirish |
+| Do'kon | `/shop/` | Tangalarni sovg'aga almashtirish. Homiy sovg'alarida homiy logotipi chiqadi |
+| Homiylar | `/homiylar/` | Ommaviy sahifa: homiylar, ular bergan sovg'alar va «Homiy bo'ling» taklifi (`SPONSOR_CONTACT`) |
 | Lenta | `/feed/` | Postlar, layk, izohlar |
 | Tadbirlar | `/events/` | Ro'yxatdan o'tish, tashkilotchi uchun QR kod, `/events/check-in/` |
 | AI Mentor | `/ai/` | Uch rejimli chat |

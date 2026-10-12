@@ -11,6 +11,7 @@ from apps.accounts.models import Faculty
 from apps.arena.levels import LEVELS
 from apps.discovery.models import Challenge, Submission, TalentFlag
 from apps.opportunities.models import Application, Opportunity
+from apps.opportunities.services import sponsor_totals
 from apps.profiles.models import Achievement
 from apps.projects.models import Project
 
@@ -128,4 +129,5 @@ def dashboard(viewer) -> dict:
         "top_students": top_students,
         "rising_stars": rising_stars,
         "recent_talent_flags": recent_flags,
+        "sponsors": sponsor_totals(student_ids),
     }

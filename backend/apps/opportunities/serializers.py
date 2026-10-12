@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from apps.accounts.serializers import UserBriefSerializer
 
-from .models import Application, Opportunity, Redemption, Reward
+from .models import Application, Opportunity, Redemption, Reward, Sponsor
 
 
 class OpportunitySerializer(serializers.ModelSerializer):
@@ -45,10 +45,18 @@ class ApplicationSerializer(serializers.ModelSerializer):
         read_only_fields = ["opportunity", "motivation"]
 
 
+class SponsorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sponsor
+        fields = ["id", "name", "slug", "logo", "website"]
+
+
 class RewardSerializer(serializers.ModelSerializer):
+    sponsor = SponsorSerializer(read_only=True)
+
     class Meta:
         model = Reward
-        fields = ["id", "name", "description", "emoji", "image", "price", "stock", "is_active"]
+        fields = ["id", "name", "description", "emoji", "image", "price", "stock", "is_active", "sponsor"]
 
 
 class RedemptionSerializer(serializers.ModelSerializer):

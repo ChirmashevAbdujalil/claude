@@ -83,4 +83,22 @@
     </div>
   </div>
 </div>
+
+<div class="card card-lg stack" style="margin-top:20px">
+  <div class="row-between wrap" style="gap:8px">
+    <div><h2>🤝 Homiylar hissasi</h2><p class="tiny muted">Do'kondagi qaysi sovg'alar homiylar hisobidan berilgan</p></div>
+    <a href="{% url 'web:sponsors' %}" class="btn btn-ghost btn-sm">Homiylar sahifasi {% icon "arrow-right" "icon-sm" %}</a>
+  </div>
+  <div class="grid-4" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px">
+    <div class="card stat" style="box-shadow:none"><span class="stat-icon tone-primary">{% icon "users" %}</span><div><div class="stat-value">{{ data.sponsors.sponsors }}</div><div class="stat-label">faol homiy</div></div></div>
+    <div class="card stat" style="box-shadow:none"><span class="stat-icon tone-info">{% icon "gift" %}</span><div><div class="stat-value">{{ data.sponsors.sponsored_rewards }}</div><div class="stat-label">homiy sovg'asi sotuvda</div></div></div>
+    <div class="card stat" style="box-shadow:none"><span class="stat-icon tone-accent">{% icon "award" %}</span><div><div class="stat-value">{{ data.sponsors.gifts }}</div><div class="stat-label">talabaga berildi</div></div></div>
+    <div class="card stat" style="box-shadow:none"><span class="stat-icon tone-success">{% icon "coin" %}</span><div><div class="stat-value">{{ data.sponsors.coins }}</div><div class="stat-label">tanga qiymatida</div></div></div>
+  </div>
+  {% if data.sponsors.top %}
+  <div class="list">
+    {% for row in data.sponsors.top %}<div class="list-item"><span class="rank">{{ forloop.counter }}</span><div class="grow bold">{{ row.name }}</div><span class="chip chip-accent">{{ row.gifts }} ta sovg'a</span></div>{% endfor %}
+  </div>
+  {% else %}<p class="muted small">Hali homiy qo'shilmagan. Admin paneldagi «Homiylar» bo'limidan qo'shing va sovg'aga biriktiring.</p>{% endif %}
+</div>
 {% endblock %}

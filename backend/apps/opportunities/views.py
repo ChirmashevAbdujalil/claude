@@ -80,7 +80,7 @@ class RewardViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.G
     pagination_class = None
 
     def get_queryset(self):
-        return Reward.objects.filter(is_active=True)
+        return Reward.objects.filter(is_active=True).select_related("sponsor")
 
     @extend_schema(request=None, responses=RedemptionSerializer)
     @action(detail=True, methods=["post"])

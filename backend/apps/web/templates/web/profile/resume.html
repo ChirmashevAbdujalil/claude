@@ -1,0 +1,98 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Rezyume{% endblock %}
+
+{% block content %}
+<a href="{% url 'web:profile' %}" class="back-link">{% icon "arrow-left" "icon-sm" %} Profil</a>
+<div class="page-header">
+  <div><h1>Rezyume 📄</h1><p>Platformadagi ko'nikmalar, tasdiqlangan yutuqlar, loyihalar va nishonlaringizdan tayyor PDF rezyume. Ish beruvchi yoki grant komissiyasiga yuborishingiz mumkin.</p></div>
+</div>
+
+<div class="resume-layout">
+  <div class="stack">
+    <div class="card card-lg stack">
+      <div class="row-between wrap" style="gap:8px">
+        <h2>PDF yuklab olish</h2>
+        <div class="tabs" role="tablist">
+          <a href="?lang=uz" class="tab {% if lang == 'uz' %}active{% endif %}">O'zbekcha</a>
+          <a href="?lang=en" class="tab {% if lang == 'en' %}active{% endif %}">English</a>
+        </div>
+      </div>
+      <div class="row wrap" style="gap:8px">
+        <a href="{% url 'web:profile-resume-pdf' %}?lang={{ lang }}" class="btn btn-primary">{% icon "download" "icon-sm" %} PDF yuklab olish</a>
+        <a href="{% url 'web:profile-resume-pdf' %}?lang={{ lang }}&view=1" class="btn btn-ghost" target="_blank" rel="noopener">{% icon "external" "icon-sm" %} Ko'rish</a>
+      </div>
+      <p class="tiny muted">PDF'da portfolio sahifangizga olib boruvchi QR kod bo'ladi: ish beruvchi ma'lumotlaringiz haqiqiyligini tekshira oladi. Tasdiqlangan yutuqlar ✓ belgisi bilan chiqadi.</p>
+    </div>
+
+    <div class="card card-lg stack">
+      <div class="row-between wrap" style="gap:8px">
+        <h2>✨ AI bilan yozish</h2>
+        {% if ai_ready %}<span class="chip chip-primary">Bugun yana {{ ai_left }} marta</span>{% endif %}
+      </div>
+      <p class="small muted">AI ko'nikma, yutuq va loyihalaringizdan kasbiy yo'nalish va qisqacha ma'lumot yozadi. Ismingiz va aloqa ma'lumotlaringiz AI'ga yuborilmaydi. Natijani tekshirib, kerak bo'lsa o'zgartiring.</p>
+      {% if ai_ready %}
+      <div class="row wrap" style="gap:8px">
+        <form method="post" action="{% url 'web:profile-resume-ai' %}">{% csrf_token %}<input type="hidden" name="lang" value="uz">
+          <button class="btn btn-accent" {% if not ai_left %}disabled{% endif %}>{% icon "sparkles" "icon-sm" %} O'zbekcha yozish</button></form>
+        <form method="post" action="{% url 'web:profile-resume-ai' %}">{% csrf_token %}<input type="hidden" name="lang" value="en">
+          <button class="btn btn-ghost" {% if not ai_left %}disabled{% endif %}>{% icon "sparkles" "icon-sm" %} Inglizcha yozish</button></form>
+      </div>
+      {% else %}
+      <div class="card" style="background:var(--surface-2); box-shadow:none"><p class="small">AI hozircha sozlanmagan. Xulosa maydonini bo'sh qoldirsangiz, rezyumedagi matn platforma ma'lumotlaridan avtomatik tuziladi.</p></div>
+      {% endif %}
+    </div>
+
+    <form method="post" class="card card-lg form">
+      {% csrf_token %}
+      <h2>Matn va aloqa</h2>
+      {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+      {% include "web/partials/field.html" with field=form.headline %}
+      {% include "web/partials/field.html" with field=form.summary %}
+      <details class="stack-sm" {% if lang == 'en' or form.headline_en.value or form.summary_en.value %}open{% endif %}>
+        <summary class="bold small" style="cursor:pointer">🇬🇧 Inglizcha variant</summary>
+        {% include "web/partials/field.html" with field=form.headline_en %}
+        {% include "web/partials/field.html" with field=form.summary_en %}
+      </details>
+      <div class="grid-2">
+        {% include "web/partials/field.html" with field=form.email %}
+        {% include "web/partials/field.html" with field=form.phone %}
+      </div>
+      {% include "web/partials/field.html" with field=form.show_contacts_public %}
+      <div class="form-actions"><button class="btn btn-primary">{% icon "check" %} Saqlash</button></div>
+    </form>
+
+    <div class="card card-lg stack-sm">
+      <h2>Rezyumeni kuchaytirish</h2>
+      <div class="list">
+        {% for label, done in checklist %}
+        <div class="list-item"><span class="check-dot {% if done %}done{% endif %}">{% if done %}{% icon "check" "icon-sm" %}{% endif %}</span><span class="{% if done %}muted{% else %}bold{% endif %} small">{{ label }}</span></div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <aside class="resume-preview" aria-label="Rezyume ko'rinishi">
+    <div class="resume-head">
+      <div class="grow" style="min-width:0">
+        <div class="resume-name">{{ preview.name }}</div>
+        {% if preview.headline %}<div class="resume-headline">{{ preview.headline }}</div>{% endif %}
+        <div class="resume-sub">{{ preview.subtitle }}</div>
+      </div>
+      {% if preview_qr %}<div class="resume-qr" title="Portfolio: {{ preview.portfolio_url }}">{{ preview_qr }}</div>{% endif %}
+    </div>
+    <div class="resume-body stack">
+      {% if preview.contacts %}<div class="tiny muted">{% for k, v in preview.contacts %}<b>{{ k }}:</b> {{ v }}{% if not forloop.last %} · {% endif %}{% endfor %}</div>{% endif %}
+      <section><h3>{% if lang == 'en' %}Profile{% else %}Qisqacha ma'lumot{% endif %}</h3><p class="small">{{ preview.summary }}</p></section>
+      {% if preview.skills %}<section><h3>{% if lang == 'en' %}Skills{% else %}Ko'nikmalar{% endif %}</h3>
+        <div class="resume-skills">{% for s in preview.skills %}<div class="small"><b>{{ s.name }}</b> <span class="resume-dots" aria-label="{{ s.level }}/5">{% for i in "12345" %}<i class="{% if forloop.counter <= s.level %}on{% endif %}"></i>{% endfor %}</span>{% if s.endorsed %} <span class="resume-ok" title="O'qituvchi tasdiqlagan">✓</span>{% endif %}</div>{% endfor %}</div></section>{% endif %}
+      {% if preview.achievements %}<section><h3>{% if lang == 'en' %}Achievements{% else %}Yutuqlar{% endif %}</h3>
+        {% for a in preview.achievements %}<div class="small"><b>{{ a.title }}</b> <span class="resume-ok">✓</span> <span class="tiny muted">· {{ a.kind }} · {{ a.date|date:"m.Y" }}</span></div>{% endfor %}</section>{% endif %}
+      {% if preview.projects %}<section><h3>{% if lang == 'en' %}Projects{% else %}Loyihalar{% endif %}</h3>
+        {% for p in preview.projects %}<div class="small"><b>{{ p.title }}</b> <span class="tiny muted">· {{ p.role }} · {{ p.stage }}</span></div>{% endfor %}</section>{% endif %}
+      {% if preview.badges %}<section><h3>{% if lang == 'en' %}Badges{% else %}Nishonlar{% endif %}</h3><p class="small">{{ preview.badges|join:" · " }}</p></section>{% endif %}
+      <div class="resume-stats">{% for k, v in preview.activity %}<div><span class="tiny muted">{{ k }}</span><b>{{ v }}</b></div>{% endfor %}</div>
+    </div>
+  </aside>
+</div>
+{% endblock %}

@@ -7,7 +7,7 @@ from apps.ai.models import Conversation
 from apps.community.models import Comment, Event, Post
 from apps.discovery.models import Challenge, TalentFlag
 from apps.opportunities.models import Opportunity
-from apps.profiles.models import Achievement, Skill, UserSkill
+from apps.profiles.models import Achievement, Resume, Skill, UserSkill
 from apps.projects.models import Project
 
 User = get_user_model()
@@ -269,3 +269,44 @@ class ConversationForm(forms.Form):
 
 class ChatForm(forms.Form):
     text = forms.CharField(max_length=4000)
+
+
+class ResumeForm(forms.ModelForm):
+    """Rezyume matnlari va aloqa. Email foydalanuvchi profilida saqlanadi."""
+
+    email = forms.EmailField(label="Email", required=False)
+
+    class Meta:
+        model = Resume
+        fields = ["headline", "summary", "headline_en", "summary_en", "phone", "show_contacts_public"]
+        labels = {
+            "headline": "Kasbiy yo'nalish",
+            "summary": "Qisqacha ma'lumot",
+            "headline_en": "Headline (inglizcha)",
+            "summary_en": "Profile summary (inglizcha)",
+        }
+        widgets = {
+            "summary": forms.Textarea(
+                attrs={"rows": 5, "placeholder": "Bo'sh qoldirsangiz, platforma ma'lumotlaridan avtomatik tuziladi"}
+            ),
+            "summary_en": forms.Textarea(
+                attrs={"rows": 5, "placeholder": "Leave empty to generate from your platform data"}
+            ),
+            "phone": forms.TextInput(attrs={"placeholder": "+998 90 123 45 67", "inputmode": "tel"}),
+            "headline_en": forms.TextInput(attrs={"placeholder": "e.g. IoT and robotics engineering student"}),
+        }
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+        if user is not None:
+            self.fields["email"].initial = user.email
+
+    def save(self, commit=True):
+        resume = super().save(commit=commit)
+        if commit and self.user is not None:
+            email = self.cleaned_data.get("email", "")
+            if email != self.user.email:
+                self.user.email = email
+                self.user.save(update_fields=["email"])
+        return resume

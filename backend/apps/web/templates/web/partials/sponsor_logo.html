@@ -1,0 +1,1 @@
+{% if sponsor.logo %}<img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }}" class="sponsor-logo sponsor-logo-{{ size|default:'sm' }}" loading="lazy">{% else %}<span class="sponsor-logo sponsor-logo-{{ size|default:'sm' }} sponsor-initials" aria-hidden="true">{{ sponsor.initials }}</span>{% endif %}

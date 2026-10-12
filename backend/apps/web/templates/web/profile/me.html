@@ -10,6 +10,7 @@
       {% avatar user "xl" %}
       <div class="row wrap">
         {% if user.portfolio_slug %}<a href="{% url 'web:portfolio' user.portfolio_slug %}" class="btn btn-ghost btn-sm">{% icon "external" "icon-sm" %} Portfolio</a>{% endif %}
+        <a href="{% url 'web:profile-resume' %}" class="btn btn-ghost btn-sm">{% icon "file" "icon-sm" %} Rezyume (PDF)</a>
         <a href="{% url 'web:profile-edit' %}" class="btn btn-primary btn-sm">{% icon "edit" "icon-sm" %} Tahrirlash</a>
       </div>
     </div>

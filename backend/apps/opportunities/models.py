@@ -57,6 +57,32 @@ class Application(models.Model):
         return f"{self.user} → {self.opportunity}"
 
 
+class Sponsor(models.Model):
+    """Do'kondagi sovg'alarni moliyalashtiradigan kompaniya yoki tashkilot."""
+
+    name = models.CharField("nomi", max_length=200, unique=True)
+    slug = models.SlugField("manzil", unique=True, help_text="Sahifa manzili, masalan: texnosoft")
+    logo = models.ImageField("logotip", upload_to="sponsors/", blank=True)
+    description = models.TextField("qisqacha tavsif", blank=True)
+    website = models.URLField("veb-sayt", blank=True)
+    is_active = models.BooleanField("faol", default=True)
+    order = models.PositiveSmallIntegerField("tartib", default=0, help_text="Kichik raqam oldinroq chiqadi")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "homiy"
+        verbose_name_plural = "homiylar"
+        ordering = ["order", "name"]
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def initials(self) -> str:
+        words = [w for w in self.name.replace("(", " ").split() if w[:1].isalpha()]
+        return "".join(w[0] for w in words[:2]).upper() or "?"
+
+
 class Reward(models.Model):
     """Mukofotlar do'konidagi mahsulot: tangalarga almashtiriladi."""
 
@@ -67,6 +93,15 @@ class Reward(models.Model):
     price = models.PositiveIntegerField("narxi (tanga)")
     stock = models.PositiveIntegerField("zaxira", default=0)
     is_active = models.BooleanField("sotuvda", default=True)
+    sponsor = models.ForeignKey(
+        Sponsor,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="rewards",
+        verbose_name="homiy",
+        help_text="Sovg'a homiy hisobidan bo'lsa, do'konda uning nomi va logotipi chiqadi",
+    )
 
     class Meta:
         verbose_name = "mukofot"

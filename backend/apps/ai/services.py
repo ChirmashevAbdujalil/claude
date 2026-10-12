@@ -11,6 +11,7 @@ from django.utils import timezone
 
 from apps.arena.levels import level_for_xp
 from apps.profiles.models import Achievement, UserSkill
+from apps.profiles.resume import collect, get_resume
 
 from . import prompts
 from .models import Conversation, Message
@@ -221,3 +222,97 @@ def suggest_review(submission, client=None) -> dict:
     submission.ai_suggestion = suggestion
     submission.save(update_fields=["ai_suggestion"])
     return suggestion
+
+
+RESUME_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "headline": {"type": "string", "description": "Kasbiy yo'nalish, 3-8 so'z"},
+        "summary": {"type": "string", "description": "Rezyume uchun 3-4 gaplik xulosa"},
+    },
+    "required": ["headline", "summary"],
+    "additionalProperties": False,
+}
+
+
+def resume_context(user) -> str:
+    """Rezyume uchun AI'ga yuboriladigan ma'lumot. Ism va aloqa ma'lumotlari yuborilmaydi."""
+    data = collect(user, "uz")
+    lines = [f"- Ta'lim: {data.subtitle}"]
+    lines += [f"- {label}: {value}" for label, value in data.activity]
+    if data.skills:
+        lines.append(
+            "- Ko'nikmalar (1-5): "
+            + ", ".join(
+                f"{s['name']} {s['level']}" + (" (o'qituvchi tasdiqlagan)" if s["endorsed"] else "")
+                for s in data.skills
+            )
+        )
+    for a in data.achievements:
+        lines.append(f"- Tasdiqlangan yutuq: {a['kind']}: {a['title']}. {a['description']}".strip())
+    for p in data.projects:
+        lines.append(f"- Loyiha: {p['title']} ({p['stage']}, vazifasi: {p['role']}). {p['description']}".strip())
+    if data.badges:
+        lines.append("- Nishonlar: " + ", ".join(data.badges))
+    bio = " ".join((user.bio or "").split())[:400]
+    if bio:
+        lines.append(f"- Talabaning o'zi haqida yozgani: {bio}")
+    return "Talaba haqida ma'lumot:\n" + "\n".join(lines)
+
+
+def ai_resume_uses_left(user) -> int:
+    resume = get_resume(user)
+    used = resume.ai_uses if resume.ai_uses_date == timezone.localdate() else 0
+    return max(settings.RESUME_AI_DAILY_LIMIT - used, 0)
+
+
+def write_resume(user, lang: str = "uz", client=None) -> dict:
+    """Rezyume uchun sarlavha va xulosani AI bilan yozadi va saqlaydi.
+
+    Xulosa doim yangilanadi; sarlavha faqat bo'sh bo'lsa to'ldiriladi (talabaning o'z matnini buzmaslik uchun).
+    """
+    lang = "en" if lang == "en" else "uz"
+    if ai_resume_uses_left(user) <= 0:
+        raise AiLimitExceeded(
+            f"Bugun AI bilan rezyume yozish limiti tugadi ({settings.RESUME_AI_DAILY_LIMIT} marta). "
+            "Ertaga urinib ko'ring."
+        )
+    language = "ingliz tili" if lang == "en" else "o'zbek tili (lotin)"
+    response = _create(
+        client,
+        max_tokens=2000,
+        system=prompts.RESUME,
+        messages=[{"role": "user", "content": f"Til: {language}\n\n{resume_context(user)}"}],
+        output_config={"effort": "medium", "format": {"type": "json_schema", "schema": RESUME_SCHEMA}},
+    )
+    if response.stop_reason == "refusal":
+        raise AiUnavailable("AI rezyume yoza olmadi. Matnni o'zingiz yozing.")
+    try:
+        data = json.loads(_extract_text(response))
+        headline = " ".join(str(data["headline"]).split())[:120]
+        summary = str(data["summary"]).strip()[:1200]
+    except (ValueError, KeyError, TypeError) as exc:
+        logger.warning("AI rezyume javobini o'qib bo'lmadi: %s", exc)
+        raise AiUnavailable("AI javobini o'qib bo'lmadi. Qayta urinib ko'ring.") from exc
+    if not summary:
+        raise AiUnavailable("AI bo'sh javob qaytardi. Qayta urinib ko'ring.")
+
+    resume = get_resume(user)
+    today = timezone.localdate()
+    resume.ai_uses = (resume.ai_uses if resume.ai_uses_date == today else 0) + 1
+    resume.ai_uses_date = today
+    fields = ["ai_uses", "ai_uses_date", "updated_at"]
+    if lang == "en":
+        resume.summary_en = summary
+        fields.append("summary_en")
+        if not resume.headline_en:
+            resume.headline_en = headline
+            fields.append("headline_en")
+    else:
+        resume.summary = summary
+        fields.append("summary")
+        if not resume.headline:
+            resume.headline = headline
+            fields.append("headline")
+    resume.save(update_fields=fields)
+    return {"headline": headline, "summary": summary}

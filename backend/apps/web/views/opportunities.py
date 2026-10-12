@@ -8,7 +8,7 @@ from django.views.decorators.http import require_POST
 
 from apps.arena.levels import level_for_xp
 from apps.opportunities import services
-from apps.opportunities.models import Application, Opportunity, Redemption, Reward
+from apps.opportunities.models import Application, Opportunity, Redemption, Reward, Sponsor
 
 from ..forms import ApplyForm, OpportunityForm
 from .common import paginate, run_service
@@ -93,10 +93,11 @@ def opportunity_form(request):
 
 @login_required
 def shop(request):
-    rewards = Reward.objects.filter(is_active=True).order_by("price")
+    rewards = Reward.objects.filter(is_active=True).select_related("sponsor").order_by("price")
     context = {
         "rewards": rewards,
-        "redemptions": Redemption.objects.filter(user=request.user).select_related("reward")[:10],
+        "redemptions": Redemption.objects.filter(user=request.user).select_related("reward", "reward__sponsor")[:10],
+        "has_sponsors": Sponsor.objects.filter(is_active=True).exists(),
     }
     return render(request, "web/opportunities/shop.html", context)
 

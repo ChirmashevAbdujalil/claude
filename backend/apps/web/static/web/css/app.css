@@ -561,3 +561,50 @@ html, body { overflow-x: clip; }
 }
 .theme-toggle .icon { transition: transform .3s ease; }
 .theme-toggle:hover .icon { transform: rotate(-20deg); }
+
+/* ---------- Homiylar ---------- */
+.sponsor-logo { flex: none; border-radius: 12px; object-fit: contain; background: #fff; border: 1px solid var(--border); }
+.sponsor-logo-sm { width: 28px; height: 28px; border-radius: 8px; }
+.sponsor-logo-md { width: 48px; height: 48px; }
+.sponsor-logo-lg { width: 88px; height: 88px; border-radius: 20px; }
+.sponsor-initials { display: grid; place-items: center; font-weight: 800; color: #fff; background: var(--gradient); border: 0; }
+.sponsor-logo-sm.sponsor-initials { font-size: 11px; }
+.sponsor-logo-md.sponsor-initials { font-size: 16px; }
+.sponsor-logo-lg.sponsor-initials { font-size: 28px; }
+.sponsor-chip { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; max-width: 100%; padding: 4px 10px 4px 4px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-text); font-size: 12px; text-decoration: none; }
+.sponsor-chip span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sponsor-chip:hover { filter: brightness(0.97); }
+.sponsor-card { display: flex; gap: 20px; align-items: flex-start; scroll-margin-top: 90px; }
+.sponsor-strip { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 8px 0; }
+.sponsor-strip-item { display: inline-flex; align-items: center; gap: 10px; padding: 8px 16px 8px 8px; border-radius: 16px; background: var(--surface); border: 1px solid var(--border); font-weight: 700; color: var(--text); text-decoration: none; }
+@media (max-width: 560px) { .sponsor-card { flex-direction: column; } }
+
+/* ---------- Rezyume ---------- */
+.resume-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 20px; align-items: start; }
+.resume-preview { position: sticky; top: 84px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-lg); overflow: hidden; }
+.resume-head { display: flex; gap: 14px; align-items: center; padding: 20px; background: var(--brand); color: #fff; border-bottom: 3px solid #168a9c; }
+.resume-name { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; }
+.resume-headline { color: #9be3ef; font-weight: 700; margin-top: 2px; }
+.resume-sub { color: #d5e7ec; font-size: 12px; margin-top: 4px; }
+.resume-qr { flex: none; width: 76px; height: 76px; padding: 4px; background: #fff; border-radius: 8px; }
+.resume-qr svg { display: block; width: 68px; height: 68px; }
+.resume-body { padding: 18px 20px 20px; }
+.resume-body h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 4px; margin-bottom: 8px; }
+.resume-skills { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 14px; }
+.resume-dots { display: inline-flex; gap: 2px; vertical-align: middle; }
+.resume-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--surface-3); }
+.resume-dots i.on { background: #168a9c; }
+.resume-ok { color: var(--success); font-weight: 800; }
+.resume-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--surface-2); }
+.resume-stats div { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-left: 1px solid var(--border); }
+.resume-stats div:first-child { border-left: 0; }
+.check-dot { width: 22px; height: 22px; flex: none; border-radius: 50%; border: 2px solid var(--border); display: grid; place-items: center; color: #fff; }
+.check-dot.done { background: var(--success); border-color: var(--success); }
+@media (max-width: 960px) {
+  .resume-layout { grid-template-columns: minmax(0, 1fr); }
+  .resume-preview { position: static; order: -1; }
+}
+@media (max-width: 480px) {
+  .resume-skills, .resume-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .resume-stats div:nth-child(3) { border-left: 0; }
+}

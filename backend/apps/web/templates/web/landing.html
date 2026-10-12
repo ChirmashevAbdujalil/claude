@@ -92,6 +92,19 @@
   </div>
 </section>
 
+{% if sponsors %}
+<section class="landing-section">
+  <div class="center stack-sm" style="align-items:center">
+    <span class="eyebrow">Homiylarimiz</span>
+    <h2 style="font-size:clamp(1.3rem,1.1rem+0.8vw,1.7rem)">Talabalar mehnatini qadrlaydigan hamkorlar</h2>
+    <div class="sponsor-strip">
+      {% for sponsor in sponsors %}<a href="{% url 'web:sponsors' %}#{{ sponsor.slug }}" class="sponsor-strip-item">{% include "web/partials/sponsor_logo.html" with sponsor=sponsor size="md" %}<span>{{ sponsor.name }}</span></a>{% endfor %}
+    </div>
+    <a href="{% url 'web:sponsors' %}#homiy-bolish" class="btn btn-ghost btn-sm">Homiy bo'lish {% icon "arrow-right" "icon-sm" %}</a>
+  </div>
+</section>
+{% endif %}
+
 <section class="landing-section">
   <div class="cta-band hero-card card">
     <h2 style="font-size:clamp(1.5rem,1.2rem+1.4vw,2.2rem)">Sizning iqtidoringiz ko'rinishga loyiq</h2>

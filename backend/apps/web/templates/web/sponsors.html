@@ -1,0 +1,61 @@
+{% extends "web/base.html" %}
+{% load web_tags %}
+{% block title %}Homiylarimiz{% endblock %}
+{% block description %}ANDTI Talent Hub homiylari: talabalar mehnatini qadrlaydigan kompaniyalar va tashkilotlar.{% endblock %}
+
+{% block body %}
+<header class="landing-nav">
+  <a href="{% if user.is_authenticated %}{% url 'web:dashboard' %}{% else %}{% url 'web:landing' %}{% endif %}" class="brand">{% brand_logo 40 %}<span>ANDTI Talent Hub<small>Andijon davlat texnika instituti</small></span></a>
+  {% if user.is_authenticated %}<a href="{% url 'web:shop' %}" class="btn btn-ghost btn-sm">{% icon "gift" "icon-sm" %} Do'konga qaytish</a>
+  {% else %}<a href="{% url 'web:login' %}" class="btn btn-ghost btn-sm">Kirish</a>{% endif %}
+</header>
+
+<main style="max-width:980px; margin:0 auto; padding:0 16px 48px" class="stack-lg">
+  <div class="card card-lg hero-card stack-sm">
+    <h1>Homiylarimiz 🤝</h1>
+    <p class="muted" style="max-width:640px">Bu kompaniyalar talabalarning mehnatini qadrlaydi: do'kondagi sovg'alarni ular moliyalashtiradi. Talaba tangani o'qish va izlanish bilan yig'adi, sovg'ani esa homiy beradi.</p>
+  </div>
+
+  <div class="grid-3">
+    <div class="card stat"><span class="stat-icon tone-primary">{% icon "users" %}</span><div><div class="stat-value">{{ totals.sponsors }}</div><div class="stat-label">faol homiy</div></div></div>
+    <div class="card stat"><span class="stat-icon tone-accent">{% icon "gift" %}</span><div><div class="stat-value">{{ totals.gifts }}</div><div class="stat-label">talabaga sovg'a berildi</div></div></div>
+    <div class="card stat"><span class="stat-icon tone-success">{% icon "coin" %}</span><div><div class="stat-value">{{ totals.coins }}</div><div class="stat-label">tanga qiymatidagi sovg'alar</div></div></div>
+  </div>
+
+  <div class="stack">
+    {% for sponsor in sponsors %}
+    <article class="card card-lg sponsor-card" id="{{ sponsor.slug }}">
+      {% include "web/partials/sponsor_logo.html" with sponsor=sponsor size="lg" %}
+      <div class="grow stack-sm" style="min-width:0">
+        <div class="row-between wrap" style="gap:8px">
+          <h2>{{ sponsor.name }}</h2>
+          {% if sponsor.website %}<a href="{{ sponsor.website }}" class="btn btn-ghost btn-sm" target="_blank" rel="noopener">{% icon "external" "icon-sm" %} Veb-sayt</a>{% endif %}
+        </div>
+        {% if sponsor.description %}<p class="muted">{{ sponsor.description }}</p>{% endif %}
+        <div class="small bold">🎁 Talabalarga {{ sponsor.gifts_given }} ta sovg'a berildi</div>
+        {% if sponsor.on_sale %}
+        <div class="row wrap" style="gap:8px">
+          {% for reward in sponsor.on_sale %}<span class="chip chip-outline">{{ reward.emoji }} {{ reward.name }} · 🪙 {{ reward.price }}</span>{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </article>
+    {% empty %}
+    <div class="card">{% include "web/partials/empty.html" with emoji="🤝" title="Birinchi homiy siz bo'ling" text="Hozircha homiylar yo'q. Quyidagi taklif bilan tanishing." %}</div>
+    {% endfor %}
+  </div>
+
+  <div class="card card-lg stack" id="homiy-bolish">
+    <h2>Homiy bo'lmoqchimisiz? 💼</h2>
+    <div class="grid-3">
+      <div class="stack-sm"><div style="font-size:28px">📣</div><div class="bold">Brendingiz talabalar oldida</div><div class="small muted">Logotipingiz do'kondagi sovg'ada va shu sahifada turadi. Talabalar uni har kuni ko'radi.</div></div>
+      <div class="stack-sm"><div style="font-size:28px">🎯</div><div class="bold">Iqtidorlar bilan erta tanishuv</div><div class="small muted">Eng faol va kuchli talabalarni ular hali bitirmasdan bilib olasiz.</div></div>
+      <div class="stack-sm"><div style="font-size:28px">📊</div><div class="bold">Shaffof hisobot</div><div class="small muted">Nechta sovg'a berilgani va kimlarga yetgani bo'yicha aniq statistika.</div></div>
+    </div>
+    <div class="row wrap" style="gap:10px">
+      {% if contact_url %}<a href="{{ contact_url }}" class="btn btn-primary" target="_blank" rel="noopener">{% icon "send" "icon-sm" %} Bog'lanish: {{ contact }}</a>
+      {% else %}<span class="muted small">Bog'lanish uchun: institut Startaplar klubi yoki talabalar ishlari bo'limi.</span>{% endif %}
+    </div>
+  </div>
+</main>
+{% endblock %}
