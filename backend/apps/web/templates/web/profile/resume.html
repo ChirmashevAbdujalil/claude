@@ -28,10 +28,12 @@
     <div class="card card-lg stack">
       <div class="row-between wrap" style="gap:8px">
         <h2>✨ AI bilan yozish</h2>
-        {% if ai_ready %}<span class="chip chip-primary">Bugun yana {{ ai_left }} marta</span>{% endif %}
+        {% if ai_ready and not ai_plan_locked %}<span class="chip chip-primary">Bugun yana {{ ai_left }} marta</span>{% endif %}
       </div>
       <p class="small muted">AI ko'nikma, yutuq va loyihalaringizdan kasbiy yo'nalish va qisqacha ma'lumot yozadi. Ismingiz va aloqa ma'lumotlaringiz AI'ga yuborilmaydi. Natijani tekshirib, kerak bo'lsa o'zgartiring.</p>
-      {% if ai_ready %}
+      {% if ai_plan_locked %}
+      <div class="card" style="background:var(--surface-2); box-shadow:none"><p class="small">🔒 AI rezyume «Standart» va «Premium» tariflarida ishlaydi. Xulosani o'zingiz yozing yoki bo'sh qoldiring: matn platforma ma'lumotlaridan avtomatik tuziladi.</p></div>
+      {% elif ai_ready %}
       <div class="row wrap" style="gap:8px">
         <form method="post" action="{% url 'web:profile-resume-ai' %}">{% csrf_token %}<input type="hidden" name="lang" value="uz">
           <button class="btn btn-accent" {% if not ai_left %}disabled{% endif %}>{% icon "sparkles" "icon-sm" %} O'zbekcha yozish</button></form>

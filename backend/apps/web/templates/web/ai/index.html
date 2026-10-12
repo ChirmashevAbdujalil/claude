@@ -14,7 +14,12 @@
   </div>
 </div>
 
-{% if not ai_ready %}
+{% if ai_plan_locked %}
+<div class="card" style="margin-bottom:20px; background:var(--accent-soft); border-color:transparent">
+  <div class="row" style="align-items:flex-start"><span style="font-size:22px">🔒</span>
+    <div class="grow small"><b>AI Mentor «Premium» tarifida ishlaydi.</b> OTMingiz hozir «{{ institution.plan_info.name }}» tarifida. Tarifni yangilash uchun OTM administratoriga murojaat qiling.</div></div>
+</div>
+{% elif not ai_ready %}
 <div class="card" style="margin-bottom:20px; background:var(--accent-soft); border-color:transparent">
   <div class="row" style="align-items:flex-start"><span style="font-size:22px">🔑</span>
     <div class="grow small"><b>AI Mentor hali ulanmagan.</b> Ishga tushirish uchun <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> saytidan API kalit oling va <code>backend/.env</code> faylidagi <code>ANTHROPIC_API_KEY=</code> qatoriga yozing, keyin serverni qayta ishga tushiring.</div></div>

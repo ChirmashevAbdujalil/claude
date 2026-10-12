@@ -3,12 +3,14 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.db import models
 
+from apps.accounts.models import Faculty
 from apps.ai.models import Conversation
 from apps.community.models import Comment, Event, Post
 from apps.discovery.models import Challenge, TalentFlag
 from apps.opportunities.models import Opportunity
 from apps.profiles.models import Achievement, Resume, Skill, UserSkill
 from apps.projects.models import Project
+from apps.tenants.models import Institution, InstitutionRequest
 
 User = get_user_model()
 
@@ -310,3 +312,77 @@ class ResumeForm(forms.ModelForm):
                 self.user.email = email
                 self.user.save(update_fields=["email"])
         return resume
+
+
+class InstitutionRequestForm(forms.ModelForm):
+    class Meta:
+        model = InstitutionRequest
+        fields = [
+            "institution_name",
+            "short_name",
+            "contact_name",
+            "position",
+            "phone",
+            "email",
+            "students",
+            "plan",
+            "message",
+        ]
+        widgets = {
+            "institution_name": forms.TextInput(
+                attrs={"placeholder": "Masalan: Toshkent axborot texnologiyalari universiteti"}
+            ),
+            "short_name": forms.TextInput(attrs={"placeholder": "TATU"}),
+            "phone": forms.TextInput(attrs={"placeholder": "+998 90 123 45 67", "inputmode": "tel"}),
+            "message": forms.Textarea(
+                attrs={"rows": 3, "placeholder": "Qaysi fakultetlardan boshlamoqchisiz, savollaringiz"}
+            ),
+        }
+
+
+class InstitutionSettingsForm(forms.ModelForm):
+    """OTM administratori uchun: nom, shior, logotip, ranglar va qoidalar."""
+
+    class Meta:
+        model = Institution
+        fields = [
+            "name",
+            "short_name",
+            "tagline",
+            "logo",
+            "color_dark",
+            "color_light",
+            "registration_open",
+            "show_in_league",
+        ]
+        widgets = {
+            "color_dark": forms.TextInput(attrs={"type": "color"}),
+            "color_light": forms.TextInput(attrs={"type": "color"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.has_feature("branding"):
+            for name in ("logo", "color_dark", "color_light"):
+                self.fields[name].disabled = True
+                self.fields[name].help_text = "«Standart» va «Premium» tariflarida"
+
+
+class FacultyForm(forms.ModelForm):
+    class Meta:
+        model = Faculty
+        fields = ["name", "short_name"]
+        labels = {"name": "Fakultet nomi", "short_name": "Qisqa nomi"}
+        widgets = {
+            "name": forms.TextInput(attrs={"placeholder": "Axborot texnologiyalari fakulteti"}),
+            "short_name": forms.TextInput(attrs={"placeholder": "ATF"}),
+        }
+
+    def clean(self):
+        cleaned = super().clean()
+        # Noyoblik OTM ichida tekshiriladi (institution maydoni formada yo'q)
+        for field in ("name", "short_name"):
+            value = cleaned.get(field)
+            if value and Faculty.objects.filter(**{f"{field}__iexact": value}).exclude(pk=self.instance.pk).exists():
+                self.add_error(field, "Bunday fakultet allaqachon bor")
+        return cleaned

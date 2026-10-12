@@ -51,6 +51,15 @@ def minus(value, other):
 
 
 @register.filter
+def money(value):
+    """1500000 -> «1 500 000» (o'zbekcha uslubda bo'shliq bilan)."""
+    try:
+        return f"{int(value):,}".replace(",", "\u00a0")
+    except (TypeError, ValueError):
+        return value
+
+
+@register.filter
 def display_name(user):
     return user.get_full_name() or user.username
 
@@ -153,18 +162,39 @@ def stepper(kind, status, compact=False):
     }
 
 
-@register.simple_tag
-def brand_logo(size=40, extra_class=""):
-    """Institut logotipi: oddiy va retina ekranlar uchun."""
+@register.simple_tag(takes_context=True)
+def brand_logo(context, size=40, extra_class=""):
+    """OTM logotipi. Yuklanmagan bo'lsa: asosiy OTM uchun institut logosi, boshqalar uchun bosh harflar."""
+    institution = context.get("institution")
+    classes = f"brand-logo {extra_class}".strip()
+    name = institution.name if institution else "Talent Hub"
+    if institution is not None and institution.logo:
+        return format_html(
+            '<img src="{}" width="{}" height="{}" class="{}" alt="{} logotipi">',
+            institution.logo.url,
+            size,
+            size,
+            classes,
+            name,
+        )
+    if institution is not None and not institution.is_default:
+        return format_html(
+            '<span class="{} brand-initials" style="width:{}px;height:{}px;font-size:{}px" aria-label="{}">{}</span>',
+            classes,
+            size,
+            size,
+            max(10, size // 3),
+            name,
+            institution.initials,
+        )
     small = static("web/img/adti-logo-64.png")
     large = static("web/img/adti-logo-128.png") if size <= 64 else static("web/img/adti-logo-256.webp")
-    classes = f"brand-logo {extra_class}".strip()
     return format_html(
-        '<img src="{}" srcset="{} 2x" width="{}" height="{}" class="{}" '
-        'alt="Andijon davlat texnika instituti logotipi">',
+        '<img src="{}" srcset="{} 2x" width="{}" height="{}" class="{}" alt="{} logotipi">',
         small if size <= 32 else large,
         large,
         size,
         size,
         classes,
+        name,
     )

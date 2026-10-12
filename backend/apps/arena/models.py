@@ -2,9 +2,13 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Q
 
+from apps.tenants.managers import TenantManager
+
 
 class PointTransaction(models.Model):
     """XP va tangalar jurnali. Foydalanuvchidagi xp/coins qiymatlari shundan kelib chiqadi."""
+
+    tenant_path = "user__institution"
 
     class Reason(models.TextChoices):
         CHALLENGE = "challenge", "Challenge yechimi"
@@ -38,6 +42,8 @@ class PointTransaction(models.Model):
     note = models.CharField("izoh", max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
+    objects = TenantManager()
+
     class Meta:
         verbose_name = "ball tranzaksiyasi"
         verbose_name_plural = "ball tranzaksiyalari"
@@ -69,9 +75,13 @@ class Badge(models.Model):
 
 
 class UserBadge(models.Model):
+    tenant_path = "user__institution"
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="badges")
     badge = models.ForeignKey(Badge, on_delete=models.CASCADE, related_name="holders")
     awarded_at = models.DateTimeField(auto_now_add=True)
+
+    objects = TenantManager()
 
     class Meta:
         verbose_name = "berilgan nishon"
@@ -84,10 +94,14 @@ class UserBadge(models.Model):
 
 
 class Streak(models.Model):
+    tenant_path = "user__institution"
+
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="streak")
     current = models.PositiveIntegerField("joriy", default=0)
     longest = models.PositiveIntegerField("eng uzun", default=0)
     last_active = models.DateField("oxirgi faollik", null=True, blank=True)
+
+    objects = TenantManager()
 
     class Meta:
         verbose_name = "streak"

@@ -1,0 +1,130 @@
+{% extends "web/base.html" %}
+{% load web_tags %}
+{% block title %}OTMlar uchun iqtidorlar platformasi{% endblock %}
+{% block description %}Talent Hub: oliy ta'lim muassasalari uchun iqtidorli talabalarni kashf qilish, rivojlantirish va imkoniyatlarga ulash platformasi.{% endblock %}
+{% block body_class %}landing{% endblock %}
+
+{% block body %}
+<header class="landing-nav">
+  <a href="/saas/" class="brand"><span class="brand-logo brand-initials" style="width:40px;height:40px;font-size:14px">TH</span><span>Talent Hub<small>OTMlar uchun SaaS platforma</small></span></a>
+  <div class="row-sm">
+    <a href="#tariflar" class="btn btn-ghost btn-sm">Tariflar</a>
+    <a href="#ariza" class="btn btn-primary btn-sm">OTMni ulash</a>
+  </div>
+</header>
+
+<section class="landing-hero">
+  <div>
+    <span class="chip chip-primary">🎓 Oliy ta'lim muassasalari uchun</span>
+    <h1 style="margin-top:18px">OTMingizdagi <span class="gradient-text">iqtidorlarni</span> bir platformada kashf qiling</h1>
+    <p class="lead">Challenge'lar, loyihalar, AI mentor, ball va mukofotlar tizimi, rektorat uchun iqtidor xaritasi. O'z subdomeningiz, logotipingiz va ranglaringiz bilan. O'rnatish, server va yangilanishlar bizdan.</p>
+    <div class="form-actions">
+      <a href="#ariza" class="btn btn-gradient btn-lg">Bepul pilotni boshlash {% icon "arrow-right" %}</a>
+      <a href="#qanday" class="btn btn-ghost btn-lg">Qanday ishlaydi?</a>
+    </div>
+    <div class="row wrap" style="margin-top:28px; gap:24px">
+      <div><div class="stat-value">{{ connected|length }}</div><div class="stat-label">ulangan OTM</div></div>
+      <div><div class="stat-value">{{ students_total }}</div><div class="stat-label">talaba</div></div>
+      <div><div class="stat-value">90 kun</div><div class="stat-label">bepul pilot</div></div>
+    </div>
+  </div>
+  <div class="hero-visual" aria-hidden="true">
+    <div class="card card-lg hero-card stack">
+      <div class="bold" style="font-size:18px">🏛️ OTMlararo liga</div>
+      {% for inst in connected|slice:":4" %}
+      <div class="row-between"><span class="row-sm"><span class="rank {% if forloop.first %}rank-1{% endif %}">{{ forloop.counter }}</span><b>{{ inst.short_name }}</b></span><span class="muted small">{{ inst.name|truncatechars:34 }}</span></div>
+      {% empty %}
+      <div class="muted small">Birinchi OTM siz bo'ling!</div>
+      {% endfor %}
+    </div>
+    <div class="float-chip" style="left:-14px; bottom:-18px">🔒 Har bir OTM ma'lumoti alohida</div>
+    <div class="float-chip" style="right:-8px; top:-18px">⚡ 1 kunda ishga tushadi</div>
+  </div>
+</section>
+
+<section class="landing-section">
+  <div class="center stack-sm" style="margin-bottom:28px">
+    <span class="eyebrow">Nima uchun Talent Hub</span>
+    <h2 style="font-size:clamp(1.5rem,1.2rem+1.4vw,2.2rem)">Har bir rol uchun aniq foyda</h2>
+  </div>
+  <div class="grid-3">
+    <div class="card card-lg"><div class="feature-icon tone-primary">🎓</div><h3>Talabaga</h3><p class="muted" style="margin-top:6px">Challenge'lar, loyihalar va jamoa, AI mentor, nishonlar, tangalar evaziga real sovg'alar, QR kodli PDF rezyume.</p></div>
+    <div class="card card-lg"><div class="feature-icon tone-success">👩‍🏫</div><h3>O'qituvchiga</h3><p class="muted" style="margin-top:6px">Yagona tekshiruv navbati, AI baho qoralamasi, ko'nikmalarni tasdiqlash va «uchqun bor» belgisi.</p></div>
+    <div class="card card-lg"><div class="feature-icon tone-accent">🏛️</div><h3>Rektoratga</h3><p class="muted" style="margin-top:6px">Real vaqtdagi iqtidor xaritasi: fakultetlar reytingi, yashirin iqtidorlar, homiylar hissasi va OTMlararo liga.</p></div>
+  </div>
+</section>
+
+<section class="landing-section" id="qanday">
+  <div class="center stack-sm" style="margin-bottom:28px">
+    <span class="eyebrow">Ulanish</span>
+    <h2 style="font-size:clamp(1.5rem,1.2rem+1.4vw,2.2rem)">Uch qadamda ishga tushadi</h2>
+  </div>
+  <div class="grid-3">
+    <div class="card card-lg stack-sm"><span class="rank rank-1">1</span><h3>Ariza qoldiring</h3><p class="muted">Pastdagi formani to'ldiring: OTM nomi va mas'ul shaxs.</p></div>
+    <div class="card card-lg stack-sm"><span class="rank">2</span><h3>Manzil va kirish</h3><p class="muted">Sizga <b>otm.talenthub</b> manzili va administrator hisobi beriladi.</p></div>
+    <div class="card card-lg stack-sm"><span class="rank">3</span><h3>Sozlang va boshlang</h3><p class="muted">Logotip, ranglar va fakultetlarni kiriting, talabalar o'zi ro'yxatdan o'tadi.</p></div>
+  </div>
+</section>
+
+<section class="landing-section" id="tariflar">
+  <div class="center stack-sm" style="margin-bottom:28px">
+    <span class="eyebrow">Tariflar</span>
+    <h2 style="font-size:clamp(1.5rem,1.2rem+1.4vw,2.2rem)">OTM hajmiga mos tarif</h2>
+    <p class="muted small">Narxlar oyiga, QQSsiz. Yillik to'lovda chegirma.</p>
+  </div>
+  <div class="pricing-grid">
+    {% for plan in plans %}
+    <div class="card card-lg pricing-card {% if plan.key == 'standart' %}featured{% endif %}">
+      {% if plan.key == 'standart' %}<span class="chip chip-accent pricing-badge">Eng ko'p tanlanadi</span>{% endif %}
+      <h3>{{ plan.name }}</h3>
+      <div class="pricing-price">{% if plan.price %}{{ plan.price|money }} <small>so'm/oy</small>{% else %}Bepul{% endif %}</div>
+      <p class="muted small">{{ plan.note }}</p>
+      <div class="bold small">👥 {% if plan.students %}{{ plan.students }} tagacha talaba{% else %}Cheklovsiz talabalar{% endif %}</div>
+      <ul class="pricing-list">
+        <li>Challenge'lar, loyihalar, arena, do'kon</li>
+        <li>Rektorat statistikasi va Telegram bot</li>
+        {% for f in plan.feature_list %}<li>{{ f }}</li>{% endfor %}
+      </ul>
+      <a href="?plan={{ plan.key }}#ariza" class="btn {% if plan.key == 'standart' %}btn-gradient{% else %}btn-ghost{% endif %} btn-block">Tanlash</a>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="landing-section" id="ariza">
+  <div class="grid-2" style="align-items:start; gap:28px">
+    <div class="stack">
+      <span class="eyebrow">OTMni ulash</span>
+      <h2 style="font-size:clamp(1.4rem,1.2rem+1vw,2rem)">Bepul pilot uchun ariza</h2>
+      <p class="muted">90 kunlik pilot davrida 300 tagacha talaba bilan platformani to'liq sinab ko'rasiz. Natijani ko'rib, tarifni tanlaysiz.</p>
+      <div class="list">
+        <div class="list-item"><span>🔒</span><span class="small">Har bir OTM ma'lumotlari boshqalaridan to'liq ajratilgan</span></div>
+        <div class="list-item"><span>🎨</span><span class="small">O'z logotipingiz, ranglaringiz va subdomeningiz</span></div>
+        <div class="list-item"><span>📈</span><span class="small">Rektorat uchun real vaqtdagi statistika</span></div>
+        <div class="list-item"><span>🛠️</span><span class="small">Server, xavfsizlik va yangilanishlar bizning zimmamizda</span></div>
+      </div>
+    </div>
+    <form method="post" class="card card-lg form">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+      <div class="grid-2">
+        {% include "web/partials/field.html" with field=form.institution_name %}
+        {% include "web/partials/field.html" with field=form.short_name %}
+        {% include "web/partials/field.html" with field=form.contact_name %}
+        {% include "web/partials/field.html" with field=form.position %}
+        {% include "web/partials/field.html" with field=form.phone %}
+        {% include "web/partials/field.html" with field=form.email %}
+        {% include "web/partials/field.html" with field=form.students %}
+        {% include "web/partials/field.html" with field=form.plan %}
+      </div>
+      {% include "web/partials/field.html" with field=form.message %}
+      <div class="form-actions"><button class="btn btn-primary btn-lg">{% icon "send" %} Ariza yuborish</button></div>
+    </form>
+  </div>
+</section>
+
+<footer class="landing-footer stack-sm" style="align-items:center">
+  <div>© Talent Hub · OTMlar uchun iqtidorlar platformasi</div>
+  {% if connected %}<div class="tiny">Ulangan: {% for inst in connected %}{{ inst.short_name }}{% if not forloop.last %} · {% endif %}{% endfor %}</div>{% endif %}
+</footer>
+{% endblock %}

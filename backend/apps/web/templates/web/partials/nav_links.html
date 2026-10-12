@@ -4,6 +4,7 @@
 <a href="{% url 'web:challenges' %}" class="nav-link {% active 'challenges' 'challenge' %}">{% icon "target" %} Challenge'lar</a>
 <a href="{% url 'web:projects' %}" class="nav-link {% active 'projects' 'project' %}">{% icon "rocket" %} Loyihalar</a>
 <a href="{% url 'web:arena' %}" class="nav-link {% active 'arena' %}">{% icon "trophy" %} Arena</a>
+{% if "league" in features %}<a href="{% url 'web:league' %}" class="nav-link {% active 'league' %}">{% icon "award" %} OTMlararo liga</a>{% endif %}
 <a href="{% url 'web:ai' %}" class="nav-link {% active 'ai' %}">{% icon "sparkles" %} AI Mentor</a>
 <a href="{% url 'web:notifications' %}" class="nav-link {% active 'notifications' 'notification' %}">{% icon "bell" %} Bildirishnomalar
   {% if unread_notifications %}<span class="chip chip-danger count">{{ unread_notifications }}</span>{% endif %}</a>
@@ -26,6 +27,12 @@
 {% if user.is_management %}
 <a href="{% url 'web:insights' %}" class="nav-link {% active 'insights' %}">{% icon "chart" %} Statistika</a>
 {% endif %}
+{% if user.is_institution_admin %}
+<a href="{% url 'web:institution-settings' %}" class="nav-link {% active 'institution-settings' %}">{% icon "edit" %} OTM sozlamalari</a>
+{% endif %}
 {% if user.is_staff %}
 <a href="{% url 'admin:index' %}" class="nav-link">{% icon "shield" %} Admin panel</a>
+{% endif %}
+{% if user.is_superuser %}
+<a href="{% url 'web:platform' %}" class="nav-link">{% icon "chart" %} Platforma (SaaS)</a>
 {% endif %}

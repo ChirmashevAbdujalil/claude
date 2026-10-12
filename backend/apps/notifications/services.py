@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 _run_in_background = True
 
 
-def _deliver_to_telegram(chat_id: int, text: str, path: str) -> None:
+def _deliver_to_telegram(chat_id: int, text: str, path: str, site: str = "") -> None:
     try:
-        telegram_bot.send_message(chat_id, text, path)
+        telegram_bot.send_message(chat_id, text, path, site)
     except Exception:  # noqa: BLE001 - bildirishnoma xatosi asosiy amalni buzmasligi kerak
         logger.exception("Telegram bildirishnomasini yuborib bo'lmadi")
 
@@ -34,12 +34,14 @@ def notify(user, title: str, body: str = "", url: str = "", icon: str = "🔔", 
     chat_id = getattr(user, "telegram_id", None)
     if chat_id and telegram_bot.is_enabled():
         text = f"{icon} {title}" + (f"\n\n{body}" if body else "")
+        institution = getattr(user, "institution", None)
+        site = institution.base_url() if institution is not None else ""
 
         def send():
             if _run_in_background:
-                threading.Thread(target=_deliver_to_telegram, args=(chat_id, text, url), daemon=True).start()
+                threading.Thread(target=_deliver_to_telegram, args=(chat_id, text, url, site), daemon=True).start()
             else:
-                _deliver_to_telegram(chat_id, text, url)
+                _deliver_to_telegram(chat_id, text, url, site)
 
         transaction.on_commit(send)
     return notification

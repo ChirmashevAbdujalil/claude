@@ -1,0 +1,65 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}OTM sozlamalari{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><h1>OTM sozlamalari 🏛️</h1><p>{{ institution.name }} · <a href="{{ site_url }}" target="_blank" rel="noopener">{{ site_url }}</a></p></div>
+</div>
+
+<div class="grid-2" style="align-items:start; margin-bottom:20px">
+  <div class="card card-lg stack">
+    <div class="row-between wrap"><h2>Tarif</h2><span class="chip {% if institution.plan == 'premium' %}chip-accent{% else %}chip-primary{% endif %}">{{ plan.name }}</span></div>
+    <div>
+      <div class="row-between small"><span class="bold">Talabalar: {{ students }}{% if limit %} / {{ limit }}{% endif %}</span>{% if usage is not None %}<span class="muted">{{ usage }}%</span>{% endif %}</div>
+      {% if limit %}<div class="progress usage-bar" style="margin-top:8px"><span style="width:{% if usage > 100 %}100{% else %}{{ usage }}{% endif %}%"></span></div>
+      {% if usage >= 90 %}<p class="small" style="color:var(--danger); margin-top:6px">Limitga yaqinlashdingiz: yangi talabalar ro'yxatdan o'ta olmay qoladi.</p>{% endif %}{% endif %}
+    </div>
+    {% if institution.paid_until %}<p class="small muted">To'langan muddat: <b>{{ institution.paid_until|date:"d.m.Y" }}</b> gacha</p>{% endif %}
+    <div class="list">
+      {% for p in plans %}
+      <div class="list-item"><span class="rank {% if p.key == institution.plan %}rank-1{% endif %}">{% if p.key == institution.plan %}✓{% else %}·{% endif %}</span>
+        <div class="grow"><div class="bold small">{{ p.name }} · {% if p.price %}{{ p.price|money }} so'm/oy{% else %}bepul{% endif %}</div><div class="tiny muted">{{ p.note }}</div></div></div>
+      {% endfor %}
+    </div>
+    <p class="tiny muted">Tarifni o'zgartirish uchun platforma bilan bog'laning: <a href="/saas/#ariza">talenthub</a>.</p>
+  </div>
+
+  <div class="card card-lg stack">
+    <h2>Fakultetlar</h2>
+    <div class="list">
+      {% for f in faculties %}
+      <div class="list-item"><span class="chip">{{ f.short_name }}</span><div class="grow small bold">{{ f.name }}</div>
+        <form method="post" action="{% url 'web:faculty-delete' f.pk %}" onsubmit="return confirm('Fakultetni o\'chirasizmi?')">{% csrf_token %}<button class="btn btn-ghost btn-sm btn-icon" aria-label="O'chirish">{% icon "trash" "icon-sm" %}</button></form></div>
+      {% empty %}<p class="muted small">Hali fakultet qo'shilmagan.</p>{% endfor %}
+    </div>
+    <form method="post" class="form">
+      {% csrf_token %}<input type="hidden" name="form" value="faculty">
+      <div class="grid-2">
+        {% include "web/partials/field.html" with field=faculty_form.name %}
+        {% include "web/partials/field.html" with field=faculty_form.short_name %}
+      </div>
+      <div class="form-actions"><button class="btn btn-soft">{% icon "plus" "icon-sm" %} Fakultet qo'shish</button></div>
+    </form>
+  </div>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="card card-lg form" style="max-width:860px">
+  {% csrf_token %}<input type="hidden" name="form" value="settings">
+  <h2>Brend va qoidalar</h2>
+  {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+  <div class="grid-2">
+    {% include "web/partials/field.html" with field=form.name %}
+    {% include "web/partials/field.html" with field=form.short_name %}
+  </div>
+  {% include "web/partials/field.html" with field=form.tagline %}
+  <div class="row" style="align-items:center">{% brand_logo 64 %}<div class="grow">{% include "web/partials/field.html" with field=form.logo %}</div></div>
+  <div class="grid-2">
+    {% include "web/partials/field.html" with field=form.color_dark %}
+    {% include "web/partials/field.html" with field=form.color_light %}
+  </div>
+  {% include "web/partials/field.html" with field=form.registration_open %}
+  {% include "web/partials/field.html" with field=form.show_in_league %}
+  <div class="form-actions"><button class="btn btn-primary btn-lg">{% icon "check" %} Saqlash</button></div>
+</form>
+{% endblock %}

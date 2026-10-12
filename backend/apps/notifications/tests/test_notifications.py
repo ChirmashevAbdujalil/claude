@@ -33,7 +33,7 @@ def sent(monkeypatch, settings):
     messages = []
     monkeypatch.setattr(services, "_run_in_background", False)
     monkeypatch.setattr(
-        telegram_bot, "send_message", lambda chat_id, text, path="": messages.append((chat_id, text, path))
+        telegram_bot, "send_message", lambda chat_id, text, path="", site="": messages.append((chat_id, text, path))
     )
     return messages
 

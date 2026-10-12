@@ -1,8 +1,24 @@
 from django.conf import settings
 from django.db import models
 
+from apps.tenants.context import default_institution_id
+from apps.tenants.managers import GlobalUniqueChecksMixin, TenantManager
+
 
 class Opportunity(models.Model):
+    tenant_shared = True
+
+    institution = models.ForeignKey(
+        "tenants.Institution",
+        on_delete=models.CASCADE,
+        related_name="opportunities",
+        default=default_institution_id,
+        null=True,
+        blank=True,
+        help_text="Bo'sh bo'lsa, platformadagi barcha OTMlarga ko'rinadi",
+        verbose_name="OTM",
+    )
+
     class Kind(models.TextChoices):
         GRANT = "grant", "Grant"
         OLYMPIAD = "olympiad", "Olimpiada"
@@ -25,6 +41,8 @@ class Opportunity(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
 
+    objects = TenantManager()
+
     class Meta:
         verbose_name = "imkoniyat"
         verbose_name_plural = "imkoniyatlar"
@@ -35,6 +53,8 @@ class Opportunity(models.Model):
 
 
 class Application(models.Model):
+    tenant_path = "user__institution"
+
     class Status(models.TextChoices):
         SUBMITTED = "submitted", "Yuborilgan"
         SHORTLISTED = "shortlisted", "Saralangan"
@@ -47,6 +67,8 @@ class Application(models.Model):
     status = models.CharField("holat", max_length=20, choices=Status.choices, default=Status.SUBMITTED)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    objects = TenantManager()
+
     class Meta:
         verbose_name = "ariza"
         verbose_name_plural = "arizalar"
@@ -57,10 +79,22 @@ class Application(models.Model):
         return f"{self.user} → {self.opportunity}"
 
 
-class Sponsor(models.Model):
+class Sponsor(GlobalUniqueChecksMixin, models.Model):
     """Do'kondagi sovg'alarni moliyalashtiradigan kompaniya yoki tashkilot."""
 
-    name = models.CharField("nomi", max_length=200, unique=True)
+    tenant_shared = True
+
+    institution = models.ForeignKey(
+        "tenants.Institution",
+        on_delete=models.CASCADE,
+        related_name="sponsors",
+        default=default_institution_id,
+        null=True,
+        blank=True,
+        help_text="Bo'sh bo'lsa, platformadagi barcha OTMlarga ko'rinadi",
+        verbose_name="OTM",
+    )
+    name = models.CharField("nomi", max_length=200)
     slug = models.SlugField("manzil", unique=True, help_text="Sahifa manzili, masalan: texnosoft")
     logo = models.ImageField("logotip", upload_to="sponsors/", blank=True)
     description = models.TextField("qisqacha tavsif", blank=True)
@@ -68,6 +102,8 @@ class Sponsor(models.Model):
     is_active = models.BooleanField("faol", default=True)
     order = models.PositiveSmallIntegerField("tartib", default=0, help_text="Kichik raqam oldinroq chiqadi")
     created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = TenantManager()
 
     class Meta:
         verbose_name = "homiy"
@@ -86,6 +122,13 @@ class Sponsor(models.Model):
 class Reward(models.Model):
     """Mukofotlar do'konidagi mahsulot: tangalarga almashtiriladi."""
 
+    institution = models.ForeignKey(
+        "tenants.Institution",
+        on_delete=models.CASCADE,
+        related_name="rewards",
+        default=default_institution_id,
+        verbose_name="OTM",
+    )
     name = models.CharField("nomi", max_length=200)
     description = models.TextField("tavsif", blank=True)
     emoji = models.CharField("belgi", max_length=8, default="🎁", help_text="Rasm bo'lmasa kartochkada ko'rinadi")
@@ -103,6 +146,8 @@ class Reward(models.Model):
         help_text="Sovg'a homiy hisobidan bo'lsa, do'konda uning nomi va logotipi chiqadi",
     )
 
+    objects = TenantManager()
+
     class Meta:
         verbose_name = "mukofot"
         verbose_name_plural = "mukofotlar do'koni"
@@ -113,6 +158,8 @@ class Reward(models.Model):
 
 
 class Redemption(models.Model):
+    tenant_path = "user__institution"
+
     class Status(models.TextChoices):
         PENDING = "pending", "Tayyorlanmoqda"
         DELIVERED = "delivered", "Topshirildi"
@@ -122,6 +169,8 @@ class Redemption(models.Model):
     price = models.PositiveIntegerField("to'langan tanga")
     status = models.CharField("holat", max_length=20, choices=Status.choices, default=Status.PENDING)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = TenantManager()
 
     class Meta:
         verbose_name = "xarid"

@@ -1,8 +1,12 @@
 from django.conf import settings
 from django.db import models
 
+from apps.tenants.managers import TenantManager
+
 
 class Notification(models.Model):
+    tenant_path = "user__institution"
+
     class Kind(models.TextChoices):
         SUCCESS = "success", "Yutuq"
         INFO = "info", "Ma'lumot"
@@ -16,6 +20,8 @@ class Notification(models.Model):
     url = models.CharField("havola", max_length=300, blank=True, help_text="Sayt ichidagi yo'l, masalan /challenges/3/")
     is_read = models.BooleanField("o'qilgan", default=False, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    objects = TenantManager()
 
     class Meta:
         verbose_name = "bildirishnoma"

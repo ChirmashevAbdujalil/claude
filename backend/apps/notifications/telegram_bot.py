@@ -37,17 +37,20 @@ def call(method: str, payload: dict) -> dict | None:
         return None
 
 
-def open_button(text: str, path: str = "/app/") -> dict | None:
-    """Saytni Telegram ichida (Mini App) ochadigan tugma. SITE_URL https bo'lishi shart."""
-    site = settings.SITE_URL.rstrip("/")
+def open_button(text: str, path: str = "/app/", site: str = "") -> dict | None:
+    """Saytni Telegram ichida (Mini App) ochadigan tugma. Manzil https bo'lishi shart.
+
+    site: OTM saytining manzili; berilmasa SITE_URL ishlatiladi.
+    """
+    site = (site or settings.SITE_URL).rstrip("/")
     if not site.startswith("https://"):
         return None
     return {"inline_keyboard": [[{"text": text, "web_app": {"url": f"{site}{path}"}}]]}
 
 
-def send_message(chat_id: int, text: str, path: str = "") -> bool:
+def send_message(chat_id: int, text: str, path: str = "", site: str = "") -> bool:
     payload = {"chat_id": chat_id, "text": text, "disable_web_page_preview": True}
-    markup = open_button("Platformada ochish", path or "/app/")
+    markup = open_button("Platformada ochish", path or "/app/", site)
     if markup:
         payload["reply_markup"] = markup
     result = call("sendMessage", payload)
@@ -56,7 +59,7 @@ def send_message(chat_id: int, text: str, path: str = "") -> bool:
 
 WELCOME_TEXT = (
     "Assalomu alaykum! 👋\n\n"
-    "Bu ANDTI Talent Hub: iqtidoringizni kashf qiluvchi platforma.\n\n"
+    "Bu Talent Hub: iqtidoringizni kashf qiluvchi platforma.\n\n"
     "🎯 Challenge'lar yeching va XP to'plang\n"
     "🚀 Loyihalar quring va jamoa toping\n"
     "🤖 AI Mentor bilan o'z yo'lingizni tuzing\n"

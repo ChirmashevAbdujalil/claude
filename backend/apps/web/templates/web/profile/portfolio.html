@@ -1,11 +1,11 @@
 {% extends "web/base.html" %}
 {% load web_tags %}
 {% block title %}{{ profile|display_name }}: portfolio{% endblock %}
-{% block description %}{{ profile|display_name }}: {{ profile.faculty.name|default:"ANDTI" }} talabasi. Ko'nikmalar, yutuqlar va loyihalar.{% endblock %}
+{% block description %}{{ profile|display_name }}: {{ profile.faculty.name|default:institution_short }} talabasi. Ko'nikmalar, yutuqlar va loyihalar.{% endblock %}
 
 {% block body %}
 <header class="landing-nav">
-  <a href="{% url 'web:landing' %}" class="brand">{% brand_logo 40 %}<span>ANDTI Talent Hub<small>Andijon davlat texnika instituti</small></span></a>
+  <a href="{% url 'web:landing' %}" class="brand">{% brand_logo 40 %}<span>{{ brand_name }}<small>{{ institution_name }}</small></span></a>
   {% if user.is_authenticated %}<a href="{% url 'web:dashboard' %}" class="btn btn-ghost btn-sm">Platformaga qaytish</a>
   {% else %}<a href="{% url 'web:login' %}" class="btn btn-ghost btn-sm">Kirish</a>{% endif %}
 </header>
@@ -24,7 +24,7 @@
       </div>
       <div>
         <h1>{{ profile|display_name }}</h1>
-        <p class="muted">{{ profile.faculty.name|default:"ANDTI" }}{% if profile.course %} · {{ profile.course }}-kurs talabasi{% endif %}</p>
+        <p class="muted">{{ profile.faculty.name|default:institution_short }}{% if profile.course %} · {{ profile.course }}-kurs talabasi{% endif %}</p>
         {% if profile.bio %}<p style="margin-top:10px; max-width:680px">{{ profile.bio }}</p>{% endif %}
       </div>
       <div class="row wrap">

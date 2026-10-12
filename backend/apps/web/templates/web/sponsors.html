@@ -1,11 +1,11 @@
 {% extends "web/base.html" %}
 {% load web_tags %}
 {% block title %}Homiylarimiz{% endblock %}
-{% block description %}ANDTI Talent Hub homiylari: talabalar mehnatini qadrlaydigan kompaniyalar va tashkilotlar.{% endblock %}
+{% block description %}{{ brand_name }} homiylari: talabalar mehnatini qadrlaydigan kompaniyalar va tashkilotlar.{% endblock %}
 
 {% block body %}
 <header class="landing-nav">
-  <a href="{% if user.is_authenticated %}{% url 'web:dashboard' %}{% else %}{% url 'web:landing' %}{% endif %}" class="brand">{% brand_logo 40 %}<span>ANDTI Talent Hub<small>Andijon davlat texnika instituti</small></span></a>
+  <a href="{% if user.is_authenticated %}{% url 'web:dashboard' %}{% else %}{% url 'web:landing' %}{% endif %}" class="brand">{% brand_logo 40 %}<span>{{ brand_name }}<small>{{ institution_name }}</small></span></a>
   {% if user.is_authenticated %}<a href="{% url 'web:shop' %}" class="btn btn-ghost btn-sm">{% icon "gift" "icon-sm" %} Do'konga qaytish</a>
   {% else %}<a href="{% url 'web:login' %}" class="btn btn-ghost btn-sm">Kirish</a>{% endif %}
 </header>

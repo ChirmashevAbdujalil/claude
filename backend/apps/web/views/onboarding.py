@@ -18,6 +18,8 @@ from apps.notifications.services import mark_all_read
 from apps.profiles.models import Achievement, Skill, UserSkill
 from apps.profiles.services import ENDORSEMENT_XP
 from apps.projects.services import STAGE_XP
+from apps.tenants import services as tenant_services
+from apps.tenants.context import unscoped
 
 from ..forms import OnboardingProfileForm, RegisterForm
 from ..guidance import next_steps
@@ -27,10 +29,13 @@ MAX_ONBOARDING_SKILLS = 8
 
 
 def register(request):
-    if not settings.REGISTRATION_OPEN:
+    is_open, reason = tenant_services.registration_state(request.institution)
+    if not is_open and reason != "limit":
         raise Http404
     if request.user.is_authenticated:
         return redirect("web:dashboard")
+    if not is_open:
+        return render(request, "web/auth/register_limit.html", status=403)
     form = RegisterForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         user = form.save()
@@ -43,7 +48,9 @@ def register(request):
 def _unique_slug(user) -> str:
     base = slugify(f"{user.first_name}-{user.last_name}") or slugify(user.username) or "talaba"
     slug = base
-    if User.objects.filter(portfolio_slug=slug).exclude(pk=user.pk).exists():
+    with unscoped():  # portfolio manzili butun platforma bo'yicha noyob
+        taken = User.objects.filter(portfolio_slug=slug).exclude(pk=user.pk).exists()
+    if taken:
         slug = f"{base}-{user.pk}"
     return slug
 

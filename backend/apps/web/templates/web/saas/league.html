@@ -1,0 +1,24 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}OTMlararo liga{% endblock %}
+
+{% block content %}
+<a href="{% url 'web:arena' %}" class="back-link">{% icon "arrow-left" "icon-sm" %} Arena</a>
+<div class="page-header"><div><h1>OTMlararo liga 🏛️</h1><p>OTMlar talabalarning o'rtacha XP'si bo'yicha bellashadi: katta va kichik OTMlar teng sharoitda.</p></div></div>
+
+{% if rows %}
+<div class="card card-lg">
+  <div class="list">
+    {% for row in rows %}
+    <div class="list-item {% if forloop.counter0 == my_index %}is-me{% endif %}">
+      <span class="rank {% if forloop.counter <= 3 %}rank-{{ forloop.counter }}{% endif %}">{{ forloop.counter }}</span>
+      <div class="grow"><div class="bold">{{ row.obj.short_name }}{% if forloop.counter0 == my_index %} <span class="chip chip-primary">Siz</span>{% endif %}</div><div class="tiny muted">{{ row.obj.name }} · {{ row.students }} talaba · 30 kunda faol {{ row.active_share }}%</div></div>
+      <div class="center"><div class="bold xp">{{ row.avg_xp }}</div><div class="tiny muted">o'rtacha XP</div></div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% else %}
+<div class="card">{% include "web/partials/empty.html" with emoji="🏛️" title="Liga hali boshlanmagan" text="Ligaga kamida bitta OTM qo'shilishi kerak." %}</div>
+{% endif %}
+{% endblock %}

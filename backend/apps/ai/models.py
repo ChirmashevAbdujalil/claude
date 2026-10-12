@@ -1,8 +1,12 @@
 from django.conf import settings
 from django.db import models
 
+from apps.tenants.managers import TenantManager
+
 
 class Conversation(models.Model):
+    tenant_path = "user__institution"
+
     class Mode(models.TextChoices):
         MENTOR = "mentor", "AI Mentor"
         IDEA_CHECK = "idea_check", "G'oya tekshiruvchi"
@@ -14,6 +18,8 @@ class Conversation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    objects = TenantManager()
+
     class Meta:
         verbose_name = "AI suhbat"
         verbose_name_plural = "AI suhbatlar"
@@ -24,6 +30,8 @@ class Conversation(models.Model):
 
 
 class Message(models.Model):
+    tenant_path = "conversation__user__institution"
+
     class Role(models.TextChoices):
         USER = "user", "Talaba"
         ASSISTANT = "assistant", "AI"
@@ -34,6 +42,8 @@ class Message(models.Model):
     input_tokens = models.PositiveIntegerField(default=0)
     output_tokens = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    objects = TenantManager()
 
     class Meta:
         verbose_name = "AI xabar"

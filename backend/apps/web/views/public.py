@@ -2,13 +2,12 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
-from apps.accounts.telegram import TelegramAuthError, verify_init_data
+from apps.accounts.telegram import TelegramAuthError, get_or_create_telegram_user, verify_init_data
 from apps.arena.levels import LEVELS
 from apps.discovery.models import Challenge, TalentFlag
 from apps.opportunities import services as opportunity_services
@@ -38,7 +37,7 @@ def landing(request):
         "projects": Project.objects.count(),
         "achievements": Achievement.objects.filter(status=Achievement.Status.APPROVED).count(),
     }
-    sponsors = Sponsor.objects.filter(is_active=True)
+    sponsors = Sponsor.objects.filter(is_active=True) if request.institution.has_feature("sponsors") else []
     return render(request, "web/landing.html", {"stats": stats, "levels": LEVELS, "sponsors": sponsors})
 
 
@@ -70,20 +69,9 @@ def telegram_login(request):
         tg_user = verify_init_data(
             request.POST.get("init_data", ""), settings.TELEGRAM_BOT_TOKEN, settings.TELEGRAM_AUTH_MAX_AGE
         )
+        user, created = get_or_create_telegram_user(tg_user)
     except TelegramAuthError as exc:
         return JsonResponse({"detail": str(exc)}, status=401)
-    with transaction.atomic():
-        user, created = User.objects.get_or_create(
-            telegram_id=tg_user["id"],
-            defaults={
-                "username": f"tg{tg_user['id']}",
-                "first_name": tg_user.get("first_name", "")[:150],
-                "last_name": tg_user.get("last_name", "")[:150],
-            },
-        )
-        if created:
-            user.set_unusable_password()
-            user.save(update_fields=["password"])
     if not user.is_active:
         return JsonResponse({"detail": "Hisob bloklangan"}, status=403)
     login(request, user, backend="django.contrib.auth.backends.ModelBackend")
@@ -144,6 +132,8 @@ def _contact_url(contact: str) -> str:
 
 
 def sponsors(request):
+    if not request.institution.has_feature("sponsors"):
+        return render(request, "web/404.html", status=404)
     contact = settings.SPONSOR_CONTACT
     context = {
         "sponsors": opportunity_services.active_sponsors(),

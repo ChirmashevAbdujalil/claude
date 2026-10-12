@@ -39,7 +39,7 @@ def review_queue(request):
         "submissions": submissions,
         "achievements": achievements,
         "kind_xp": Achievement.DEFAULT_XP,
-        "ai_ready": ai_services.is_configured(),
+        "ai_ready": ai_services.is_ready(request.user, "ai"),
     }
     return render(request, "web/staff/review.html", context)
 

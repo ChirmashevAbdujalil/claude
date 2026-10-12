@@ -55,3 +55,33 @@ def sign_init_data(fields: dict[str, str], bot_token: str) -> str:
     secret_key = hmac.new(b"WebAppData", bot_token.encode(), hashlib.sha256).digest()
     signature = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
     return urlencode({**fields, "hash": signature})
+
+
+def get_or_create_telegram_user(tg_user: dict):
+    """Telegram foydalanuvchisini joriy OTMda topadi yoki yaratadi.
+
+    Bitta Telegram hisobi faqat bitta OTMga ulanadi: boshqa OTMda bo'lsa, xato qaytaradi.
+    """
+    from django.contrib.auth import get_user_model
+    from django.db import transaction
+
+    from apps.tenants.context import current, unscoped
+
+    User = get_user_model()
+    with unscoped():
+        existing = User.objects.filter(telegram_id=tg_user["id"]).first()
+    institution = current()
+    if existing is not None:
+        if institution is not None and existing.institution_id != institution.pk:
+            raise TelegramAuthError("Bu Telegram hisobi boshqa OTMga ulangan")
+        return existing, False
+    with transaction.atomic():
+        user = User(
+            telegram_id=tg_user["id"],
+            username=f"tg{tg_user['id']}",
+            first_name=tg_user.get("first_name", "")[:150],
+            last_name=tg_user.get("last_name", "")[:150],
+        )
+        user.set_unusable_password()
+        user.save()
+    return user, True

@@ -1,0 +1,11 @@
+{% extends "web/base.html" %}
+{% load web_tags %}
+{% block title %}Ro'yxatdan o'tish vaqtincha yopiq{% endblock %}
+{% block body %}
+<main class="auth-wrap"><div class="card card-lg stack center" style="max-width:480px; margin:auto">
+  {% brand_logo 72 %}
+  <h1>Joylar tugadi</h1>
+  <p class="muted">{{ brand_name }}'da talabalar soni tarif limitiga yetdi. OTM administratsiyasi tarifni kengaytirgach, ro'yxatdan o'tish qayta ochiladi.</p>
+  <a href="{% url 'web:login' %}" class="btn btn-ghost">Kirish</a>
+</div></main>
+{% endblock %}

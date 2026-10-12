@@ -6,7 +6,8 @@ python manage.py seed --demo    # + demo fakultetlar, talabalar, challenge va ta
 
 from datetime import timedelta
 
-from django.core.management.base import BaseCommand
+from django.conf import settings
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
@@ -21,6 +22,8 @@ from apps.opportunities.models import Opportunity, Redemption, Reward, Sponsor
 from apps.profiles.models import Achievement, Skill, UserSkill
 from apps.projects import services as project_services
 from apps.projects.models import Project, ProjectMember
+from apps.tenants.context import activate, default_institution
+from apps.tenants.models import Institution
 
 BADGES = [
     ("welcome", "Xush kelibsiz", "Boshlang'ich sozlashni yakunladingiz", "👋", 20),
@@ -122,6 +125,13 @@ FACULTIES = [
     ("Avtomobilsozlik va transport fakulteti", "AT"),
 ]
 
+# Boshqa OTMlar uchun demo fakultetlar
+GENERIC_FACULTIES = [
+    ("Axborot texnologiyalari fakulteti (demo)", "AT"),
+    ("Muhandislik fakulteti (demo)", "MF"),
+    ("Iqtisodiyot fakulteti (demo)", "IF"),
+]
+
 # Oldingi versiyadagi demo fakultetlar → haqiqiy fakultet (qisqa nomi bo'yicha)
 LEGACY_DEMO_FACULTIES = {"KI": "IBKT", "EN": "QMEE", "MSH": "MKM", "AT": "AT"}
 
@@ -131,9 +141,25 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--demo", action="store_true", help="Demo fakultet, foydalanuvchi va kontent yaratish")
+        parser.add_argument(
+            "--institution",
+            default=settings.DEFAULT_INSTITUTION_SLUG,
+            help="Qaysi OTM uchun (manzili, masalan: tatu). Standart: asosiy OTM",
+        )
 
     @transaction.atomic
     def handle(self, *args, **options):
+        slug = options["institution"]
+        institution = (
+            default_institution()
+            if slug == settings.DEFAULT_INSTITUTION_SLUG
+            else Institution.objects.filter(slug=slug).first()
+        )
+        if institution is None:
+            raise CommandError(
+                f"«{slug}» manzilli OTM topilmadi. Avval admin paneldan yoki create_institution bilan yarating."
+            )
+        # Nishonlar va ko'nikmalar barcha OTMlar uchun umumiy
         for code, name, description, icon, bonus in BADGES:
             Badge.objects.update_or_create(
                 code=code, defaults={"name": name, "description": description, "icon": icon, "xp_bonus": bonus}
@@ -141,6 +167,12 @@ class Command(BaseCommand):
         for category, names in SKILLS.items():
             for name in names:
                 Skill.objects.get_or_create(name=name, defaults={"category": category})
+        with activate(institution):
+            self._institution_data(institution, options["demo"])
+
+    def _institution_data(self, institution, demo):
+        self.institution = institution
+        self.prefix = "demo" if institution.is_default else institution.slug
         for name, description, price, stock, emoji in REWARDS:
             reward, created = Reward.objects.get_or_create(
                 name=name, defaults={"description": description, "price": price, "stock": stock, "emoji": emoji}
@@ -149,12 +181,17 @@ class Command(BaseCommand):
                 Reward.objects.filter(pk=reward.pk).update(emoji=emoji)
         self.stdout.write(
             self.style.SUCCESS(
-                f"Nishonlar: {len(BADGES)}, ko'nikmalar: {Skill.objects.count()}, mukofotlar: {Reward.objects.count()}"
+                f"{institution.short_name}: nishonlar {len(BADGES)}, ko'nikmalar {Skill.objects.count()}, "
+                f"mukofotlar {Reward.objects.count()}"
             )
         )
 
-        self._faculties()
-        if options["demo"]:
+        if institution.is_default:
+            self._faculties()
+        elif demo and not Faculty.objects.exists():
+            for name, short in GENERIC_FACULTIES:
+                Faculty.objects.create(name=name, short_name=short)
+        if demo:
             self._demo()
 
     def _faculties(self):
@@ -183,9 +220,13 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f"Fakultetlar: {Faculty.objects.count()}"))
 
     def _demo(self):
-        faculties = [Faculty.objects.get(short_name=short) for _, short in FACULTIES]
+        if self.institution.is_default:
+            faculties = [Faculty.objects.get(short_name=short) for _, short in FACULTIES]
+        else:
+            faculties = list(Faculty.objects.all()) or [Faculty.objects.create(name="Umumiy fakultet", short_name="UF")]
+        prefix = self.prefix
         teacher, created = User.objects.get_or_create(
-            username="demo_teacher",
+            username=f"{prefix}_teacher",
             defaults={
                 "first_name": "Demo",
                 "last_name": "O'qituvchi",
@@ -198,7 +239,7 @@ class Command(BaseCommand):
             teacher.set_password("demo12345")
             teacher.save()
         rector, created = User.objects.get_or_create(
-            username="demo_rector",
+            username=f"{prefix}_rector",
             defaults={
                 "first_name": "Demo",
                 "last_name": "Rektorat",
@@ -213,14 +254,14 @@ class Command(BaseCommand):
         students = []
         for index, (first, last, bio, skills, xp) in enumerate(DEMO_STUDENTS, start=1):
             student, created = User.objects.get_or_create(
-                username=f"demo_student{index}",
+                username=f"{prefix}_student{index}",
                 defaults={
                     "first_name": first,
                     "last_name": last,
                     "bio": bio,
                     "faculty": faculties[index % len(faculties)],
                     "course": (index % 4) + 1,
-                    "portfolio_slug": f"demo-student-{index}",
+                    "portfolio_slug": f"{prefix}-student-{index}",
                     "onboarded_at": timezone.now(),
                 },
             )
@@ -309,6 +350,8 @@ class Command(BaseCommand):
             ),
         ]
         for order, (name, slug, description, rewards) in enumerate(demo):
+            if not self.institution.is_default:
+                slug = f"{self.institution.slug}-{slug}"
             sponsor, _ = Sponsor.objects.get_or_create(
                 slug=slug, defaults={"name": name, "description": description, "order": order}
             )

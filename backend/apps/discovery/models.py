@@ -4,9 +4,19 @@ from django.db import models
 from django.utils import timezone
 
 from apps.profiles.models import Skill
+from apps.tenants.context import default_institution_id
+from apps.tenants.managers import TenantManager
 
 
 class Challenge(models.Model):
+    institution = models.ForeignKey(
+        "tenants.Institution",
+        on_delete=models.CASCADE,
+        related_name="challenges",
+        default=default_institution_id,
+        verbose_name="OTM",
+    )
+
     class Kind(models.TextChoices):
         DAILY = "daily", "Kunlik"
         WEEKLY = "weekly", "Haftalik"
@@ -46,6 +56,8 @@ class Challenge(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
 
+    objects = TenantManager()
+
     class Meta:
         verbose_name = "challenge"
         verbose_name_plural = "challenge'lar"
@@ -66,6 +78,8 @@ class Challenge(models.Model):
 
 
 class Submission(models.Model):
+    tenant_path = "user__institution"
+
     class Status(models.TextChoices):
         PENDING = "pending", "Tekshirilmoqda"
         ACCEPTED = "accepted", "Qabul qilindi"
@@ -85,6 +99,8 @@ class Submission(models.Model):
     ai_suggestion = models.JSONField("AI taklifi", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    objects = TenantManager()
+
     class Meta:
         verbose_name = "yechim"
         verbose_name_plural = "yechimlar"
@@ -98,11 +114,15 @@ class Submission(models.Model):
 class TalentFlag(models.Model):
     """O'qituvchining «bu talabada uchqun bor» belgisi."""
 
+    tenant_path = "student__institution"
+
     student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="talent_flags")
     flagged_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
     area = models.CharField("yo'nalish", max_length=20, choices=Skill.Category.choices)
     note = models.TextField("izoh")
     created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = TenantManager()
 
     class Meta:
         verbose_name = "iqtidor belgisi"

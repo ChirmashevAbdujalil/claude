@@ -2,9 +2,12 @@ from django.conf import settings
 from django.db import models
 
 from apps.profiles.models import Skill
+from apps.tenants.managers import TenantManager
 
 
 class Project(models.Model):
+    tenant_path = "owner__institution"
+
     class Stage(models.TextChoices):
         IDEA = "idea", "G'oya"
         PROTOTYPE = "prototype", "Prototip"
@@ -27,6 +30,8 @@ class Project(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    objects = TenantManager()
+
     class Meta:
         verbose_name = "loyiha"
         verbose_name_plural = "loyihalar"
@@ -42,6 +47,8 @@ class Project(models.Model):
 
 
 class ProjectMember(models.Model):
+    tenant_path = "user__institution"
+
     class Status(models.TextChoices):
         PENDING = "pending", "So'rov yuborilgan"
         ACTIVE = "active", "A'zo"
@@ -52,6 +59,8 @@ class ProjectMember(models.Model):
     message = models.CharField("xabar", max_length=500, blank=True)
     status = models.CharField("holat", max_length=10, choices=Status.choices, default=Status.PENDING)
     joined_at = models.DateTimeField(auto_now_add=True)
+
+    objects = TenantManager()
 
     class Meta:
         verbose_name = "loyiha a'zosi"

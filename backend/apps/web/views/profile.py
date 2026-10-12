@@ -108,6 +108,7 @@ def resume(request):
         # SVG'ni o'zimiz yasaymiz, unda foydalanuvchi kiritgan matn yo'q
         "preview_qr": mark_safe(resume_lib.qr_svg(portfolio)) if portfolio else "",
         "ai_ready": ai_services.is_configured(),
+        "ai_plan_locked": not ai_services.feature_enabled(user, "resume_ai"),
         "ai_left": ai_services.ai_resume_uses_left(user),
         "checklist": [
             ("Kamida 3 ta ko'nikma", user.skills.count() >= 3),
@@ -124,7 +125,9 @@ def resume(request):
 @require_POST
 def resume_ai(request):
     lang = _lang(request)
-    if not ai_services.is_configured():
+    if not ai_services.feature_enabled(request.user, "resume_ai"):
+        messages.error(request, ai_services.PLAN_LOCKED)
+    elif not ai_services.is_configured():
         messages.error(request, ai_services.NOT_CONFIGURED)
     elif run_service(request, ai_services.write_resume, request.user, lang):
         messages.success(request, "AI xulosani yozdi. Tekshirib, kerak bo'lsa tahrirlang ✨")

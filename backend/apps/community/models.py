@@ -3,12 +3,17 @@ import secrets
 from django.conf import settings
 from django.db import models
 
+from apps.tenants.context import default_institution_id
+from apps.tenants.managers import TenantManager
+
 
 def new_checkin_code() -> str:
     return secrets.token_urlsafe(16)
 
 
 class Post(models.Model):
+    tenant_path = "author__institution"
+
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="posts")
     text = models.TextField("matn", max_length=5000)
     image = models.ImageField("rasm", upload_to="posts/", blank=True)
@@ -18,6 +23,8 @@ class Post(models.Model):
     likes = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="liked_posts")
     is_hidden = models.BooleanField("yashirilgan (moderatsiya)", default=False)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    objects = TenantManager()
 
     class Meta:
         verbose_name = "post"
@@ -29,10 +36,14 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
+    tenant_path = "author__institution"
+
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="comments")
     text = models.TextField("matn", max_length=1000)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = TenantManager()
 
     class Meta:
         verbose_name = "izoh"
@@ -44,6 +55,13 @@ class Comment(models.Model):
 
 
 class Event(models.Model):
+    institution = models.ForeignKey(
+        "tenants.Institution",
+        on_delete=models.CASCADE,
+        related_name="events",
+        default=default_institution_id,
+        verbose_name="OTM",
+    )
     title = models.CharField("nomi", max_length=200)
     description = models.TextField("tavsif")
     location = models.CharField("joy", max_length=200)
@@ -55,6 +73,8 @@ class Event(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
 
+    objects = TenantManager()
+
     class Meta:
         verbose_name = "tadbir"
         verbose_name_plural = "tadbirlar"
@@ -65,10 +85,14 @@ class Event(models.Model):
 
 
 class EventRegistration(models.Model):
+    tenant_path = "user__institution"
+
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="registrations")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="event_registrations")
     registered_at = models.DateTimeField(auto_now_add=True)
     attended_at = models.DateTimeField("kelgan vaqti", null=True, blank=True)
+
+    objects = TenantManager()
 
     class Meta:
         verbose_name = "ro'yxatdan o'tish"

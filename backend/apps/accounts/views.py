@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.db import transaction
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
@@ -7,9 +6,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Faculty, User
+from .models import Faculty
 from .serializers import FacultySerializer, MeSerializer, TelegramAuthSerializer, TokenPairSerializer
-from .telegram import TelegramAuthError, verify_init_data
+from .telegram import TelegramAuthError, get_or_create_telegram_user, verify_init_data
 
 
 class TelegramAuthView(APIView):
@@ -27,21 +26,9 @@ class TelegramAuthView(APIView):
                 settings.TELEGRAM_BOT_TOKEN,
                 settings.TELEGRAM_AUTH_MAX_AGE,
             )
+            user, created = get_or_create_telegram_user(tg_user)
         except TelegramAuthError as exc:
             return Response({"detail": str(exc)}, status=status.HTTP_401_UNAUTHORIZED)
-
-        with transaction.atomic():
-            user, created = User.objects.get_or_create(
-                telegram_id=tg_user["id"],
-                defaults={
-                    "username": f"tg{tg_user['id']}",
-                    "first_name": tg_user.get("first_name", "")[:150],
-                    "last_name": tg_user.get("last_name", "")[:150],
-                },
-            )
-            if created:
-                user.set_unusable_password()
-                user.save(update_fields=["password"])
 
         if not user.is_active:
             return Response({"detail": "Hisob bloklangan"}, status=status.HTTP_403_FORBIDDEN)

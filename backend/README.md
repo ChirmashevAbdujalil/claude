@@ -86,6 +86,40 @@ Telegram Mini App ulash: @BotFather'da bot yarating, `TELEGRAM_BOT_TOKEN` ni `.e
 - **Profil to'liqligi**: 6 bandli ro'yxat va foiz.
 - **Holat chizig'i**: yechim, yutuq va arizada «Yuborildi → Tekshirilmoqda → Natija».
 
+## SaaS: bir nechta OTM uchun
+
+Platforma bitta serverda bir nechta OTMga xizmat qiladi. Har bir OTMning foydalanuvchilari, fakultetlari,
+topshiriqlari, loyihalari, tadbirlari, do'koni va statistikasi boshqalaridan to'liq ajratilgan.
+
+- **Qaysi OTM?** So'rov manzilidan aniqlanadi: `tatu.talenthub.uz` (subdomen) yoki OTMning o'z domeni.
+  `SAAS_BASE_DOMAIN` bo'sh bo'lsa, platforma bitta OTM (`DEFAULT_INSTITUTION_*`) uchun ishlaydi.
+- **Ajratish qanday ishlaydi?** `apps/tenants/` ichida: middleware joriy OTMni o'rnatadi, modellar
+  menejeri (`TenantManager`) har bir so'rovni shu OTM bilan avtomatik cheklaydi. Kod biror joyda filtrni
+  unutsa ham boshqa OTM ma'lumoti ko'rinmaydi. Login, portfolio manzili va Telegram ID butun platforma bo'yicha noyob.
+- **Tariflar** (`apps/tenants/plans.py`): Pilot (bepul, 300 talaba), Standart, Premium. Tarif talabalar limiti va
+  imkoniyatlarni belgilaydi: AI Mentor, AI rezyume, homiylar, o'z logotipi va ranglari, OTMlararo liga.
+  Narxlar taxminiy, ularni o'zingiz o'zgartirasiz.
+
+| Sahifa | Manzil | Kim uchun |
+|---|---|---|
+| Taqdimot, tariflar, ulanish arizasi | `/saas/` | OTMlar (ommaviy) |
+| Platforma paneli: OTMlar, MRR, arizalarni tasdiqlash | `/platform/` | Platforma egasi (superuser) |
+| OTM sozlamalari: logotip, ranglar, fakultetlar, tarif | `/settings/otm/` | Rektorat / OTM administratori |
+| OTMlararo liga | `/arena/otm-ligasi/` | Hamma |
+
+Yangi OTM ulash (ariza tasdiqlanganda ham shu ishlaydi):
+
+```bash
+python manage.py create_institution "Toshkent axborot texnologiyalari universiteti" TATU --slug tatu --plan standart
+python manage.py seed --demo --institution tatu   # ixtiyoriy: demo ma'lumotlar
+```
+
+Lokal sinov: `http://tatu.localhost:8000` (Chrome va Firefox `*.localhost` ni o'z kompyuteringizga yo'naltiradi).
+
+Serverga joylashtirish: DNS'da `*.talenthub.uz` yozuvini serverga yo'naltiring, `.env` da
+`SAAS_BASE_DOMAIN=talenthub.uz` va `DJANGO_ALLOWED_HOSTS=.talenthub.uz,talenthub.uz` qiling, wildcard SSL sertifikati oling.
+Telegram bot hozircha butun platforma uchun bitta.
+
 ## Bildirishnomalar va Telegram bot
 
 Muhim hodisalarda (yechim tekshirildi, yutuq tasdiqlandi, nishon olindi, jamoaga qabul qilindi, izoh yozildi) bildirishnoma saytda saqlanadi. Talaba Telegram orqali kirgan bo'lsa, botga ham xabar boradi.

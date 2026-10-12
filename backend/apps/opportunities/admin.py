@@ -1,11 +1,13 @@
 from django.contrib import admin
 from django.db.models import Count, Q, Sum
 
+from apps.tenants.admin import TenantAdminMixin
+
 from .models import Application, Opportunity, Redemption, Reward, Sponsor
 
 
 @admin.register(Opportunity)
-class OpportunityAdmin(admin.ModelAdmin):
+class OpportunityAdmin(TenantAdminMixin, admin.ModelAdmin):
     list_display = ["title", "kind", "organization", "min_level", "deadline", "is_active"]
     list_filter = ["kind", "is_active"]
     search_fields = ["title", "organization"]
@@ -25,7 +27,7 @@ class ApplicationAdmin(admin.ModelAdmin):
 
 
 @admin.register(Sponsor)
-class SponsorAdmin(admin.ModelAdmin):
+class SponsorAdmin(TenantAdminMixin, admin.ModelAdmin):
     list_display = ["name", "is_active", "order", "reward_count", "delivered", "coins_value"]
     list_editable = ["is_active", "order"]
     prepopulated_fields = {"slug": ["name"]}
@@ -57,7 +59,7 @@ class SponsorAdmin(admin.ModelAdmin):
 
 
 @admin.register(Reward)
-class RewardAdmin(admin.ModelAdmin):
+class RewardAdmin(TenantAdminMixin, admin.ModelAdmin):
     list_display = ["emoji", "name", "price", "stock", "sponsor", "is_active"]
     list_display_links = ["emoji", "name"]
     list_editable = ["price", "stock", "is_active"]

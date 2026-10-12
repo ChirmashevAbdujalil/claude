@@ -3,18 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>{% block title %}Iqtidorlar platformasi{% endblock %} · ANDTI Talent Hub</title>
-  <meta name="description" content="{% block description %}Andijon davlat texnika instituti iqtidorli talabalarini kashf qiluvchi va rivojlantiruvchi platforma{% endblock %}">
-  <meta name="theme-color" content="#062d3b">
+  <title>{% block title %}Iqtidorlar platformasi{% endblock %} · {{ brand_name }}</title>
+  <meta name="description" content="{% block description %}{{ institution_name }} iqtidorli talabalarini kashf qiluvchi va rivojlantiruvchi platforma{% endblock %}">
+  <meta name="theme-color" content="{% if theme_colors %}{{ theme_colors.0 }}{% else %}#062d3b{% endif %}">
   <script>try { var t = localStorage.getItem("theme"); if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t); } catch (e) {}</script>
+  {% if institution.logo %}<link rel="icon" href="{{ institution.logo.url }}">{% else %}
   <link rel="icon" type="image/png" sizes="32x32" href="{% static 'web/img/adti-logo-32.png' %}">
-  <link rel="icon" type="image/png" sizes="64x64" href="{% static 'web/img/adti-logo-64.png' %}">
+  <link rel="icon" type="image/png" sizes="64x64" href="{% static 'web/img/adti-logo-64.png' %}">{% endif %}
   <link rel="apple-touch-icon" href="{% static 'web/img/apple-touch-icon.png' %}">
   <meta property="og:image" content="{% static 'web/img/adti-logo-512.webp' %}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'web/css/app.css' %}">
+  {% if theme_colors %}<style>:root, :root[data-theme] { --brand: {{ theme_colors.0 }}; --primary-strong: {{ theme_colors.0 }}; --gradient: linear-gradient(135deg, {{ theme_colors.0 }} 0%, {{ theme_colors.1 }} 100%); }</style>{% endif %}
   {% block head %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}"

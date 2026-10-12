@@ -47,6 +47,7 @@ def ai_home(request):
             "used": used,
             "limit": settings.AI_DAILY_MESSAGE_LIMIT,
             "ai_ready": services.is_configured(),
+            "ai_plan_locked": not services.feature_enabled(request.user, "ai"),
         },
     )
 

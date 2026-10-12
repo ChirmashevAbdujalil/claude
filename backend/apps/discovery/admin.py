@@ -1,10 +1,12 @@
 from django.contrib import admin
 
+from apps.tenants.admin import TenantAdminMixin
+
 from .models import Challenge, Submission, TalentFlag
 
 
 @admin.register(Challenge)
-class ChallengeAdmin(admin.ModelAdmin):
+class ChallengeAdmin(TenantAdminMixin, admin.ModelAdmin):
     list_display = ["title", "kind", "difficulty", "category", "xp_reward", "starts_at", "ends_at", "is_published"]
     list_filter = ["kind", "difficulty", "category", "is_published"]
     search_fields = ["title"]
@@ -14,8 +16,7 @@ class ChallengeAdmin(admin.ModelAdmin):
             obj.created_by = request.user
         super().save_model(request, obj, form, change)
 
-    def get_exclude(self, request, obj=None):
-        return ["created_by"]
+    exclude = ["created_by"]
 
 
 @admin.register(Submission)

@@ -6,7 +6,7 @@
 <div class="auth-wrap" style="align-items:start; padding-top:32px">
   <div class="stack-lg" style="width:100%; max-width:640px">
     <div class="row-between">
-      <span class="brand">{% brand_logo 34 %}<span>ANDTI Talent Hub</span></span>
+      <span class="brand">{% brand_logo 34 %}<span>{{ brand_name }}</span></span>
       {% if step < 3 %}
       <form method="post" action="{% url 'web:welcome-skip' %}">{% csrf_token %}<button class="btn btn-ghost btn-sm">Keyinroq</button></form>
       {% endif %}

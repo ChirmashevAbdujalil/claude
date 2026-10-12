@@ -40,6 +40,19 @@ class AiUnavailable(AiError):
 NOT_CONFIGURED = "AI Mentor hali sozlanmagan: administrator .env fayliga ANTHROPIC_API_KEY kalitini yozishi kerak."
 
 
+PLAN_LOCKED = "Bu imkoniyat OTMingiz tarifiga kirmaydi. OTM administratori tarifni yangilashi mumkin."
+
+
+def feature_enabled(user, feature: str) -> bool:
+    """OTM tarifida shu AI imkoniyati bormi."""
+    institution = getattr(user, "institution", None)
+    return institution is None or institution.has_feature(feature)
+
+
+def is_ready(user, feature: str = "ai") -> bool:
+    return is_configured() and feature_enabled(user, feature)
+
+
 def is_configured() -> bool:
     """Claude API kaliti o'rnatilganmi. Bo'sh qiymat (.env.example dagi kabi) hisobga olinmaydi."""
     return bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN"))
@@ -65,6 +78,7 @@ def student_context(user) -> str:
     unknown = "ko'rsatilmagan"
     lines = [
         "Talaba haqida ma'lumot:",
+        f"- OTM: {user.institution.name if user.institution_id else unknown}",
         f"- Fakultet: {user.faculty.name if user.faculty else unknown}",
         f"- Kurs: {user.course or unknown}",
         f"- Platformadagi daraja: {level['name']} ({user.xp} XP)",
@@ -125,6 +139,8 @@ def _create(client=None, **kwargs):
 def reply(conversation: Conversation, text: str, client=None) -> Message:
     """Talaba xabariga AI javobini oladi va ikkalasini saqlaydi."""
     user = conversation.user
+    if not feature_enabled(user, "ai"):
+        raise AiUnavailable(PLAN_LOCKED)
     if messages_today(user) >= settings.AI_DAILY_MESSAGE_LIMIT:
         raise AiLimitExceeded(
             f"Bugungi limit tugadi ({settings.AI_DAILY_MESSAGE_LIMIT} ta xabar). Ertaga davom ettiramiz!"
@@ -186,6 +202,8 @@ def suggest_review(submission, client=None) -> dict:
 
     Talabaning ismi yuborilmaydi: faqat challenge sharti va javob matni.
     """
+    if not feature_enabled(submission.user, "ai"):
+        raise AiUnavailable(PLAN_LOCKED)
     challenge = submission.challenge
     parts = [
         f"Challenge: {challenge.title}",
@@ -272,6 +290,8 @@ def write_resume(user, lang: str = "uz", client=None) -> dict:
     Xulosa doim yangilanadi; sarlavha faqat bo'sh bo'lsa to'ldiriladi (talabaning o'z matnini buzmaslik uchun).
     """
     lang = "en" if lang == "en" else "uz"
+    if not feature_enabled(user, "resume_ai"):
+        raise AiUnavailable(PLAN_LOCKED)
     if ai_resume_uses_left(user) <= 0:
         raise AiLimitExceeded(
             f"Bugun AI bilan rezyume yozish limiti tugadi ({settings.RESUME_AI_DAILY_LIMIT} marta). "

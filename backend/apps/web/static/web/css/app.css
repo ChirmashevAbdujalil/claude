@@ -608,3 +608,18 @@ html, body { overflow-x: clip; }
   .resume-skills, .resume-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .resume-stats div:nth-child(3) { border-left: 0; }
 }
+
+/* ---------- OTM brendi (logotip yuklanmagan bo'lsa) ---------- */
+.brand-initials { display: inline-grid; place-items: center; flex: none; border-radius: 50%; background: var(--gradient); color: #fff; font-weight: 800; letter-spacing: -0.02em; }
+
+/* ---------- SaaS: tariflar ---------- */
+.pricing-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); align-items: stretch; }
+.pricing-card { position: relative; display: flex; flex-direction: column; gap: 10px; }
+.pricing-card.featured { border: 2px solid var(--accent); box-shadow: var(--shadow-lg); }
+.pricing-badge { position: absolute; top: -12px; right: 16px; }
+.pricing-price { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.02em; }
+.pricing-price small { font-size: 13px; font-weight: 600; color: var(--muted); }
+.pricing-list { list-style: none; padding: 0; margin: 4px 0 8px; display: grid; gap: 6px; align-content: start; flex: 1; font-size: 14px; }
+.pricing-list li::before { content: "✓"; color: var(--success); font-weight: 800; margin-right: 8px; }
+.usage-bar { height: 10px; }
+.list-item.is-me { background: var(--primary-soft); border-radius: 12px; padding-left: 10px; padding-right: 10px; }

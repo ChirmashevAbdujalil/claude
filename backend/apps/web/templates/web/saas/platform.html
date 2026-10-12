@@ -1,0 +1,59 @@
+{% extends "web/base.html" %}
+{% load web_tags %}
+{% block title %}Platforma boshqaruvi{% endblock %}
+
+{% block body %}
+<header class="landing-nav">
+  <a href="/platform/" class="brand"><span class="brand-logo brand-initials" style="width:40px;height:40px;font-size:14px">TH</span><span>Talent Hub<small>Platforma boshqaruvi</small></span></a>
+  <div class="row-sm">
+    <a href="/saas/" class="btn btn-ghost btn-sm">Taqdimot sahifasi</a>
+    <a href="{% url 'admin:index' %}" class="btn btn-primary btn-sm">{% icon "shield" "icon-sm" %} Admin panel</a>
+  </div>
+</header>
+
+<main style="max-width:1180px; margin:0 auto; padding:0 16px 48px" class="stack-lg">
+  <div class="kpi-grid">
+    <div class="card stat"><span class="stat-icon tone-primary">{% icon "home" %}</span><div><div class="stat-value">{{ totals.active }} / {{ totals.institutions }}</div><div class="stat-label">faol OTM</div></div></div>
+    <div class="card stat"><span class="stat-icon tone-info">{% icon "users" %}</span><div><div class="stat-value">{{ totals.students }}</div><div class="stat-label">talaba</div></div></div>
+    <div class="card stat"><span class="stat-icon tone-success">{% icon "flame" %}</span><div><div class="stat-value">{{ totals.active_week }}</div><div class="stat-label">7 kunda faol</div></div></div>
+    <div class="card stat"><span class="stat-icon tone-accent">{% icon "coin" %}</span><div><div class="stat-value">{{ totals.mrr|money }}</div><div class="stat-label">so'm · oylik tushum (MRR)</div></div></div>
+  </div>
+
+  <div class="card card-lg stack">
+    <div class="row-between wrap"><h2>OTMlar</h2><a href="{% url 'admin:tenants_institution_add' %}" class="btn btn-ghost btn-sm">{% icon "plus" "icon-sm" %} Qo'lda qo'shish</a></div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>OTM</th><th>Tarif</th><th>Talabalar</th><th>7 kunda faol</th><th>Jami XP</th><th>Holat</th></tr></thead>
+        <tbody>
+          {% for row in institutions %}
+          <tr>
+            <td><div class="bold">{{ row.obj.short_name }}</div><div class="tiny muted">{{ row.obj.name }} · {{ row.obj.slug }}</div></td>
+            <td><span class="chip {% if row.obj.plan == 'premium' %}chip-accent{% elif row.obj.plan == 'standart' %}chip-primary{% endif %}">{{ row.obj.plan_info.name }}</span>{% if row.obj.paid_until %}<div class="tiny muted">{{ row.obj.paid_until|date:"d.m.Y" }} gacha</div>{% endif %}</td>
+            <td>{{ row.students }}{% if row.limit %} / {{ row.limit }}<div class="progress" style="height:5px; margin-top:4px"><span style="width:{{ row.usage|default:0 }}%"></span></div>{% endif %}</td>
+            <td>{{ row.active_week }}</td>
+            <td>{{ row.total_xp }}</td>
+            <td>{% if row.obj.is_active %}<span class="chip chip-success">Faol</span>{% else %}<span class="chip chip-danger">To'xtatilgan</span>{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card card-lg stack">
+    <h2>Yangi ulanish arizalari {% if totals.requests %}<span class="chip chip-danger">{{ totals.requests }}</span>{% endif %}</h2>
+    <div class="list">
+      {% for r in requests %}
+      <div class="list-item" style="align-items:flex-start">
+        <span style="font-size:22px">🏛️</span>
+        <div class="grow"><div class="bold">{{ r.institution_name }} ({{ r.short_name }})</div>
+          <div class="small muted">{{ r.contact_name }}{% if r.position %}, {{ r.position }}{% endif %} · {{ r.phone }}{% if r.email %} · {{ r.email }}{% endif %}</div>
+          <div class="tiny muted">{{ r.get_plan_display }} tarif · ~{{ r.students|default:"?" }} talaba · {{ r.created_at|date:"d.m.Y H:i" }}</div>
+          {% if r.message %}<div class="small" style="margin-top:4px">{{ r.message }}</div>{% endif %}</div>
+        <form method="post" action="{% url 'web:platform-approve' r.pk %}">{% csrf_token %}<button class="btn btn-primary btn-sm">{% icon "check" "icon-sm" %} Tasdiqlash va ulash</button></form>
+      </div>
+      {% empty %}<p class="muted small">Yangi ariza yo'q.</p>{% endfor %}
+    </div>
+  </div>
+</main>
+{% endblock %}

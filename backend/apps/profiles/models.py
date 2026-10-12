@@ -2,6 +2,8 @@ from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from apps.tenants.managers import TenantManager
+
 
 class Skill(models.Model):
     class Category(models.TextChoices):
@@ -26,11 +28,15 @@ class Skill(models.Model):
 
 
 class UserSkill(models.Model):
+    tenant_path = "user__institution"
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="skills")
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE, related_name="user_skills", verbose_name="ko'nikma")
     level = models.PositiveSmallIntegerField(
         "daraja", default=1, validators=[MinValueValidator(1), MaxValueValidator(5)]
     )
+
+    objects = TenantManager()
 
     class Meta:
         verbose_name = "talaba ko'nikmasi"
@@ -44,12 +50,16 @@ class UserSkill(models.Model):
 class Endorsement(models.Model):
     """O'qituvchi talabaning ko'nikmasini tasdiqlaydi."""
 
+    tenant_path = "user_skill__user__institution"
+
     user_skill = models.ForeignKey(UserSkill, on_delete=models.CASCADE, related_name="endorsements")
     endorsed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="given_endorsements"
     )
     comment = models.CharField("izoh", max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = TenantManager()
 
     class Meta:
         verbose_name = "tasdiq"
@@ -61,6 +71,8 @@ class Endorsement(models.Model):
 
 
 class Achievement(models.Model):
+    tenant_path = "user__institution"
+
     class Kind(models.TextChoices):
         OLYMPIAD = "olympiad", "Olimpiada"
         HACKATHON = "hackathon", "Hakaton"
@@ -103,6 +115,8 @@ class Achievement(models.Model):
     xp_awarded = models.PositiveIntegerField("berilgan XP", default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    objects = TenantManager()
+
     class Meta:
         verbose_name = "yutuq"
         verbose_name_plural = "yutuqlar"
@@ -117,6 +131,8 @@ class Resume(models.Model):
 
     Ko'nikmalar, yutuqlar, loyihalar va nishonlar rezyumega platformadan avtomatik olinadi.
     """
+
+    tenant_path = "user__institution"
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="resume")
     headline = models.CharField(
@@ -137,6 +153,8 @@ class Resume(models.Model):
     ai_uses_date = models.DateField(null=True, blank=True, editable=False)
     ai_uses = models.PositiveSmallIntegerField(default=0, editable=False)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = TenantManager()
 
     class Meta:
         verbose_name = "rezyume"

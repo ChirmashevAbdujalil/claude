@@ -31,7 +31,7 @@ if not SECRET_KEY:
         )
     SECRET_KEY = "dev-only-insecure-key"
 
-ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,.localhost")
 CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
 
 INSTALLED_APPS = [
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_filters",
     "drf_spectacular",
+    "apps.tenants",
     "apps.accounts",
     "apps.profiles",
     "apps.arena",
@@ -60,6 +61,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "apps.tenants.middleware.TenantMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -177,6 +179,13 @@ TELEGRAM_WEBHOOK_SECRET = os.environ.get("TELEGRAM_WEBHOOK_SECRET", "")
 
 # Saytning tashqi manzili: Telegram tugmalari va xabarlardagi havolalar uchun
 SITE_URL = os.environ.get("SITE_URL", "")
+
+# SaaS: bitta platformada bir nechta OTM. Har bir OTM o'z subdomenida ishlaydi: <slug>.SAAS_BASE_DOMAIN
+# Bo'sh bo'lsa, platforma bitta OTM (DEFAULT_INSTITUTION) uchun ishlaydi. Lokal sinov: <slug>.localhost:8000
+SAAS_BASE_DOMAIN = os.environ.get("SAAS_BASE_DOMAIN", "")
+DEFAULT_INSTITUTION_SLUG = os.environ.get("DEFAULT_INSTITUTION_SLUG", "andti")
+DEFAULT_INSTITUTION_NAME = os.environ.get("DEFAULT_INSTITUTION_NAME", "Andijon davlat texnika instituti")
+DEFAULT_INSTITUTION_SHORT = os.environ.get("DEFAULT_INSTITUTION_SHORT", "ANDTI")
 # Homiylar sahifasidagi aloqa: email, @telegram yoki to'liq havola
 SPONSOR_CONTACT = os.environ.get("SPONSOR_CONTACT", "@chirmashev")
 

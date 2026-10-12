@@ -1,5 +1,7 @@
 from django.contrib import admin
 
+from apps.tenants.admin import TenantAdminMixin
+
 from .models import Comment, Event, EventRegistration, Post
 
 
@@ -29,7 +31,7 @@ class RegistrationInline(admin.TabularInline):
 
 
 @admin.register(Event)
-class EventAdmin(admin.ModelAdmin):
+class EventAdmin(TenantAdminMixin, admin.ModelAdmin):
     list_display = ["title", "location", "starts_at", "ends_at", "xp_reward", "checkin_code"]
     readonly_fields = ["checkin_code"]
     exclude = ["created_by"]

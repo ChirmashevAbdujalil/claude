@@ -94,10 +94,12 @@ def opportunity_form(request):
 @login_required
 def shop(request):
     rewards = Reward.objects.filter(is_active=True).select_related("sponsor").order_by("price")
+    sponsors_on = request.institution.has_feature("sponsors")
     context = {
         "rewards": rewards,
         "redemptions": Redemption.objects.filter(user=request.user).select_related("reward", "reward__sponsor")[:10],
-        "has_sponsors": Sponsor.objects.filter(is_active=True).exists(),
+        "has_sponsors": sponsors_on and Sponsor.objects.filter(is_active=True).exists(),
+        "sponsors_on": sponsors_on,
     }
     return render(request, "web/opportunities/shop.html", context)
 
