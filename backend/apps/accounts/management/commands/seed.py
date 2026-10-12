@@ -64,11 +64,11 @@ SKILLS = {
 }
 
 REWARDS = [
-    ("Oshxona taloni", "Institut oshxonasida bir martalik tushlik", 50, 100),
-    ("Texnik kitob", "Kutubxonadan tanlangan kitob sovg'a sifatida", 150, 30),
-    ("Talent Hub futbolkasi", "Platformaning brendli futbolkasi", 300, 50),
-    ("Onlayn kurs sertifikati", "Hamkor platformada pullik kurs", 800, 10),
-    ("Rektor bilan choy", "Rektor bilan shaxsiy uchrashuv", 1500, 5),
+    ("Oshxona taloni", "Institut oshxonasida bir martalik tushlik", 50, 100, "🍽️"),
+    ("Texnik kitob", "Kutubxonadan tanlangan kitob sovg'a sifatida", 150, 30, "📚"),
+    ("Talent Hub futbolkasi", "Platformaning brendli futbolkasi", 300, 50, "👕"),
+    ("Onlayn kurs sertifikati", "Hamkor platformada pullik kurs", 800, 10, "🎓"),
+    ("Rektor bilan choy", "Rektor bilan shaxsiy uchrashuv", 1500, 5, "☕"),
 ]
 
 DEMO_STUDENTS = [
@@ -140,10 +140,12 @@ class Command(BaseCommand):
         for category, names in SKILLS.items():
             for name in names:
                 Skill.objects.get_or_create(name=name, defaults={"category": category})
-        for name, description, price, stock in REWARDS:
-            Reward.objects.get_or_create(
-                name=name, defaults={"description": description, "price": price, "stock": stock}
+        for name, description, price, stock, emoji in REWARDS:
+            reward, created = Reward.objects.get_or_create(
+                name=name, defaults={"description": description, "price": price, "stock": stock, "emoji": emoji}
             )
+            if not created and reward.emoji == "🎁":
+                Reward.objects.filter(pk=reward.pk).update(emoji=emoji)
         self.stdout.write(
             self.style.SUCCESS(
                 f"Nishonlar: {len(BADGES)}, ko'nikmalar: {Skill.objects.count()}, mukofotlar: {Reward.objects.count()}"

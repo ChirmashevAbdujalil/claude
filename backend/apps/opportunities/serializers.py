@@ -48,7 +48,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
 class RewardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reward
-        fields = ["id", "name", "description", "image", "price", "stock", "is_active"]
+        fields = ["id", "name", "description", "emoji", "image", "price", "stock", "is_active"]
 
 
 class RedemptionSerializer(serializers.ModelSerializer):

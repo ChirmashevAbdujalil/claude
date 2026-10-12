@@ -96,6 +96,34 @@
   #s5 .flow .box .e { display: block; font-size: 44px; margin-bottom: 6px; }
   #s5 .flow .arr { font-size: 48px; color: var(--teal); font-weight: 800; }
 
+  /* 5b. Tanga do'koni */
+  #shop .wallet { position: absolute; left: 1470px; top: 104px; width: 330px; padding: 22px 30px; border-radius: 28px; background: var(--grad); color: #fff; box-shadow: 0 24px 60px rgba(6,45,59,.3); }
+  #shop .wallet small { display: block; font-size: 20px; font-weight: 700; opacity: .8; }
+  #shop .wallet b { display: block; font-size: 64px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
+  #shop .item { position: absolute; top: 320px; width: 316px; padding: 22px; }
+  #shop .item .pic { height: 130px; border-radius: 20px; background: #eef3f5; display: grid; place-items: center; font-size: 72px; }
+  #shop .item h3 { margin-top: 18px; font-size: 28px; line-height: 1.15; height: 64px; display: flex; align-items: flex-end; }
+  #shop .item p { margin-top: 6px; font-size: 19px; font-weight: 600; color: var(--muted); line-height: 1.35; height: 52px; }
+  #shop .item .price { margin-top: 14px; font-size: 32px; font-weight: 800; }
+  #shop .item .stock { font-size: 19px; font-weight: 700; color: var(--muted); }
+  #shop .item .buy { margin-top: 14px; height: 54px; border-radius: 16px; display: grid; place-items: center; font-size: 22px; font-weight: 800; }
+  #shop .item .buy.ok { background: linear-gradient(135deg, #f59e0b, #f97316); color: #fff; }
+  #shop .item .buy.no { background: #f3f6f7; color: var(--muted); border: 1px solid var(--border); }
+  #shop .item .bar { margin-top: 10px; height: 8px; border-radius: 4px; background: #e6edf0; overflow: hidden; }
+  #shop .item .bar i { display: block; height: 100%; background: linear-gradient(90deg, #f59e0b, #f97316); transform-origin: 0 50%; }
+  #shop .ombor { position: absolute; left: 118px; top: 820px; width: 1684px; display: flex; align-items: center; gap: 24px; padding: 26px 32px; }
+  #shop .ombor .icon-tile { flex: none; }
+  #shop .ombor div { font-size: 28px; font-weight: 700; line-height: 1.35; }
+  #shop .ombor small { display: block; font-size: 22px; font-weight: 600; color: var(--muted); margin-top: 4px; }
+  #shop .flycoin { position: absolute; left: 1520px; top: 150px; font-size: 54px; opacity: 0; z-index: 5; }
+  #shop .toast { position: absolute; left: 50%; top: 40px; transform: translateX(-50%); display: flex; align-items: center; gap: 14px; padding: 18px 30px; border-radius: 20px; background: #fff; border-left: 8px solid #10b981; box-shadow: 0 20px 60px rgba(6,45,59,.25); font-size: 28px; font-weight: 800; z-index: 6; white-space: nowrap; }
+  #shop .buy { position: relative; }
+  #shop .ring { position: absolute; inset: -9px; border-radius: 22px; border: 5px solid #f59e0b; opacity: 0; }
+  #shop .flow2 { position: absolute; left: 130px; top: 330px; width: 640px; }
+  #shop .flow2 .st { display: flex; align-items: center; gap: 24px; padding: 22px 28px; margin-bottom: 18px; border-radius: 24px; background: #fff; border: 2px solid var(--border); }
+  #shop .flow2 .st .em { width: 66px; height: 66px; border-radius: 20px; display: grid; place-items: center; font-size: 34px; background: #eef3f5; flex: none; }
+  #shop .flow2 .st .tt { font-size: 30px; font-weight: 800; } #shop .flow2 .st .dd { font-size: 21px; font-weight: 600; color: var(--muted); margin-top: 2px; }
+
   /* 6. Imkoniyatlar */
   #s6 .feat { position: absolute; width: 520px; padding: 34px; }
   #s6 .feat h3 { margin-top: 22px; font-size: 34px; } #s6 .feat p { margin-top: 10px; font-size: 24px; font-weight: 600; color: var(--muted); line-height: 1.4; }
@@ -209,10 +237,41 @@
     </div>
   </section>
 
+  <!-- 5b. Tanga do'koni -->
+  <section class="scene light" id="shop">
+    <div class="abs" style="left:130px;top:110px">
+      <div class="eyebrow"><b>05</b> Tanga do'koni</div>
+      <h2 style="margin-top:22px">Tangalar real sovg'aga aylanadi</h2>
+    </div>
+    <div class="wallet"><small>Balansingiz</small><b>🪙 <span id="walletNum">488</span></b></div>
+    <div id="shopItems">
+    <div class="item card" style="left:118px"><div class="pic">🍽️</div><h3>Oshxona taloni</h3><p>Institut oshxonasida bir martalik tushlik</p><div class="row-between" style="display:flex;justify-content:space-between;align-items:baseline;margin-top:14px"><span class="price" style="margin:0">🪙 50</span><span class="stock">100 ta qoldi</span></div><div class="buy ok">Olish</div></div>
+    <div class="item card" style="left:460px"><div class="pic">📚</div><h3>Texnik kitob</h3><p>Kutubxonadan tanlangan kitob</p><div class="row-between" style="display:flex;justify-content:space-between;align-items:baseline;margin-top:14px"><span class="price" style="margin:0">🪙 150</span><span class="stock"><span id="kitobStock">30</span> ta qoldi</span></div><div class="buy ok" id="kitobBtn"><span id="kitobBtnText">Olish</span><i class="ring" id="buyRing"></i></div></div>
+    <div class="item card" style="left:802px"><div class="pic">👕</div><h3>Talent Hub futbolkasi</h3><p>Platformaning brendli futbolkasi</p><div class="row-between" style="display:flex;justify-content:space-between;align-items:baseline;margin-top:14px"><span class="price" style="margin:0">🪙 300</span><span class="stock">50 ta qoldi</span></div><div class="buy ok">Olish</div></div>
+    <div class="item card" style="left:1144px"><div class="pic">🎓</div><h3>Onlayn kurs sertifikati</h3><p>Hamkor platformada pullik kurs</p><div class="row-between" style="display:flex;justify-content:space-between;align-items:baseline;margin-top:14px"><span class="price" style="margin:0">🪙 800</span><span class="stock">10 ta qoldi</span></div><div class="buy no">Yana 312 🪙 kerak</div><div class="bar"><i style="width:61%"></i></div></div>
+    <div class="item card" style="left:1486px"><div class="pic">☕</div><h3>Rektor bilan choy</h3><p>Rektor bilan shaxsiy uchrashuv</p><div class="row-between" style="display:flex;justify-content:space-between;align-items:baseline;margin-top:14px"><span class="price" style="margin:0">🪙 1500</span><span class="stock">5 ta qoldi</span></div><div class="buy no">Yana 1012 🪙 kerak</div><div class="bar"><i style="width:33%"></i></div></div>
+    </div>
+    <div class="flycoin">🪙</div>
+    <div class="flycoin">🪙</div>
+    <div class="flycoin">🪙</div>
+    <div class="flycoin">🪙</div>
+    <div class="flycoin">🪙</div>
+    <div class="flycoin">🪙</div>
+    <div class="ombor card"><span class="icon-tile t-teal">📦</span><div>Ombor nazoratda: har bir sovg'aning soni cheklangan<small>Rektorat admin paneldan yangi sovg'a qo'shadi, narx va zaxirani belgilaydi</small></div></div>
+    <div class="toast" id="shopToast">✅ «Texnik kitob» sizniki! 🎁</div>
+    <div class="flow2" id="shopFlow">
+      <div class="st"><span class="em">🛒</span><div><div class="tt">Xarid qilindi</div><div class="dd">Tanga hamyondan avtomatik yechiladi</div></div></div>
+      <div class="st"><span class="em">📦</span><div><div class="tt">Tayyorlanmoqda</div><div class="dd">Xodim sovg'ani ombordan tayyorlaydi</div></div></div>
+      <div class="st"><span class="em">✅</span><div><div class="tt">Topshirildi</div><div class="dd">Talabalar ishlari bo'limidan olinadi</div></div></div>
+    </div>
+    <div class="browser" id="shopBrowser" style="left:830px;top:300px;width:990px"><div class="bar"><i></i><i></i><i></i><span>talent.andti.uz/shop</span></div>
+      <div class="view" style="height:619px"><img src="assets/shop-bought.webp" id="shopImg" alt=""></div></div>
+  </section>
+
   <!-- 6. Imkoniyatlar -->
   <section class="scene light" id="s6">
     <div class="abs center" style="left:0;right:0;top:90px">
-      <div class="eyebrow"><b>05</b> Imkoniyatlar</div>
+      <div class="eyebrow"><b>06</b> Imkoniyatlar</div>
       <h2 style="margin-top:22px">Talabaga kerakli hamma narsa bir joyda</h2>
     </div>
     <div class="feat card" style="left:150px;top:330px"><span class="icon-tile t-gold">🏆</span><h3>Arena va reyting</h3><p>Haftalik reyting, fakultetlar ligasi, 14 xil nishon va streak</p></div>
@@ -226,7 +285,7 @@
   <!-- 7. O'qituvchi -->
   <section class="scene light" id="s7">
     <div class="abs" style="left:130px;top:140px;width:640px">
-      <div class="eyebrow"><b>06</b> O'qituvchi uchun</div>
+      <div class="eyebrow"><b>07</b> O'qituvchi uchun</div>
       <h2 style="margin-top:22px">Baholash tez, qaror o'qituvchida</h2>
       <p class="lead" style="margin-top:24px">Yechimlar, yutuqlar va ko'nikma tasdiqlari bitta tekshiruv navbatida</p>
     </div>
@@ -240,7 +299,7 @@
   <!-- 8. Rektorat -->
   <section class="scene light" id="s8">
     <div class="abs" style="left:130px;top:130px;width:700px">
-      <div class="eyebrow"><b>07</b> Rektorat uchun</div>
+      <div class="eyebrow"><b>08</b> Rektorat uchun</div>
       <h2 style="margin-top:22px">Institutning iqtidor xaritasi real vaqtda</h2>
     </div>
     <div class="browser" id="s8browser" style="left:880px;top:130px;width:940px"><div class="bar"><i></i><i></i><i></i><span>talent.andti.uz/insights</span></div>
@@ -255,7 +314,7 @@
   <!-- 9. Ishonch -->
   <section class="scene light" id="s9">
     <div class="abs center" style="left:0;right:0;top:120px">
-      <div class="eyebrow"><b>08</b> Qulay va ishonchli</div>
+      <div class="eyebrow"><b>09</b> Qulay va ishonchli</div>
       <h2 style="margin-top:22px">Har bir talabaning cho'ntagida</h2>
     </div>
     <div class="trust" style="left:120px;top:440px"><span class="icon-tile t-blue">📱</span><h3>Telefon va kompyuter</h3><p>Har qanday ekranga moslashadi</p></div>
@@ -268,7 +327,7 @@
   <!-- 10. Yo'l xaritasi -->
   <section class="scene light" id="s10">
     <div class="abs center" style="left:0;right:0;top:120px">
-      <div class="eyebrow"><b>09</b> Joriy etish</div>
+      <div class="eyebrow"><b>10</b> Joriy etish</div>
       <h2 style="margin-top:22px">Bosqichma-bosqich, xavfsiz boshlash</h2>
     </div>
     <div class="line"><i id="s10line"></i></div>
@@ -295,9 +354,9 @@
   // Kadr-kadr yozib olish uchun: hamma narsa bitta to'xtatilgan timeline'da, vaqt bo'yicha aniq hisoblanadi.
   const S = [
     ["s1", 0, 7.5], ["s2", 7.5, 16.5], ["s3", 16.5, 26.5], ["s4", 26.5, 45], ["s5", 45, 57],
-    ["s6", 57, 69], ["s7", 69, 79], ["s8", 79, 91], ["s9", 91, 99], ["s10", 99, 108], ["s11", 108, 116],
+    ["shop", 57, 77], ["s6", 77, 89], ["s7", 89, 99], ["s8", 99, 111], ["s9", 111, 119], ["s10", 119, 128], ["s11", 128, 136],
   ];
-  const DURATION = 116;
+  const DURATION = 136;
   const tl = gsap.timeline({ paused: true });
   const ease = "power3.out";
   const q = (sel) => document.querySelectorAll(sel);
@@ -308,7 +367,7 @@
     if (i < S.length - 1) tl.to("#" + id, { autoAlpha: 0, duration: 0.7, ease: "power1.inOut" }, b - 0.35);
   });
   tl.fromTo("#watermark", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 7.8);
-  tl.to("#watermark", { opacity: 0, duration: 0.6 }, 107.5);
+  tl.to("#watermark", { opacity: 0, duration: 0.6 }, 127.5);
 
   // 1. Kirish
   tl.fromTo("#s1 .ring", { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 2.2, stagger: 0.25, ease }, 0.2);
@@ -373,43 +432,79 @@
   tl.fromTo("#s5browser", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 1, ease }, 49.6);
   tl.fromTo("#s5img", { scale: 1, transformOrigin: "60% 25%" }, { scale: 1.14, duration: 6, ease: "sine.inOut" }, 50.8);
 
+  // 5b. Tanga do'koni
+  tl.fromTo("#shop .eyebrow, #shop h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 57.4);
+  tl.fromTo("#shop .wallet", { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.8, ease: "back.out(1.8)" }, 57.9);
+  tl.fromTo("#shop .item", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.45, ease }, 58.4);
+  tl.fromTo("#shop .item .buy", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, stagger: 0.2, ease: "back.out(2)" }, 61.4);
+  tl.fromTo("#shop .item .bar i", { scaleX: 0 }, { scaleX: 1, duration: 1.2, ease }, 62.4);
+  tl.fromTo("#shop .ombor", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease }, 63.2);
+  // Xarid: "Olish" bosiladi, tangalar hamyondan uchib ketadi
+  tl.fromTo("#buyRing", { scale: 1.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "power2.out" }, 64.4);
+  tl.to("#kitobBtn", { scale: 0.92, duration: 0.12, yoyo: true, repeat: 1 }, 64.8);
+  tl.to("#shop .item:nth-child(2)", { y: -14, boxShadow: "0 30px 70px rgba(245,158,11,.35)", duration: 0.5, ease }, 64.8);
+  q("#shop .flycoin").forEach((c, i) => {
+    const t0 = 64.95 + i * 0.12;
+    tl.fromTo(c, { x: 0, y: 0, opacity: 0, scale: 1 }, { opacity: 1, duration: 0.08 }, t0)
+      .to(c, { x: -900, duration: 0.75, ease: "power1.inOut" }, t0)
+      .to(c, { y: 360, duration: 0.75, ease: "power2.in" }, t0)
+      .to(c, { scale: 0.4, opacity: 0, duration: 0.2 }, t0 + 0.6);
+  });
+  tl.to("#buyRing", { opacity: 0, duration: 0.4 }, 66.2);
+  tl.fromTo("#shopToast", { y: -120, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "back.out(1.8)" }, 66.1);
+  tl.to("#shopToast", { y: -120, opacity: 0, duration: 0.5, ease: "power2.in" }, 68.6);
+  // Keyin: xarid holati va haqiqiy do'kon sahifasi
+  tl.to("#shopItems, #shop .ombor", { y: 60, opacity: 0, duration: 0.6, ease: "power2.in" }, 67.6);
+  tl.to("#shop .wallet", { scale: 0.8, x: 40, y: -10, duration: 0.6, ease }, 67.6);
+  tl.fromTo("#shopBrowser", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, ease }, 68.2);
+  tl.fromTo("#shopImg", { scale: 1, transformOrigin: "100% 100%" }, { scale: 1.12, duration: 7.5, ease: "sine.inOut" }, 68.8);
+  tl.fromTo("#shopFlow .st", { x: -50, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, stagger: 1.3, ease }, 68.6);
+  [0, 1, 2].forEach((i) => {
+    tl.to(`#shopFlow .st:nth-child(${i + 1})`, { borderColor: i === 2 ? "#10b981" : "#168a9c", duration: 0.4 }, 68.9 + i * 1.3)
+      .to(`#shopFlow .st:nth-child(${i + 1}) .em`, { background: i === 2 ? "#d1fae5" : "#e2f0f4", duration: 0.4 }, 68.9 + i * 1.3);
+  });
+
   // 6. Imkoniyatlar
-  tl.fromTo("#s6 .eyebrow, #s6 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 57.4);
-  tl.fromTo("#s6 .feat", { y: 70, opacity: 0, scale: 0.94 }, { y: 0, opacity: 1, scale: 1, duration: 0.8, stagger: 0.55, ease }, 58.4);
-  tl.to("#s6 .feat .icon-tile", { rotate: 8, duration: 0.5, yoyo: true, repeat: 1, stagger: 0.25, ease: "sine.inOut" }, 63.5);
+  tl.fromTo("#s6 .eyebrow, #s6 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 77.4);
+  tl.fromTo("#s6 .feat", { y: 70, opacity: 0, scale: 0.94 }, { y: 0, opacity: 1, scale: 1, duration: 0.8, stagger: 0.55, ease }, 78.4);
+  tl.to("#s6 .feat .icon-tile", { rotate: 8, duration: 0.5, yoyo: true, repeat: 1, stagger: 0.25, ease: "sine.inOut" }, 83.5);
 
   // 7. O'qituvchi
-  tl.fromTo("#s7 .eyebrow, #s7 h2, #s7 .lead", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 69.4);
-  tl.fromTo("#s7browser", { x: 120, opacity: 0 }, { x: 0, opacity: 1, duration: 1, ease }, 70);
-  tl.fromTo("#s7 .callout", { x: -60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, stagger: 1.4, ease }, 72);
-  tl.fromTo("#s7browser .view img", { scale: 1, transformOrigin: "65% 25%" }, { scale: 1.12, duration: 7, ease: "sine.inOut" }, 71);
+  tl.fromTo("#s7 .eyebrow, #s7 h2, #s7 .lead", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 89.4);
+  tl.fromTo("#s7browser", { x: 120, opacity: 0 }, { x: 0, opacity: 1, duration: 1, ease }, 90);
+  tl.fromTo("#s7 .callout", { x: -60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, stagger: 1.4, ease }, 92);
+  tl.fromTo("#s7browser .view img", { scale: 1, transformOrigin: "65% 25%" }, { scale: 1.12, duration: 7, ease: "sine.inOut" }, 91);
 
   // 8. Rektorat
-  tl.fromTo("#s8 .eyebrow, #s8 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 79.4);
-  tl.fromTo("#s8browser", { x: 120, opacity: 0 }, { x: 0, opacity: 1, duration: 1, ease }, 80);
-  tl.fromTo("#s8stats > *", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.5, ease }, 81);
-  tl.fromTo("#s8img", { scale: 1, transformOrigin: "60% 30%" }, { scale: 1.12, duration: 7, ease: "sine.inOut" }, 82.5);
+  tl.fromTo("#s8 .eyebrow, #s8 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 99.4);
+  tl.fromTo("#s8browser", { x: 120, opacity: 0 }, { x: 0, opacity: 1, duration: 1, ease }, 100);
+  tl.fromTo("#s8stats > *", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.5, ease }, 101);
+  tl.fromTo("#s8img", { scale: 1, transformOrigin: "60% 30%" }, { scale: 1.12, duration: 7, ease: "sine.inOut" }, 102.5);
 
   // 9. Ishonch
-  tl.fromTo("#s9 .eyebrow, #s9 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 91.4);
-  tl.fromTo("#s9 .trust", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.45, ease: "back.out(1.6)" }, 92.3);
+  tl.fromTo("#s9 .eyebrow, #s9 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 111.4);
+  tl.fromTo("#s9 .trust", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.45, ease: "back.out(1.6)" }, 112.3);
 
   // 10. Yo'l xaritasi
-  tl.fromTo("#s10 .eyebrow, #s10 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 99.4);
-  tl.fromTo("#s10line", { scaleX: 0 }, { scaleX: 1, duration: 5, ease: "power1.inOut" }, 100.3);
-  tl.fromTo("#s10 .ms", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 1.15, ease: "back.out(1.6)" }, 100.4);
+  tl.fromTo("#s10 .eyebrow, #s10 h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.2, ease }, 119.4);
+  tl.fromTo("#s10line", { scaleX: 0 }, { scaleX: 1, duration: 5, ease: "power1.inOut" }, 120.3);
+  tl.fromTo("#s10 .ms", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 1.15, ease: "back.out(1.6)" }, 120.4);
 
   // 11. Yakun
-  tl.fromTo("#s11 .logo", { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.2, ease: "back.out(1.6)" }, 108.3);
-  tl.fromTo("#s11 h1, #s11 p", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 1, stagger: 0.35, ease }, 109.2);
+  tl.fromTo("#s11 .logo", { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.2, ease: "back.out(1.6)" }, 128.3);
+  tl.fromTo("#s11 h1, #s11 p", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 1, stagger: 0.35, ease }, 129.2);
   tl.to("#s11", { autoAlpha: 0, duration: 0.8 }, DURATION - 0.8);
 
   // Vaqtga bog'liq qo'shimcha holatlar (hisoblagich va progress)
   function custom(t) {
     document.getElementById("progress").style.width = (t / DURATION) * 100 + "%";
     document.getElementById("s4url").textContent = t < 41.3 ? "talent.andti.uz/challenges" : "talent.andti.uz/app";
-    const k = Math.min(Math.max((t - 81.3) / 1.5, 0), 1);
+    const k = Math.min(Math.max((t - 101.3) / 1.5, 0), 1);
     q("#s8stats [data-count]").forEach((el) => { el.textContent = Math.round(+el.dataset.count * k); });
+    const pay = Math.min(Math.max((t - 65.1) / 0.9, 0), 1);
+    document.getElementById("walletNum").textContent = Math.round(488 - 150 * pay);
+    document.getElementById("kitobStock").textContent = t < 65.9 ? 30 : 29;
+    document.getElementById("kitobBtnText").textContent = t < 65.9 ? "Olish" : "✓ Sizniki";
   }
 
   window.DURATION = DURATION;

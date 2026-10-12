@@ -16,7 +16,7 @@
   {% for reward in rewards %}
   <div class="card stack-sm">
     {% if reward.image %}<img src="{{ reward.image.url }}" alt="" style="border-radius:12px; aspect-ratio:16/10; object-fit:cover; width:100%">
-    {% else %}<div class="center" style="font-size:44px; padding:18px 0; background:var(--surface-2); border-radius:12px">🎁</div>{% endif %}
+    {% else %}<div class="center" style="font-size:44px; padding:18px 0; background:var(--surface-2); border-radius:12px">{{ reward.emoji|default:"🎁" }}</div>{% endif %}
     <h3>{{ reward.name }}</h3>
     {% if reward.description %}<p class="small muted">{{ reward.description }}</p>{% endif %}
     <div class="row-between" style="margin-top:auto; padding-top:8px">
@@ -39,7 +39,7 @@
   <h2 style="margin-bottom:6px">Xaridlarim</h2>
   <div class="list">
     {% for r in redemptions %}
-    <div class="list-item"><span style="font-size:22px">🎁</span>
+    <div class="list-item"><span style="font-size:22px">{{ r.reward.emoji|default:"🎁" }}</span>
       <div class="grow"><div class="bold">{{ r.reward.name }}</div><div class="small muted">{{ r.created_at|date:"d.m.Y" }} · 🪙 {{ r.price }}</div></div>
       <span class="chip {% if r.status == 'delivered' %}chip-success{% else %}chip-info{% endif %}">{{ r.get_status_display }}</span></div>
     {% endfor %}

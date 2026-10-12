@@ -25,7 +25,8 @@ class ApplicationAdmin(admin.ModelAdmin):
 
 @admin.register(Reward)
 class RewardAdmin(admin.ModelAdmin):
-    list_display = ["name", "price", "stock", "is_active"]
+    list_display = ["emoji", "name", "price", "stock", "is_active"]
+    list_display_links = ["emoji", "name"]
     list_editable = ["price", "stock", "is_active"]
 
 

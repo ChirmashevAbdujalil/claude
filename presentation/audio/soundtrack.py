@@ -14,7 +14,8 @@ from scipy.io import wavfile
 from scipy.signal import butter, sosfilt
 
 SR = 48_000
-DURATION = 116.0
+DURATION = 136.0
+SHIFT = 20.0  # do'kon sahnasidan keyingi sahnalar shu qadar surilgan
 rng = np.random.default_rng(7)
 
 
@@ -207,10 +208,10 @@ def music():
         t += BEAT / 2
         step += 1
 
-    # Yengil ritm: kick va hi-hat, 26.5-soniyadan (talaba yo'li) 106-soniyagacha
+    # Yengil ritm: kick va hi-hat, 26.5-soniyadan (talaba yo'li) 126-soniyagacha
     beat_t = 26.5
     k = 0
-    while beat_t < 106:
+    while beat_t < 126:
         if k % 2 == 0:
             n = int(0.3 * SR)
             tt = np.arange(n) / SR
@@ -230,7 +231,7 @@ def music():
     # Umumiy dinamika: boshida va oxirida tinchroq
     curve = np.interp(
         np.arange(total) / SR,
-        [0, 3, 7.5, 26.5, 104, 108, 113, DURATION],
+        [0, 3, 7.5, 26.5, 124, 128, 133, DURATION],
         [0.0, 0.7, 0.8, 1.0, 1.0, 0.85, 0.6, 0.0],
     )
     return track * curve[:, None]
@@ -238,8 +239,8 @@ def music():
 
 # ---------------------------------------------------------------- vaqt jadvali (video.html bilan bir xil)
 
-SCENE_ENDS = [7.5, 16.5, 26.5, 45, 57, 69, 79, 91, 99, 108]
-HEADERS = [7.9, 16.9, 26.9, 45.4, 57.4, 69.4, 79.4, 91.4, 99.4]
+SCENE_ENDS = [7.5, 16.5, 26.5, 45, 57, 77, 89, 99, 111, 119, 128]
+HEADERS = [7.9, 16.9, 26.9, 45.4, 57.4, 77.4, 89.4, 99.4, 111.4, 119.4]
 
 
 def events():
@@ -296,39 +297,64 @@ def events():
     add(49.4, success(0.2))
     add(49.6, whoosh(0.8, 0.8, 0.3, 0.22))
 
+    # 5b. Tanga do'koni
+    add(57.9, pop(480, 0.3, 0.6))
+    add(58.0, coin(0.2))
+    for i, s in enumerate(["C5", "D5", "E5", "G5", "A5"]):
+        add(58.4 + i * 0.45, pop(520 + i * 50, 0.24, -0.8 + i * 0.4))
+        add(58.4 + i * 0.45, bell(note(s), 0.6, 0.07, pan=-0.8 + i * 0.4))
+    for i in range(5):
+        add(61.4 + i * 0.2, tick(1900 + i * 150, 0.13, -0.8 + i * 0.4))
+    add(62.4, riser(1.2, 0.05))
+    add(63.2, pop(560, 0.28))
+    add(64.4, bell(note("E6"), 0.6, 0.1, pan=-0.4))
+    add(64.8, tick(1400, 0.25, -0.4))
+    add(64.82, pop(820, 0.3, -0.4))
+    for i in range(6):
+        add(64.95 + i * 0.12, tick(3200 - i * 120, 0.08, 0.6 - i * 0.2))
+    add(65.6, coin(0.3))
+    add(65.9, coin(0.22))
+    add(66.1, success(0.26))
+    add(67.6, whoosh(0.7, 0.2, -0.6, 0.25))
+    add(68.2, whoosh(0.8, 0.8, 0.3, 0.22))
+    for i, s in enumerate(["C5", "E5", "G5"]):
+        add(68.6 + i * 1.3, pop(600 + i * 60, 0.25, -0.6))
+        add(68.9 + i * 1.3, bell(note(s), 1.2, 0.18, pan=-0.6))
+    add(71.5, shimmer(0.08, 10, 0.8))
+
     # 6. Imkoniyatlar
     for i, s in enumerate(["C5", "E5", "G5", "A5", "C6", "E6"]):
-        add(58.4 + i * 0.55, pop(500 + i * 50, 0.24, -0.6 + (i % 3) * 0.6))
-        add(58.4 + i * 0.55, bell(note(s), 0.7, 0.07, pan=-0.6 + (i % 3) * 0.6))
+        add(SHIFT + 58.4 + i * 0.55, pop(500 + i * 50, 0.24, -0.6 + (i % 3) * 0.6))
+        add(SHIFT + 58.4 + i * 0.55, bell(note(s), 0.7, 0.07, pan=-0.6 + (i % 3) * 0.6))
 
     # 7. O'qituvchi
-    add(70.0, whoosh(0.8, 0.9, 0.3, 0.25))
+    add(SHIFT + 70.0, whoosh(0.8, 0.9, 0.3, 0.25))
     for i in range(3):
-        add(72 + i * 1.4, pop(620 + i * 40, 0.28, -0.5))
-    add(72.05, shimmer(0.06, 6, 0.4))
+        add(SHIFT + 72 + i * 1.4, pop(620 + i * 40, 0.28, -0.5))
+    add(SHIFT + 72.05, shimmer(0.06, 6, 0.4))
 
     # 8. Rektorat
-    add(80.0, whoosh(0.8, 0.9, 0.3, 0.25))
+    add(SHIFT + 80.0, whoosh(0.8, 0.9, 0.3, 0.25))
     for i in range(3):
-        add(81 + i * 0.5, pop(560 + i * 60, 0.25, -0.5))
+        add(SHIFT + 81 + i * 0.5, pop(560 + i * 60, 0.25, -0.5))
     for k in range(5):
-        add(81.3 + 1.5 * (k + 0.5) / 5, tick(2600, 0.14, -0.5))
+        add(SHIFT + 81.3 + 1.5 * (k + 0.5) / 5, tick(2600, 0.14, -0.5))
 
     # 9. Ishonch
     for i, s in enumerate(["G5", "A5", "C6", "D6", "E6"]):
-        add(92.3 + i * 0.45, pop(520 + i * 40, 0.22, -0.8 + i * 0.4))
-        add(92.3 + i * 0.45, bell(note(s), 0.6, 0.06, pan=-0.8 + i * 0.4))
+        add(SHIFT + 92.3 + i * 0.45, pop(520 + i * 40, 0.22, -0.8 + i * 0.4))
+        add(SHIFT + 92.3 + i * 0.45, bell(note(s), 0.6, 0.06, pan=-0.8 + i * 0.4))
 
     # 10. Yo'l xaritasi
-    add(100.3, riser(5.0, 0.1))
+    add(SHIFT + 100.3, riser(5.0, 0.1))
     for i, s in enumerate(["C5", "E5", "G5", "C6"]):
-        add(100.4 + i * 1.15, bell(note(s), 1.3, 0.22, pan=-0.75 + i * 0.5))
+        add(SHIFT + 100.4 + i * 1.15, bell(note(s), 1.3, 0.22, pan=-0.75 + i * 0.5))
 
     # 11. Yakun
-    add(108.25, impact(0.6))
-    add(108.6, shimmer(0.14, 18, 1.8))
-    add(109.2, bell(note("C6"), 2.5, 0.12))
-    add(109.25, bell(note("G6"), 2.5, 0.08))
+    add(SHIFT + 108.25, impact(0.6))
+    add(SHIFT + 108.6, shimmer(0.14, 18, 1.8))
+    add(SHIFT + 109.2, bell(note("C6"), 2.5, 0.12))
+    add(SHIFT + 109.25, bell(note("G6"), 2.5, 0.08))
     return ev
 
 

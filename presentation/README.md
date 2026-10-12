@@ -1,6 +1,6 @@
 # ANDTI Talent Hub: taqdimot videosi
 
-16:9 (1920×1080), taxminan 116 soniyali animatsion video. Ovozsiz, o'zbekcha matnlar bilan.
+16:9 (1920×1080), taxminan 136 soniyali animatsion video. Ovozsiz, o'zbekcha matnlar bilan.
 
 - `video.html`: videoning o'zi. Brauzerda ochsangiz, animatsiya avtomatik aylanib o'ynaydi.
 - `render.js`: sahifani kadrma-kadr suratga olib, MP4 ga yig'adi.

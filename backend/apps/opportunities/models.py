@@ -62,6 +62,7 @@ class Reward(models.Model):
 
     name = models.CharField("nomi", max_length=200)
     description = models.TextField("tavsif", blank=True)
+    emoji = models.CharField("belgi", max_length=8, default="🎁", help_text="Rasm bo'lmasa kartochkada ko'rinadi")
     image = models.ImageField("rasm", upload_to="rewards/", blank=True)
     price = models.PositiveIntegerField("narxi (tanga)")
     stock = models.PositiveIntegerField("zaxira", default=0)

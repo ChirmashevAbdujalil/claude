@@ -60,3 +60,10 @@ def test_out_of_stock(api, student):
     reward = Reward.objects.create(name="Noyob", price=1, stock=0)
     arena.award(student, arena.Reason.MANUAL, 100)
     assert api(student).post(f"/api/v1/rewards/{reward.id}/redeem/").status_code == 400
+
+
+def test_shop_shows_reward_emoji(client, make_user):
+    Reward.objects.update_or_create(name="Texnik kitob", defaults={"price": 150, "stock": 3, "emoji": "📚"})
+    client.force_login(make_user())
+    body = client.get("/shop/").content.decode()
+    assert "📚" in body
