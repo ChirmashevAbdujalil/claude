@@ -1,5 +1,5 @@
 // video.html ni kadrma-kadr suratga olib, ffmpeg orqali MP4 ga yig'adi.
-// Ishlatish: node render.js [chiqish.mp4] [fps]
+// Ishlatish: node render.js [chiqish.mp4] [fps]   (boshqa sahifa uchun: VIDEO_PAGE=pitch.html)
 //   PLAYWRIGHT_PATH, CHROMIUM_PATH, FFMPEG_PATH muhit o'zgaruvchilari bilan yo'llarni almashtirish mumkin.
 const path = require("path");
 const { spawn } = require("child_process");
@@ -12,7 +12,7 @@ const ffmpegPath = process.env.FFMPEG_PATH || "ffmpeg";
 (async () => {
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
-  await page.goto("file://" + path.join(__dirname, "video.html") + "?render=1");
+  await page.goto("file://" + path.join(__dirname, process.env.VIDEO_PAGE || "video.html") + "?render=1");
   await page.evaluate(() => window.ready);
   const duration = await page.evaluate(() => window.DURATION);
   const total = Math.round(duration * fps);

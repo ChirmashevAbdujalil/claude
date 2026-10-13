@@ -65,3 +65,27 @@ python audio/diktor_offline.py --model-dir vits-piper-kk_KZ-issai-high --chiqish
 
 Ovoz modeli: [ISSAI KazakhTTS](https://github.com/IS2AI/Kazakh_TTS) (CC-BY-4.0), Piper formatida
 [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx) orqali.
+
+## Pitch video: «Mening startap loyiham» tanlovi uchun (`pitch.html`)
+
+Taxminan 3 daqiqalik (178 soniya) hakamlar uchun video: rektor ko'targan muammo, yechim zanjiri, iqtidor
+diagnostikasi, iqtidorlar reyestri, mentor va reja, imkoniyatlarni moslash, gamifikatsiya, AI, rektorat
+hisoboti, harakatlar jurnali, SaaS va to'lovlar, tayyor MVP, yo'l xaritasi. Skrinshotlar `assets/pitch/` da.
+
+```bash
+cd presentation
+VIDEO_PAGE=pitch.html node render.js pitch-video.mp4 30          # video (ovozsiz)
+python audio/pitch_soundtrack.py pitch_soundtrack.wav             # musiqa va effektlar
+python audio/diktor_offline.py --model-dir vits-piper-kk_KZ-issai-high \
+    --matn audio/pitch_narration.json --uzunlik 178 --chiqish pitch_diktor.wav
+ffmpeg -i pitch-video.mp4 -i pitch_soundtrack.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k -shortest pitch-musiqali.mp4
+python audio/diktor_offline.py --model-dir vits-piper-kk_KZ-issai-high --matn audio/pitch_narration.json \
+    --uzunlik 178 --chiqish pitch_diktor.wav --video pitch-musiqali.mp4
+```
+
+Microsoft'ning haqiqiy o'zbekcha ovozi bilan (internet kerak, tavsiya etiladi):
+
+```bash
+python audio/ovozlash.py --video pitch-musiqali.mp4 --matn audio/pitch_narration.json            # Madina
+python audio/ovozlash.py --video pitch-musiqali.mp4 --matn audio/pitch_narration.json --ovoz sardor
+```

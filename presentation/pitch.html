@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>ANDTI Talent Hub: pitch video</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=block" rel="stylesheet">
+<style>
+  :root {
+    --brand: #062d3b; --primary: #0e5a73; --teal: #168a9c; --mint: #5cc6d9;
+    --gold: #f59e0b; --orange: #f97316; --green: #10b981; --red: #ef4444;
+    --bg: #f3f6f7; --text: #0b1d24; --muted: #5f747c; --card: #fff; --border: #dbe4e7;
+    --grad: linear-gradient(135deg, #062d3b 0%, #0e5a73 55%, #168a9c 100%);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #000; }
+  body { font-family: "Manrope", system-ui, sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; }
+  #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+  .scene { position: absolute; inset: 0; visibility: hidden; opacity: 0; overflow: hidden; }
+  .dark { background: radial-gradient(circle at 72% 28%, #0e5a73 0%, #062d3b 52%, #021118 100%); color: #fff; }
+  .light { background: var(--bg); }
+  .light::before { content: ""; position: absolute; width: 1000px; height: 1000px; right: -340px; top: -420px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(22,138,156,.16), transparent 65%); }
+  .light::after { content: ""; position: absolute; width: 760px; height: 760px; left: -280px; bottom: -360px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(245,158,11,.10), transparent 65%); }
+  .abs { position: absolute; }
+  h1 { font-size: 112px; font-weight: 800; letter-spacing: -0.045em; line-height: 1; }
+  h2 { font-size: 70px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.06; }
+  h3 { font-size: 34px; font-weight: 800; letter-spacing: -0.02em; }
+  .lead { font-size: 32px; font-weight: 500; line-height: 1.42; color: var(--muted); }
+  .dark .lead { color: rgba(255,255,255,.8); }
+  .eyebrow { display: inline-flex; align-items: center; gap: 14px; font-size: 22px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--teal); }
+  .dark .eyebrow { color: var(--mint); }
+  .eyebrow b { display: inline-grid; place-items: center; width: 46px; height: 46px; border-radius: 13px; background: var(--grad); color: #fff; letter-spacing: 0; font-size: 20px; }
+  .dark .eyebrow b { background: rgba(255,255,255,.14); }
+  .grad-text { background: linear-gradient(90deg, #168a9c, #5cc6d9); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .gold-text { background: linear-gradient(90deg, #f59e0b, #f97316); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .head { position: absolute; left: 120px; top: 96px; width: 1680px; }
+  .head h2 { margin-top: 18px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 28px; box-shadow: 0 14px 44px rgba(6,45,59,.09); }
+  .pill { position: absolute; display: inline-flex; align-items: center; gap: 12px; padding: 14px 26px; border-radius: 999px; font-size: 27px; font-weight: 800; background: #fff; box-shadow: 0 18px 44px rgba(6,45,59,.2); white-space: nowrap; }
+  .pill.gold { background: linear-gradient(135deg, #f59e0b, #f97316); color: #fff; }
+  .pill.teal { background: var(--grad); color: #fff; }
+  .icon-tile { width: 88px; height: 88px; border-radius: 26px; display: grid; place-items: center; font-size: 44px; flex: none; }
+  .t-teal { background: #e2f0f4; } .t-gold { background: #fff4dc; } .t-green { background: #e3f6ee; } .t-rose { background: #fdeaea; } .t-blue { background: #e6f1fb; } .t-violet { background: #efeafc; }
+
+  .browser { position: absolute; border-radius: 22px; overflow: hidden; background: #fff; box-shadow: 0 44px 110px rgba(6,45,59,.28), 0 0 0 1px rgba(6,45,59,.08); }
+  .browser .bar { height: 46px; background: #e9eff1; display: flex; align-items: center; gap: 10px; padding: 0 18px; }
+  .browser .bar i { width: 14px; height: 14px; border-radius: 50%; background: #f87171; }
+  .browser .bar i:nth-child(2) { background: #fbbf24; } .browser .bar i:nth-child(3) { background: #34d399; }
+  .browser .bar span { margin-left: 16px; height: 28px; flex: 1; max-width: 560px; border-radius: 8px; background: #fff; font-size: 16px; font-weight: 700; color: var(--muted); display: flex; align-items: center; padding: 0 14px; }
+  .browser .bar span::before { content: "🔒"; font-size: 12px; margin-right: 8px; }
+  .browser .view { position: relative; overflow: hidden; background: #f3f6f7; }
+  .browser .view img { position: absolute; left: 0; top: 0; width: 100%; display: block; transform-origin: 50% 0; }
+  .phone { position: absolute; width: 390px; height: 820px; border-radius: 58px; background: #0b1d24; padding: 13px; box-shadow: 0 44px 110px rgba(6,45,59,.38); }
+  .phone .screen { position: relative; width: 100%; height: 100%; border-radius: 46px; overflow: hidden; background: #f3f6f7; }
+  .phone .screen img { position: absolute; left: 0; top: 36px; width: 100%; display: block; }
+  .phone .notch { position: absolute; left: 50%; top: 24px; transform: translateX(-50%); width: 118px; height: 30px; border-radius: 20px; background: #0b1d24; z-index: 3; }
+
+  #progress { position: absolute; left: 0; bottom: 0; height: 6px; background: linear-gradient(90deg, #f59e0b, #168a9c); z-index: 50; }
+  #watermark { position: absolute; left: 54px; bottom: 30px; display: flex; align-items: center; gap: 12px; font-size: 21px; font-weight: 800; color: var(--brand); z-index: 40; opacity: 0; }
+  #watermark img { width: 44px; height: 44px; border-radius: 50%; background: #fff; box-shadow: 0 2px 10px rgba(6,45,59,.2); }
+
+  /* 1. Kirish */
+  #intro .ring { position: absolute; left: 50%; top: 42%; border-radius: 50%; border: 2px solid rgba(92,198,217,.3); transform: translate(-50%,-50%); }
+  #intro .logo { position: absolute; left: 50%; top: 210px; width: 290px; height: 290px; margin-left: -145px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 14px rgba(255,255,255,.08), 0 30px 90px rgba(0,0,0,.45); }
+  #intro .title { position: absolute; left: 0; right: 0; top: 560px; text-align: center; }
+  #intro .sub { position: absolute; left: 0; right: 0; top: 700px; text-align: center; font-size: 40px; font-weight: 600; color: rgba(255,255,255,.88); }
+  #intro .tag { position: absolute; left: 50%; top: 820px; transform: translateX(-50%); padding: 14px 30px; border-radius: 999px; border: 2px solid rgba(92,198,217,.5); font-size: 24px; font-weight: 800; letter-spacing: .22em; text-transform: uppercase; color: var(--mint); white-space: nowrap; }
+
+  /* 2. Rektor so'zi */
+  #quote .mark { position: absolute; left: 150px; top: 120px; font-size: 380px; line-height: 1; font-weight: 800; color: rgba(92,198,217,.22); }
+  #quote .text { position: absolute; left: 230px; top: 300px; width: 1460px; font-size: 62px; font-weight: 700; line-height: 1.28; letter-spacing: -0.02em; }
+  #quote .text em { font-style: normal; color: var(--gold); }
+  #quote .who { position: absolute; left: 230px; top: 790px; display: flex; align-items: center; gap: 22px; font-size: 30px; font-weight: 700; color: rgba(255,255,255,.85); }
+  #quote .who i { width: 70px; height: 4px; background: var(--gold); border-radius: 2px; }
+  #quote .who small { font-size: 22px; font-weight: 600; color: rgba(255,255,255,.55); margin-left: 6px; }
+
+  /* 3. Muammo */
+  #problem .pain { position: absolute; top: 380px; width: 520px; padding: 40px 38px; }
+  #problem .pain h3 { margin-top: 26px; font-size: 36px; line-height: 1.15; }
+  #problem .pain p { margin-top: 14px; font-size: 25px; font-weight: 600; color: var(--muted); line-height: 1.42; }
+  #problem .pain .x { position: absolute; right: 30px; top: 30px; width: 54px; height: 54px; border-radius: 50%; background: #fdeaea; color: var(--red); display: grid; place-items: center; font-size: 28px; font-weight: 800; }
+  #problem .result { position: absolute; left: 120px; right: 120px; top: 800px; display: flex; align-items: center; justify-content: center; gap: 18px; padding: 28px 34px; border-radius: 26px; background: linear-gradient(135deg, #fff4dc, #fdeaea); font-size: 32px; font-weight: 800; }
+  #problem .paper { position: absolute; padding: 12px 18px; border-radius: 14px; background: #fff; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(6,45,59,.12); font-size: 20px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+
+  /* 4. Yechim zanjiri */
+  #solution .node { position: absolute; top: 420px; width: 330px; text-align: center; }
+  #solution .node .c { width: 210px; height: 210px; margin: 0 auto; border-radius: 50%; display: grid; place-items: center; font-size: 92px; background: #fff; border: 6px solid var(--border); box-shadow: 0 24px 60px rgba(6,45,59,.14); }
+  #solution .node .n { margin-top: 26px; font-size: 38px; font-weight: 800; }
+  #solution .node .d { margin-top: 8px; font-size: 23px; font-weight: 600; color: var(--muted); line-height: 1.35; }
+  #solution .line { position: absolute; left: 330px; top: 520px; width: 1260px; height: 10px; border-radius: 5px; background: #dbe4e7; overflow: hidden; }
+  #solution .line i { display: block; width: 100%; height: 100%; background: linear-gradient(90deg, #168a9c, #f59e0b); transform-origin: 0 50%; }
+  #solution .roles { position: absolute; left: 0; right: 0; top: 860px; display: flex; justify-content: center; gap: 22px; }
+  #solution .roles span { padding: 14px 28px; border-radius: 999px; background: #fff; border: 1px solid var(--border); font-size: 25px; font-weight: 800; box-shadow: 0 10px 30px rgba(6,45,59,.08); }
+
+  /* 5. Diagnostika */
+  .side { position: absolute; left: 120px; top: 120px; width: 700px; }
+  .side h2 { margin-top: 18px; }
+  .side .lead { margin-top: 26px; }
+  .bullets { margin-top: 36px; display: grid; gap: 18px; }
+  .bullets div { display: flex; align-items: center; gap: 18px; font-size: 27px; font-weight: 700; }
+  .bullets b { width: 46px; height: 46px; flex: none; border-radius: 14px; display: grid; place-items: center; background: #e2f0f4; color: var(--primary); font-size: 22px; }
+  #diag .result { position: absolute; left: 1220px; top: 420px; width: 600px; padding: 34px 36px; }
+  #diag .result h3 { font-size: 30px; }
+  #diag .bar { display: grid; grid-template-columns: 290px 1fr 54px; gap: 14px; align-items: center; margin-top: 18px; font-size: 22px; font-weight: 700; }
+  #diag .bar .tr { height: 14px; border-radius: 7px; background: #e6edf0; overflow: hidden; }
+  #diag .bar .tr i { display: block; height: 100%; width: 100%; border-radius: 7px; background: linear-gradient(90deg, #0e5a73, #168a9c); transform-origin: 0 50%; }
+  #diag .bar:first-of-type .tr i { background: linear-gradient(90deg, #f59e0b, #f97316); }
+  #diag .bar b { text-align: right; font-variant-numeric: tabular-nums; }
+  #diag .winner { position: absolute; left: 1250px; top: 790px; }
+
+  /* 6. Reyestr */
+  #registry .stage { position: absolute; top: 330px; width: 380px; height: 120px; display: flex; align-items: center; gap: 20px; padding: 0 26px; border-radius: 26px; background: #fff; border: 3px solid var(--border); }
+  #registry .stage .no { width: 56px; height: 56px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 26px; font-weight: 800; background: #e2f0f4; color: var(--primary); }
+  #registry .stage div { font-size: 27px; font-weight: 800; line-height: 1.15; }
+  #registry .stage small { display: block; font-size: 19px; font-weight: 600; color: var(--muted); margin-top: 4px; }
+  #registry .arrow { position: absolute; top: 368px; font-size: 40px; color: var(--teal); font-weight: 800; }
+  #registry .src { position: absolute; left: 120px; width: 560px; display: flex; align-items: center; gap: 18px; padding: 22px 26px; font-size: 26px; font-weight: 800; }
+  #registry .src small { display: block; font-size: 20px; font-weight: 600; color: var(--muted); margin-top: 2px; }
+
+  /* 7. Mentor va reja */
+  .bubble { position: absolute; width: 650px; display: flex; gap: 18px; align-items: flex-start; padding: 22px 26px; border-radius: 26px; background: #fff; box-shadow: 0 20px 60px rgba(6,45,59,.2); }
+  .bubble .em { width: 60px; height: 60px; flex: none; border-radius: 18px; display: grid; place-items: center; font-size: 32px; background: #e2f0f4; }
+  .bubble b { display: block; font-size: 24px; line-height: 1.25; }
+  .bubble small { display: block; margin-top: 6px; font-size: 19px; font-weight: 600; color: var(--muted); }
+  .bubble > div { padding-right: 70px; }
+  .bubble .tg { position: absolute; right: 18px; top: 16px; font-size: 15px; font-weight: 800; color: #229ed9; }
+
+  /* 8. Moslash */
+  #match .opp { position: absolute; left: 120px; top: 420px; width: 560px; padding: 32px 34px; }
+  #match .opp .kind { display: inline-block; padding: 8px 18px; border-radius: 999px; background: #e6f1fb; color: #1d6fb8; font-size: 20px; font-weight: 800; }
+  #match .opp h3 { margin-top: 18px; font-size: 38px; line-height: 1.15; }
+  #match .opp p { margin-top: 12px; font-size: 23px; font-weight: 600; color: var(--muted); }
+  #match .opp .tracks { margin-top: 20px; display: flex; gap: 10px; }
+  #match .opp .tracks span { padding: 8px 16px; border-radius: 12px; background: #e2f0f4; color: var(--primary); font-size: 20px; font-weight: 800; }
+  #match .stu { position: absolute; width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; font-size: 44px; background: #fff; border: 4px solid var(--border); box-shadow: 0 10px 30px rgba(6,45,59,.12); }
+  #match .stu .ok { position: absolute; right: -10px; top: -10px; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; background: var(--green); color: #fff; opacity: 0; }
+  #match svg { position: absolute; left: 0; top: 0; pointer-events: none; }
+  #match .beam { stroke: #f59e0b; stroke-width: 4; fill: none; stroke-linecap: round; }
+
+  /* 9. Motivatsiya */
+  #game .feat { position: absolute; left: 120px; width: 600px; display: flex; align-items: center; gap: 22px; padding: 22px 26px; }
+  #game .feat div { font-size: 28px; font-weight: 800; }
+  #game .feat small { display: block; font-size: 21px; font-weight: 600; color: var(--muted); margin-top: 4px; }
+
+  /* 10. AI */
+  #ai .aicard { position: absolute; top: 360px; width: 530px; overflow: hidden; }
+  #ai .aicard .shot { height: 380px; overflow: hidden; position: relative; border-bottom: 1px solid var(--border); background: #f3f6f7; }
+  #ai .aicard .shot img { position: absolute; width: 900px; }
+  #ai .aicard .body { padding: 28px 30px; }
+  #ai .aicard h3 { display: flex; align-items: center; gap: 14px; font-size: 32px; }
+  #ai .aicard p { margin-top: 10px; font-size: 23px; font-weight: 600; color: var(--muted); line-height: 1.4; }
+
+  /* 11. Hisobot */
+  #report .pdf { position: absolute; left: 1290px; top: 150px; width: 520px; border-radius: 10px; box-shadow: 0 40px 100px rgba(6,45,59,.35); overflow: hidden; background: #fff; }
+  #report .pdf img { width: 100%; display: block; }
+  #report .pdfchip { position: absolute; left: 1230px; top: 870px; }
+
+  /* 12. Ishonch */
+  #trust .block { position: absolute; top: 470px; width: 250px; padding: 22px; border-radius: 22px; background: #fff; border: 3px solid var(--border); box-shadow: 0 14px 40px rgba(6,45,59,.1); }
+  #trust .block b { display: block; font-size: 22px; } #trust .block small { display: block; margin-top: 6px; font-size: 18px; font-weight: 600; color: var(--muted); }
+  #trust .block code { display: block; margin-top: 12px; font: 700 17px ui-monospace, Menlo, monospace; color: var(--primary); }
+  #trust .link { position: absolute; top: 540px; width: 74px; height: 6px; background: var(--teal); border-radius: 3px; }
+  #trust .verdict { position: absolute; left: 0; right: 0; top: 720px; text-align: center; }
+  #trust .guards { position: absolute; left: 0; right: 0; top: 840px; display: flex; justify-content: center; gap: 26px; }
+  #trust .guards span { display: inline-flex; align-items: center; gap: 12px; padding: 16px 26px; border-radius: 20px; background: #fff; border: 1px solid var(--border); font-size: 24px; font-weight: 800; box-shadow: 0 10px 30px rgba(6,45,59,.08); }
+
+  /* 13. SaaS */
+  #saas .plan { position: absolute; top: 640px; width: 400px; padding: 28px 30px; }
+  #saas .plan .nm { font-size: 30px; font-weight: 800; } #saas .plan .pr { margin-top: 8px; font-size: 40px; font-weight: 800; letter-spacing: -0.02em; }
+  #saas .plan .pr small { font-size: 20px; font-weight: 700; color: var(--muted); }
+  #saas .plan p { margin-top: 10px; font-size: 21px; font-weight: 600; color: var(--muted); line-height: 1.4; }
+  #saas .plan.hot { border: 3px solid var(--gold); }
+  #saas .pay { position: absolute; padding: 18px 34px; border-radius: 18px; font-size: 34px; font-weight: 800; color: #fff; box-shadow: 0 16px 40px rgba(6,45,59,.2); }
+
+  /* 14. MVP */
+  #mvp .num { position: absolute; top: 380px; width: 380px; text-align: center; }
+  #mvp .num b { display: block; font-size: 128px; font-weight: 800; letter-spacing: -0.05em; line-height: 1; }
+  #mvp .num span { display: block; margin-top: 14px; font-size: 28px; font-weight: 700; color: rgba(255,255,255,.8); }
+  #mvp .mods { position: absolute; left: 120px; right: 120px; top: 700px; display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; }
+  #mvp .mods span { padding: 12px 22px; border-radius: 999px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18); font-size: 23px; font-weight: 700; }
+
+  /* 15. Yo'l xaritasi */
+  #road .line { position: absolute; left: 240px; top: 560px; height: 8px; width: 1440px; border-radius: 4px; background: #dbe4e7; overflow: hidden; }
+  #road .line i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #168a9c, #f59e0b); transform-origin: 0 50%; }
+  #road .ms { position: absolute; top: 508px; width: 380px; margin-left: -190px; text-align: center; }
+  #road .ms .dot { width: 110px; height: 110px; margin: 0 auto; border-radius: 50%; display: grid; place-items: center; font-size: 50px; background: #fff; border: 6px solid #168a9c; box-shadow: 0 16px 40px rgba(6,45,59,.18); }
+  #road .ms .when { margin-top: 24px; font-size: 22px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--teal); }
+  #road .ms h3 { margin-top: 8px; font-size: 32px; } #road .ms p { margin-top: 8px; font-size: 22px; font-weight: 600; color: var(--muted); line-height: 1.35; }
+
+  /* 16. Yakun */
+  #final .logo { position: absolute; left: 50%; top: 170px; width: 250px; height: 250px; margin-left: -125px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 14px rgba(255,255,255,.08), 0 30px 80px rgba(0,0,0,.4); }
+  #final h1 { position: absolute; left: 0; right: 0; top: 480px; text-align: center; }
+  #final .claim { position: absolute; left: 0; right: 0; top: 620px; text-align: center; font-size: 42px; font-weight: 700; color: rgba(255,255,255,.9); }
+  #final .cta { position: absolute; left: 50%; top: 740px; transform: translateX(-50%); padding: 22px 46px; border-radius: 999px; background: linear-gradient(135deg, #f59e0b, #f97316); font-size: 38px; font-weight: 800; color: #fff; white-space: nowrap; box-shadow: 0 20px 60px rgba(249,115,22,.4); }
+  #final .org { position: absolute; left: 0; right: 0; top: 900px; text-align: center; font-size: 24px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--mint); }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- 1. Kirish -->
+  <section class="scene dark" id="intro">
+    <div class="ring" style="width:520px;height:520px"></div>
+    <div class="ring" style="width:760px;height:760px"></div>
+    <div class="ring" style="width:1020px;height:1020px"></div>
+    <img class="logo" src="assets/logo.webp" alt="">
+    <h1 class="title">ANDTI <span class="grad-text">Talent Hub</span></h1>
+    <div class="sub">Iqtidorli talabalar bilan ishlashning raqamli platformasi</div>
+    <div class="tag">Mening startap loyiham · 2026</div>
+  </section>
+
+  <!-- 2. Rektor so'zi -->
+  <section class="scene dark" id="quote">
+    <div class="mark">“</div>
+    <div class="text">Iqtidorli talabalar bilan ishlashda <em>tartibsizliklar</em> bor. Ularni tartibga solish va har birini <em>iqtidoriga qarab to'g'ri yo'naltirish</em> uchun raqamli platforma kerak.</div>
+    <div class="who"><i></i>ANDTI rektori, talabalar bilan uchrashuvda <small>(mazmunan)</small></div>
+  </section>
+
+  <!-- 3. Muammo -->
+  <section class="scene light" id="problem">
+    <div class="head"><div class="eyebrow"><b>01</b> Muammo</div><h2>Bugun iqtidor <span class="gold-text">yo'qolib qolmoqda</span></h2></div>
+    <div class="paper" style="left:1240px;top:150px">📄 iqtidorlilar_2025.xlsx</div>
+    <div class="paper" style="left:1500px;top:230px">💬 Telegram guruh</div>
+    <div class="paper" style="left:1320px;top:300px">🗂 qog'oz ro'yxat</div>
+    <div class="card pain" style="left:120px"><div class="icon-tile t-gold">📋</div><div class="x">✕</div><h3>Ro'yxatlar tarqoq</h3><p>Iqtidorli talabalar Excel, qog'oz va chatlarda: kim, qaysi yo'nalishda, hech kim bilmaydi.</p></div>
+    <div class="card pain" style="left:700px"><div class="icon-tile t-rose">🧑‍🏫</div><div class="x">✕</div><h3>Mentor yo'q</h3><p>Topilgan iqtidorga mas'ul ustoz va aniq reja biriktirilmagan: salohiyat o'z holiga tashlanadi.</p></div>
+    <div class="card pain" style="left:1280px"><div class="icon-tile t-blue">📭</div><div class="x">✕</div><h3>Imkoniyat yetmaydi</h3><p>Olimpiada, grant va tanlovlar haqida kerakli talaba kech biladi yoki umuman bilmaydi.</p></div>
+    <div class="result">⚠️ Natijada salohiyat ochilmay qoladi, institut esa o'z iqtidorlarini to'liq ko'rmaydi</div>
+  </section>
+
+  <!-- 4. Yechim -->
+  <section class="scene light" id="solution">
+    <div class="head" style="text-align:center"><div class="eyebrow"><b>02</b> Yechim</div><h2>Bitta platforma, <span class="grad-text">to'liq zanjir</span></h2></div>
+    <div class="line"><i></i></div>
+    <div class="node" style="left:165px"><div class="c">🧭</div><div class="n">Aniqlash</div><div class="d">diagnostika va<br>avtomatik reyestr</div></div>
+    <div class="node" style="left:585px"><div class="c">🧑‍🏫</div><div class="n">Mentor</div><div class="d">har bir iqtidorga<br>mas'ul ustoz</div></div>
+    <div class="node" style="left:1005px"><div class="c">🎯</div><div class="n">Reja</div><div class="d">muddatli maqsadlar<br>va eslatmalar</div></div>
+    <div class="node" style="left:1425px"><div class="c">🏆</div><div class="n">Natija</div><div class="d">olimpiada, maqola, patent<br>va hisobot</div></div>
+    <div class="roles"><span>🎓 Talaba</span><span>🧑‍🏫 O'qituvchi</span><span>🏛 Dekanat</span><span>⭐ Rektorat</span></div>
+  </section>
+
+  <!-- 5. Diagnostika -->
+  <section class="scene light" id="diag">
+    <div class="side" style="width:560px"><div class="eyebrow"><b>03</b> Aniqlash</div><h2>Iqtidor <span class="grad-text">diagnostikasi</span></h2>
+      <p class="lead">10 ta savol, 3 daqiqa. Natija faqat javobga emas, real ishga ham tayanadi.</p>
+      <div class="bullets"><div><b>70%</b>Qiziqish va uslub savollari</div><div><b>30%</b>Ko'nikma, yutuq va yechimlar</div><div><b>6</b>Iqtidor yo'nalishi</div></div>
+    </div>
+    <div class="browser" id="diagBrowser" style="left:740px;top:140px;width:880px"><div class="bar"><i></i><i></i><i></i><span>andti.talenthub.uz/mening-yolim/test</span></div><div class="view" style="height:600px"><img src="assets/pitch/diag.webp" alt=""></div></div>
+    <div class="card result" id="diagResult">
+      <h3>Natija</h3>
+      <div class="bar"><span>💻 IT va dasturlash</span><span class="tr"><i data-w="0.88"></i></span><b data-n="88">0</b></div>
+      <div class="bar"><span>⚙️ Ixtirochilik</span><span class="tr"><i data-w="0.61"></i></span><b data-n="61">0</b></div>
+      <div class="bar"><span>🚀 Startap</span><span class="tr"><i data-w="0.47"></i></span><b data-n="47">0</b></div>
+      <div class="bar"><span>🔬 Ilmiy tadqiqot</span><span class="tr"><i data-w="0.35"></i></span><b data-n="35">0</b></div>
+      <div class="bar"><span>🏅 Olimpiada</span><span class="tr"><i data-w="0.28"></i></span><b data-n="28">0</b></div>
+    </div>
+    <div class="pill gold winner">💻 Yo'nalish: IT va dasturlash</div>
+  </section>
+
+  <!-- 6. Reyestr -->
+  <section class="scene light" id="registry">
+    <div class="head"><div class="eyebrow"><b>04</b> Tartib</div><h2>Iqtidorlar <span class="grad-text">reyestri</span></h2></div>
+    <div class="stage" style="left:120px"><span class="no">1</span><div>Aniqlangan<small>reyestrga tushdi</small></div></div>
+    <div class="arrow" style="left:518px">→</div>
+    <div class="stage" style="left:560px"><span class="no">2</span><div>Mentor<small>biriktirildi</small></div></div>
+    <div class="arrow" style="left:958px">→</div>
+    <div class="stage" style="left:1000px"><span class="no">3</span><div>Rivojlanmoqda<small>rejasi bor</small></div></div>
+    <div class="arrow" style="left:1398px">→</div>
+    <div class="stage" style="left:1440px"><span class="no">4</span><div>Natija<small>olimpiada, patent</small></div></div>
+    <div class="card src" style="top:520px"><span class="icon-tile t-gold" style="width:70px;height:70px;font-size:34px">✨</span><div>O'qituvchi «uchqun» belgisi<small>bir bosishda reyestrga</small></div></div>
+    <div class="card src" style="top:650px"><span class="icon-tile t-green" style="width:70px;height:70px;font-size:34px">🏅</span><div>Tasdiqlangan natija<small>olimpiada, hakaton, maqola, patent</small></div></div>
+    <div class="card src" style="top:780px"><span class="icon-tile t-blue" style="width:70px;height:70px;font-size:34px">📊</span><div>Reyting va diagnostika<small>«E'tiborga loyiq» tavsiyalari</small></div></div>
+    <div class="browser" id="regBrowser" style="left:740px;top:500px;width:1060px"><div class="bar"><i></i><i></i><i></i><span>andti.talenthub.uz/iqtidorlar</span></div><div class="view" style="height:520px"><img id="regImg" src="assets/pitch/registry.webp" alt=""></div></div>
+  </section>
+
+  <!-- 7. Mentor va reja -->
+  <section class="scene light" id="plan">
+    <div class="side" style="width:620px"><div class="eyebrow"><b>05</b> Samarali yo'l</div><h2>Mentor va <span class="grad-text">shaxsiy reja</span></h2>
+      <p class="lead">Har bir iqtidorga ustoz biriktiriladi. Maqsadlar muddatli, nazorat avtomatik.</p></div>
+    <div class="browser" id="planBrowser" style="left:820px;top:120px;width:990px"><div class="bar"><i></i><i></i><i></i><span>andti.talenthub.uz/iqtidorlar/12</span></div><div class="view" style="height:820px"><img id="planImg" src="assets/pitch/profile.webp" alt=""></div></div>
+    <div class="bubble" style="left:110px;top:540px"><span class="tg">Telegram</span><span class="em">🧑‍🏫</span><div><b>Sizga mentor biriktirildi</b><small>Mentor bilan semestr rejasini tuzing</small></div></div>
+    <div class="bubble" style="left:110px;top:680px"><span class="tg">Telegram</span><span class="em" style="background:#fff4dc">⏰</span><div><b>Maqsad muddati 3 kundan keyin</b><small>Olimpiadaga tayyorlanish · 60%</small></div></div>
+    <div class="bubble" style="left:110px;top:820px"><span class="tg">Telegram</span><span class="em" style="background:#fdeaea">⚠️</span><div><b>Shogirdingiz maqsadi muddati o'tdi</b><small>Mentor va dekanatga xabar</small></div></div>
+  </section>
+
+  <!-- 8. Moslash -->
+  <section class="scene light" id="match">
+    <div class="head"><div class="eyebrow"><b>06</b> To'g'ri yo'naltirish</div><h2>Imkoniyat talabani <span class="gold-text">o'zi topadi</span></h2></div>
+    <div class="card opp"><span class="kind">Hakaton</span><h3>Respublika AI hakatoni</h3><p>IT Park · 48 soat</p><div class="tracks"><span>💻 IT</span><span>🚀 Startap</span></div></div>
+    <svg width="1920" height="1080" id="beams"></svg>
+    <div class="stu" style="left:860px;top:330px">💻<span class="ok">✓</span></div>
+    <div class="stu dim" style="left:1000px;top:470px">🎨</div>
+    <div class="stu" style="left:900px;top:640px">🚀<span class="ok">✓</span></div>
+    <div class="stu dim" style="left:1080px;top:800px">🔬</div>
+    <div class="stu" style="left:1140px;top:380px">💻<span class="ok">✓</span></div>
+    <div class="stu dim" style="left:1180px;top:590px">⚙️</div>
+    <div class="phone" id="matchPhone" style="left:1400px;top:180px"><div class="notch"></div><div class="screen"><img src="assets/pitch/m-notif.webp" alt=""></div></div>
+    <div class="pill teal" id="matchToast" style="left:1180px;top:140px">🎯 Sizga mos imkoniyat!</div>
+  </section>
+
+  <!-- 9. Motivatsiya -->
+  <section class="scene light" id="game">
+    <div class="side" style="width:620px"><div class="eyebrow"><b>07</b> Motivatsiya</div><h2>O'qish o'yin kabi <span class="gold-text">qiziqarli</span></h2></div>
+    <div class="card feat" style="top:420px"><span class="icon-tile t-gold">⚡</span><div>Ball va 6 daraja<small>har bir foydali ish uchun XP</small></div></div>
+    <div class="card feat" style="top:560px"><span class="icon-tile t-violet">🏅</span><div>14 xil nishon<small>daraja va yutuqlar uchun avtomatik</small></div></div>
+    <div class="card feat" style="top:700px"><span class="icon-tile t-green">🪙</span><div>Tangalar → real sovg'alar<small>homiylar qo'llab-quvvatlaydi</small></div></div>
+    <div class="browser" id="gameBrowser" style="left:800px;top:160px;width:1000px"><div class="bar"><i></i><i></i><i></i><span>andti.talenthub.uz/app</span></div><div class="view" style="height:700px"><img id="gameImg" src="assets/pitch/dash.webp" alt=""></div></div>
+    <div class="pill gold" id="xp1" style="left:1540px;top:250px">⚡ +50 XP</div>
+    <div class="pill" id="xp2" style="left:1580px;top:420px">🪙 +20 tanga</div>
+    <div class="pill" id="xp3" style="left:1520px;top:590px">🏅 Yangi nishon!</div>
+  </section>
+
+  <!-- 10. AI -->
+  <section class="scene light" id="ai">
+    <div class="head"><div class="eyebrow"><b>08</b> Sun'iy intellekt</div><h2>AI <span class="grad-text">har bir qadamda</span></h2></div>
+    <div class="card aicard" style="left:120px"><div class="shot"><img src="assets/pitch/ai.webp" style="left:-30px;top:-10px" alt=""></div><div class="body"><h3>🤖 AI Mentor</h3><p>24/7 maslahat: o'quv reja, karyera yo'li, loyiha g'oyasi.</p></div></div>
+    <div class="card aicard" style="left:695px"><div class="shot"><img src="assets/pitch/review.webp" style="left:-30px;top:-20px" alt=""></div><div class="body"><h3>🧑‍🏫 AI baho qoralamasi</h3><p>O'qituvchiga baho va izoh taklif qiladi, qaror esa o'qituvchida.</p></div></div>
+    <div class="card aicard" style="left:1270px"><div class="shot" style="background:#eef3f5"><img src="assets/pitch/pdf.webp" style="left:105px;top:-40px;width:320px;box-shadow:0 20px 50px rgba(6,45,59,.25)" alt=""></div><div class="body"><h3>📄 AI rezyume</h3><p>Portfolio asosida o'zbek va ingliz tilida rezyume, QR kodli PDF.</p></div></div>
+  </section>
+
+  <!-- 11. Hisobot -->
+  <section class="scene light" id="report">
+    <div class="side" style="width:520px"><div class="eyebrow"><b>09</b> Rektorat</div><h2>Bitta tugma: <span class="grad-text">rasmiy hisobot</span></h2>
+      <div class="bullets"><div><b>✓</b>Fakultetlar kesimi</div><div><b>✓</b>Mentorlar faoliyati</div><div><b>✓</b>Davr natijalari</div><div><b>✓</b>E'tibor talab qiladiganlar</div></div></div>
+    <div class="browser" id="repBrowser" style="left:660px;top:170px;width:820px"><div class="bar"><i></i><i></i><i></i><span>andti.talenthub.uz/iqtidorlar/hisobot</span></div><div class="view" style="height:700px"><img id="repImg" src="assets/pitch/report.webp" alt=""></div></div>
+    <div class="pdf" id="repPdf"><img src="assets/pitch/pdf.webp" alt=""></div>
+    <div class="pill gold pdfchip" id="repChip">⬇ PDF · Excel</div>
+  </section>
+
+  <!-- 12. Ishonch -->
+  <section class="scene light" id="trust">
+    <div class="head" style="text-align:center"><div class="eyebrow"><b>10</b> Ishonch</div><h2>O'zgartirib bo'lmaydigan <span class="grad-text">harakatlar jurnali</span></h2></div>
+    <div class="block" style="left:150px"><b>Rektorat</b><small>OTM sozlamalari</small><code>#4b02…9e1f</code></div>
+    <div class="link" style="left:403px"></div>
+    <div class="block" style="left:480px"><b>O'qituvchi</b><small>Baho: 10 → 40 XP</small><code>#8bb7…3570</code></div>
+    <div class="link" style="left:733px"></div>
+    <div class="block" id="tamper" style="left:810px"><b>Qo'lda berilgan ball</b><small>+150 XP, sababi bilan</small><code>#6ef9…2c0b</code></div>
+    <div class="link" id="tamperLink" style="left:1063px"></div>
+    <div class="block" style="left:1140px"><b>Payme</b><small>To'lov qabul qilindi</small><code>#e2a1…77d4</code></div>
+    <div class="link" style="left:1393px"></div>
+    <div class="block" style="left:1470px"><b>Kirish urinishi</b><small>muvaffaqiyatsiz, IP bilan</small><code>#29eb…de46</code></div>
+    <div class="verdict"><span class="pill teal" id="verdictOk" style="position:relative">✅ SHA-256 zanjir: kimdir yozuvni o'zgartirsa, darhol aniqlanadi</span></div>
+    <div class="guards"><span>🔐 Rollar va huquqlar</span><span>🏛 Har OTM alohida</span><span>🔑 Parollar shifrlangan</span><span>📤 CSV eksport</span></div>
+  </section>
+
+  <!-- 13. SaaS -->
+  <section class="scene light" id="saas">
+    <div class="side" style="width:620px;top:110px"><div class="eyebrow"><b>11</b> Biznes model</div><h2>SaaS: har bir <span class="grad-text">oliygoh uchun</span></h2>
+      <p class="lead">Har bir OTM o'z manzilida, ma'lumotlari to'liq alohida.</p></div>
+    <div class="browser" id="saasA" style="left:860px;top:90px;width:760px"><div class="bar"><i></i><i></i><i></i><span>andti.talenthub.uz</span></div><div class="view" style="height:440px"><img src="assets/pitch/landing.webp" alt=""></div></div>
+    <div class="browser" id="saasB" style="left:1080px;top:200px;width:760px"><div class="bar"><i></i><i></i><i></i><span>tatu.talenthub.uz</span></div><div class="view" style="height:440px"><img src="assets/pitch/tatu.webp" alt=""></div></div>
+    <div class="card plan" style="left:120px"><div class="nm">Pilot</div><div class="pr">Bepul <small>90 kun</small></div><p>300 talabagacha, sinab ko'rish uchun</p></div>
+    <div class="card plan hot" style="left:560px"><div class="nm">Standart ⭐</div><div class="pr">1,5 mln <small>so'm/oy</small></div><p>3000 talaba, homiylar, o'z brendi, AI rezyume</p></div>
+    <div class="card plan" style="left:1000px"><div class="nm">Premium</div><div class="pr">3,5 mln <small>so'm/oy</small></div><p>Cheksiz talaba, AI Mentor, OTMlararo liga</p></div>
+    <div class="pay" id="payme" style="left:1480px;top:690px;background:#33cccc">Payme</div>
+    <div class="pay" id="click" style="left:1480px;top:810px;background:#0072ff">Click</div>
+    <div class="abs" id="saasNote" style="left:120px;top:930px;font-size:20px;font-weight:600;color:var(--muted)">Narxlar pilot davomida aniqlashtiriladi · yillik to'lovda 2 oy bepul</div>
+  </section>
+
+  <!-- 14. MVP -->
+  <section class="scene dark" id="mvp">
+    <div class="head" style="text-align:center"><div class="eyebrow"><b>12</b> Holat</div><h2>Bu g'oya emas, <span class="gold-text">ishlaydigan mahsulot</span></h2></div>
+    <div class="num" style="left:150px"><b data-count="15">0</b><span>modul</span></div>
+    <div class="num" style="left:560px"><b data-count="6">0</b><span>foydalanuvchi roli</span></div>
+    <div class="num" style="left:970px"><b data-count="226">0</b><span>avtomatik test</span></div>
+    <div class="num" style="left:1380px"><b data-count="2">0</b><span>to'lov tizimi</span></div>
+    <div class="mods"><span>Iqtidorlar reyestri</span><span>Diagnostika</span><span>Mentor va reja</span><span>AI Mentor</span><span>Arena va nishonlar</span><span>Tangalar do'koni</span><span>Telegram bot</span><span>Rektorat hisoboti</span><span>Harakatlar jurnali</span><span>SaaS va Payme/Click</span></div>
+  </section>
+
+  <!-- 15. Yo'l xaritasi -->
+  <section class="scene light" id="road">
+    <div class="head" style="text-align:center"><div class="eyebrow"><b>13</b> Yo'l xaritasi</div><h2>ANDTI'dan <span class="grad-text">butun mintaqaga</span></h2></div>
+    <div class="line"><i></i></div>
+    <div class="ms" style="left:240px"><div class="dot">🧪</div><div class="when">2026 kuz</div><h3>ANDTI pilot</h3><p>Startaplar klubi va<br>2–3 fakultet</p></div>
+    <div class="ms" style="left:720px"><div class="dot">🏛</div><div class="when">2027 bahor</div><h3>Butun institut</h3><p>barcha fakultetlar,<br>rasmiy joriy etish</p></div>
+    <div class="ms" style="left:1200px"><div class="dot">🇺🇿</div><div class="when">2027</div><h3>Boshqa OTMlar</h3><p>dastlabki 3 ta oliygoh<br>obuna asosida</p></div>
+    <div class="ms" style="left:1680px"><div class="dot">🌍</div><div class="when">Keyin</div><h3>Markaziy Osiyo</h3><p>rus tili va mintaqa<br>bozorlari</p></div>
+  </section>
+
+  <!-- 16. Yakun -->
+  <section class="scene dark" id="final">
+    <img class="logo" src="assets/logo.webp" alt="">
+    <h1>ANDTI <span class="grad-text">Talent Hub</span></h1>
+    <div class="claim">Har bir iqtidor ko'rinadi, yo'naltiriladi va rivojlanadi</div>
+    <div class="cta">Iqtidoringizni kashf qiling!</div>
+    <div class="org">Andijon davlat texnika instituti · Startaplar klubi</div>
+  </section>
+
+  <div id="watermark"><img src="assets/logo.webp" alt="">ANDTI Talent Hub</div>
+  <div id="progress"></div>
+</div>
+
+<script src="assets/gsap.min.js"></script>
+<script>
+  const S = [
+    ["intro", 0, 7], ["quote", 7, 17], ["problem", 17, 29], ["solution", 29, 40], ["diag", 40, 53],
+    ["registry", 53, 66], ["plan", 66, 80], ["match", 80, 91], ["game", 91, 102], ["ai", 102, 112],
+    ["report", 112, 125], ["trust", 125, 135], ["saas", 135, 149], ["mvp", 149, 158], ["road", 158, 168],
+    ["final", 168, 178],
+  ];
+  const DURATION = 178;
+  const tl = gsap.timeline({ paused: true });
+  const ease = "power3.out";
+  const T = Object.fromEntries(S.map(([id, a]) => [id, a]));
+  const head = (id, extra = "") => tl.fromTo(`#${id} .eyebrow, #${id} h2${extra}`, { y: 44, opacity: 0 },
+    { y: 0, opacity: 1, duration: 0.9, stagger: 0.18, ease }, T[id] + 0.4);
+
+  // Moslash sahnasidagi nurlar: e'londan mos talabalargacha
+  const beams = document.getElementById("beams");
+  const from = [680, 520];
+  document.querySelectorAll("#match .stu:not(.dim)").forEach((el) => {
+    const x = parseFloat(el.style.left) + 48, y = parseFloat(el.style.top) + 48;
+    const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    p.setAttribute("d", `M${from[0]},${from[1]} C${from[0] + 120},${from[1]} ${x - 140},${y} ${x - 50},${y}`);
+    p.setAttribute("class", "beam");
+    p.setAttribute("pathLength", "1");
+    p.style.strokeDasharray = "1";
+    p.style.strokeDashoffset = "1";
+    beams.appendChild(p);
+  });
+
+  S.forEach(([id, a, b], i) => {
+    tl.fromTo("#" + id, { autoAlpha: 0 }, { autoAlpha: 1, duration: i === 0 ? 0.01 : 0.7, ease: "power1.inOut" }, a);
+    if (i < S.length - 1) tl.to("#" + id, { autoAlpha: 0, duration: 0.7, ease: "power1.inOut" }, b - 0.35);
+  });
+  tl.fromTo("#watermark", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 17.4);
+  tl.to("#watermark", { opacity: 0, duration: 0.5 }, 148.6);
+  tl.to("#watermark", { opacity: 1, duration: 0.5 }, 158.4);
+  tl.to("#watermark", { opacity: 0, duration: 0.5 }, 167.5);
+
+  // 1. Kirish
+  tl.fromTo("#intro .ring", { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 2.2, stagger: 0.25, ease }, 0.2);
+  tl.to("#intro .ring", { scale: 1.06, duration: 3.5, yoyo: true, repeat: 1, ease: "sine.inOut" }, 2.4);
+  tl.fromTo("#intro .logo", { scale: 0.3, opacity: 0, rotate: -40 }, { scale: 1, opacity: 1, rotate: 0, duration: 1.4, ease: "back.out(1.6)" }, 0.4);
+  tl.fromTo("#intro .title", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 1.1, ease }, 1.5);
+  tl.fromTo("#intro .sub", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 1, ease }, 2.2);
+  tl.fromTo("#intro .tag", { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.9, ease: "back.out(1.8)" }, 3.1);
+
+  // 2. Rektor so'zi: so'zlar ketma-ket paydo bo'ladi
+  const qt = document.querySelector("#quote .text");
+  qt.innerHTML = qt.innerHTML.replace(/(<em>.*?<\/em>|[^\s<]+)/g, (m) => m.startsWith("<em>")
+    ? m.replace(/<em>(.*?)<\/em>/, (_, inner) => inner.split(" ").map((w) => `<span class="w"><em>${w}</em></span>`).join(" "))
+    : `<span class="w">${m}</span>`);
+  tl.fromTo("#quote .mark", { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 1, ease: "back.out(1.6)" }, 7.3);
+  tl.fromTo("#quote .w", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.45, stagger: 0.17, ease }, 7.7);
+  tl.fromTo("#quote .who", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.8, ease }, 12.6);
+
+  // 3. Muammo
+  head("problem");
+  tl.fromTo("#problem .paper", { opacity: 0, y: -30, rotate: 0 }, { opacity: 1, y: 0, rotate: (i) => [-6, 5, -3][i], duration: 0.6, stagger: 0.2, ease: "back.out(2)" }, 17.9);
+  tl.to("#problem .paper", { y: "+=14", rotate: "+=3", duration: 1.6, yoyo: true, repeat: 3, ease: "sine.inOut", stagger: 0.3 }, 18.6);
+  tl.fromTo("#problem .pain", { y: 90, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 1.6, ease }, 18.8);
+  tl.fromTo("#problem .x", { scale: 0 }, { scale: 1, duration: 0.4, stagger: 1.6, ease: "back.out(3)" }, 19.6);
+  tl.fromTo("#problem .result", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease }, 24.4);
+
+  // 4. Yechim
+  head("solution");
+  tl.fromTo("#solution .line i", { scaleX: 0 }, { scaleX: 1, duration: 5.2, ease: "power1.inOut" }, 30.4);
+  tl.fromTo("#solution .node", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 1.4, ease: "back.out(1.6)" }, 30.3);
+  ["#168a9c", "#0e5a73", "#f59e0b", "#10b981"].forEach((c, i) => {
+    tl.to(`#solution .node:nth-of-type(${i + 3}) .c`, { borderColor: c, boxShadow: `0 0 0 10px ${c}22, 0 24px 60px rgba(6,45,59,.18)`, duration: 0.4 }, 30.9 + i * 1.4);
+  });
+  tl.fromTo("#solution .roles span", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, stagger: 0.2, ease }, 36.3);
+
+  // 5. Diagnostika
+  tl.fromTo("#diag .eyebrow, #diag h2, #diag .lead", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.18, ease }, 40.4);
+  tl.fromTo("#diag .bullets div", { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6, stagger: 0.3, ease }, 41.6);
+  tl.fromTo("#diagBrowser", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 1, ease }, 41.0);
+  tl.fromTo("#diagBrowser img", { scale: 1, transformOrigin: "50% 10%" }, { scale: 1.08, duration: 5, ease: "sine.inOut" }, 42);
+  tl.fromTo("#diagResult", { x: 120, opacity: 0 }, { x: 0, opacity: 1, duration: 0.9, ease }, 45.6);
+  tl.fromTo("#diagResult .tr i", { scaleX: 0 }, { scaleX: (i, el) => +el.dataset.w, duration: 1.6, stagger: 0.18, ease: "power2.out" }, 46.4);
+  tl.fromTo("#diag .winner", { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.7, ease: "back.out(2.2)" }, 48.8);
+  tl.to("#diag .winner", { y: -12, duration: 0.9, yoyo: true, repeat: 3, ease: "sine.inOut" }, 49.5);
+
+  // 6. Reyestr
+  head("registry");
+  tl.fromTo("#registry .stage, #registry .arrow", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, stagger: 0.18, ease }, 54.2);
+  ["#168a9c", "#0e5a73", "#f59e0b", "#10b981"].forEach((c, i) => {
+    const t = 55.8 + i * 1.1;
+    tl.to(`#registry .stage:nth-of-type(${2 * i + 2})`, { borderColor: c, boxShadow: `0 16px 40px ${c}33`, duration: 0.4 }, t)
+      .to(`#registry .stage:nth-of-type(${2 * i + 2}) .no`, { background: c, color: "#fff", duration: 0.4 }, t);
+  });
+  tl.fromTo("#registry .src", { x: -60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, stagger: 0.6, ease }, 58.6);
+  tl.fromTo("#regBrowser", { x: 140, opacity: 0 }, { x: 0, opacity: 1, duration: 1, ease }, 59.2);
+  tl.fromTo("#regImg", { y: 0 }, { y: -240, duration: 6, ease: "sine.inOut" }, 60.2);
+
+  // 7. Mentor va reja
+  tl.fromTo("#plan .eyebrow, #plan h2, #plan .lead", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.18, ease }, 66.4);
+  tl.fromTo("#planBrowser", { x: 140, opacity: 0 }, { x: 0, opacity: 1, duration: 1, ease }, 67);
+  tl.fromTo("#planImg", { y: 0 }, { y: -120, duration: 9, ease: "sine.inOut" }, 68.5);
+  tl.fromTo("#plan .bubble", { x: -80, opacity: 0, scale: 0.9 }, { x: 0, opacity: 1, scale: 1, duration: 0.6, stagger: 2.2, ease: "back.out(1.6)" }, 70.4);
+
+  // 8. Moslash: e'lon mos talabalarga "nur" bilan yetib boradi
+  head("match");
+  tl.fromTo("#match .opp", { x: -80, opacity: 0 }, { x: 0, opacity: 1, duration: 0.8, ease }, 81);
+  tl.fromTo("#match .stu", { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, stagger: 0.12, ease: "back.out(2)" }, 81.8);
+  tl.to("#match .stu.dim", { opacity: 0.35, filter: "grayscale(1)", duration: 0.5 }, 83.6);
+  tl.fromTo("#beams path", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.9, stagger: 0.25, ease: "power2.inOut" }, 83.8);
+  tl.to("#match .stu:not(.dim)", { borderColor: "#10b981", boxShadow: "0 0 0 10px rgba(16,185,129,.18)", duration: 0.4, stagger: 0.25 }, 84.6);
+  tl.fromTo("#match .stu .ok", { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, stagger: 0.25, ease: "back.out(3)" }, 84.7);
+  tl.fromTo("#matchPhone", { y: 160, opacity: 0 }, { y: 0, opacity: 1, duration: 1, ease }, 85.8);
+  tl.fromTo("#matchToast", { y: -60, opacity: 0, scale: 0.8 }, { y: 0, opacity: 1, scale: 1, duration: 0.6, ease: "back.out(2)" }, 86.8);
+
+  // 9. Motivatsiya
+  tl.fromTo("#game .eyebrow, #game h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.18, ease }, 91.4);
+  tl.fromTo("#game .feat", { x: -60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, stagger: 0.7, ease }, 92.4);
+  tl.fromTo("#gameBrowser", { x: 140, opacity: 0 }, { x: 0, opacity: 1, duration: 1, ease }, 92.6);
+  tl.fromTo("#gameImg", { scale: 1, transformOrigin: "40% 20%" }, { scale: 1.1, duration: 7, ease: "sine.inOut" }, 93.5);
+  ["#xp1", "#xp2", "#xp3"].forEach((id, i) => {
+    tl.fromTo(id, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(2.4)" }, 95 + i * 1.3)
+      .to(id, { y: -14, duration: 0.8, yoyo: true, repeat: 2, ease: "sine.inOut" }, 95.5 + i * 1.3);
+  });
+
+  // 10. AI
+  head("ai");
+  tl.fromTo("#ai .aicard", { y: 90, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 1.4, ease }, 103.2);
+  tl.fromTo("#ai .aicard .shot img", { scale: 1 }, { scale: 1.08, duration: 6, ease: "sine.inOut" }, 104);
+
+  // 11. Hisobot
+  tl.fromTo("#report .eyebrow, #report h2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.18, ease }, 112.4);
+  tl.fromTo("#report .bullets div", { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6, stagger: 0.5, ease }, 113.6);
+  tl.fromTo("#repBrowser", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 1, ease }, 113.2);
+  tl.fromTo("#repImg", { y: 0 }, { y: -260, duration: 6, ease: "sine.inOut" }, 114.5);
+  tl.fromTo("#repPdf", { x: 300, y: 120, rotate: 14, opacity: 0 }, { x: 0, y: 0, rotate: 3, opacity: 1, duration: 1.2, ease: "power3.out" }, 117.6);
+  tl.to("#repPdf", { rotate: -1, y: -10, duration: 3, ease: "sine.inOut" }, 118.8);
+  tl.fromTo("#repChip", { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(2.4)" }, 119.2);
+
+  // 12. Ishonch: zanjir bloklari bog'lanadi, buzish urinishi aniqlanadi
+  head("trust");
+  tl.fromTo("#trust .block", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, stagger: 0.35, ease: "back.out(1.6)" }, 126);
+  tl.fromTo("#trust .link", { scaleX: 0, transformOrigin: "0 50%" }, { scaleX: 1, duration: 0.4, stagger: 0.35 }, 126.4);
+  tl.to("#tamper", { borderColor: "#ef4444", backgroundColor: "#fdeaea", x: -6, duration: 0.08, repeat: 7, yoyo: true }, 129.2);
+  tl.to("#tamperLink", { backgroundColor: "#ef4444", scaleX: 0.3, duration: 0.3 }, 129.4);
+  tl.to("#tamper", { borderColor: "#10b981", backgroundColor: "#fff", x: 0, duration: 0.4 }, 131.0);
+  tl.to("#tamperLink", { backgroundColor: "#168a9c", scaleX: 1, duration: 0.4 }, 131.0);
+  tl.fromTo("#verdictOk", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease }, 130.2);
+  tl.fromTo("#trust .guards span", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, stagger: 0.2, ease }, 131.4);
+
+  // 13. SaaS
+  tl.fromTo("#saas .eyebrow, #saas h2, #saas .lead", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.18, ease }, 135.4);
+  tl.fromTo("#saasA", { x: 140, opacity: 0 }, { x: 0, opacity: 1, duration: 0.9, ease }, 136.2);
+  tl.fromTo("#saasB", { x: 200, opacity: 0 }, { x: 0, opacity: 1, duration: 0.9, ease }, 137.2);
+  tl.fromTo("#saas .plan", { y: 70, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, stagger: 0.5, ease }, 140.6);
+  tl.to("#saas .plan.hot", { y: -16, boxShadow: "0 30px 70px rgba(245,158,11,.3)", duration: 0.6, ease }, 142.4);
+  tl.fromTo("#payme, #click", { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, stagger: 0.4, ease: "back.out(2.4)" }, 144.4);
+  tl.fromTo("#saasNote", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 145.4);
+
+  // 14. MVP
+  head("mvp");
+  tl.fromTo("#mvp .num", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, stagger: 0.3, ease }, 150);
+  tl.fromTo("#mvp .mods span", { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, stagger: 0.12, ease: "back.out(2)" }, 152.6);
+
+  // 15. Yo'l xaritasi
+  head("road");
+  tl.fromTo("#road .line i", { scaleX: 0 }, { scaleX: 1, duration: 5, ease: "power1.inOut" }, 159);
+  tl.fromTo("#road .ms", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 1.2, ease: "back.out(1.6)" }, 159.1);
+
+  // 16. Yakun
+  tl.fromTo("#final .logo", { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.2, ease: "back.out(1.6)" }, 168.3);
+  tl.fromTo("#final h1, #final .claim", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 1, stagger: 0.35, ease }, 169.1);
+  tl.fromTo("#final .cta", { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.8, ease: "back.out(2)" }, 170.6);
+  tl.to("#final .cta", { scale: 1.05, duration: 0.9, yoyo: true, repeat: 3, ease: "sine.inOut" }, 171.6);
+  tl.fromTo("#final .org", { opacity: 0 }, { opacity: 1, duration: 0.8 }, 171.4);
+  tl.to("#final", { autoAlpha: 0, duration: 0.8 }, DURATION - 0.8);
+
+  function custom(t) {
+    document.getElementById("progress").style.width = (t / DURATION) * 100 + "%";
+    const k = Math.min(Math.max((t - 46.4) / 1.8, 0), 1);
+    document.querySelectorAll("#diagResult b[data-n]").forEach((el) => { el.textContent = Math.round(+el.dataset.n * k); });
+    const m = Math.min(Math.max((t - 150.2) / 1.6, 0), 1);
+    const eased = 1 - Math.pow(1 - m, 3);
+    document.querySelectorAll("#mvp [data-count]").forEach((el) => { el.textContent = Math.round(+el.dataset.count * eased); });
+  }
+
+  window.DURATION = DURATION;
+  window.seek = (t) => { tl.seek(t, true); custom(t); };
+  window.ready = Promise.all([
+    document.fonts.ready,
+    ...Array.from(document.images).map((img) => img.decode().catch(() => null)),
+  ]).then(() => { window.seek(0); return true; });
+
+  if (!/[?&]render=1/.test(location.search)) {
+    window.ready.then(() => {
+      const start = performance.now();
+      const loop = () => { window.seek(((performance.now() - start) / 1000) % DURATION); requestAnimationFrame(loop); };
+      loop();
+    });
+  }
+</script>
+</body>
+</html>
