@@ -5,6 +5,7 @@
 {% block content %}
 <div class="page-header">
   <div><h1>OTM sozlamalari 🏛️</h1><p>{{ institution.name }} · <a href="{{ site_url }}" target="_blank" rel="noopener">{{ site_url }}</a></p></div>
+  <a href="{% url 'web:audit-log' %}" class="btn btn-ghost btn-sm">{% icon "shield" "icon-sm" %} Harakatlar jurnali</a>
 </div>
 
 <div class="grid-2" style="align-items:start; margin-bottom:20px">

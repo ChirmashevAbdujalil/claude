@@ -30,6 +30,7 @@
 {% endif %}
 {% if user.is_institution_admin %}
 <a href="{% url 'web:institution-settings' %}" class="nav-link {% active 'institution-settings' %}">{% icon "edit" %} OTM sozlamalari</a>
+<a href="{% url 'web:audit-log' %}" class="nav-link {% active 'audit-log' %}">{% icon "shield" %} Harakatlar jurnali</a>
 {% endif %}
 {% if user.is_staff %}
 <a href="{% url 'admin:index' %}" class="nav-link">{% icon "shield" %} Admin panel</a>

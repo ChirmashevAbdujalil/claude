@@ -149,6 +149,27 @@ Muddati o'tgan OTMlarni 3 kunlik imtiyozdan keyin to'xtatish uchun buyruqni har 
 python manage.py check_subscriptions            # --dry-run: faqat ro'yxatni ko'rsatadi
 ```
 
+## Harakatlar jurnali (audit log)
+
+Kim, qachon, qayerdan (IP) va nimani o'zgartirgani `apps/audit/` da avtomatik yoziladi. Rektorat uni
+`/settings/otm/jurnal/` sahifasida ko'radi: filtrlar, CSV (Excel) eksport va yaxlitlikni tekshirish tugmasi bilan.
+Platforma egasi barcha OTMlar jurnalini `/admin/` da ko'radi.
+
+- **Nima yoziladi:** xodimlarning (o'qituvchi, dekanat, rektorat, administrator) muhim o'zgarishlari, ya'ni OTM
+  sozlamalari, foydalanuvchilar, rollar, bloklash, parol almashtirish, topshiriqlar, yechim baholari, yutuqlar,
+  qo'lda berilgan ball, do'kon, homiylar, tadbirlar va to'lovlar. Har o'zgarishda eski va yangi qiymat saqlanadi.
+  Tizimga kirish, chiqish va muvaffaqiyatsiz kirish urinishlari ham yoziladi. Payme, Click va obuna nazorati
+  «Tizim» nomidan yoziladi.
+- **Nima yozilmaydi:** talabalarning kundalik harakatlari va parollar (faqat «parol o'zgartirildi» degan fakt).
+- **O'zgartirib bo'lmaydi:** yozuvni tahrirlash va o'chirish kodda taqiqlangan. Har yozuv OTM bo'yicha oldingisining
+  SHA-256 xeshi bilan zanjirlanadi, shuning uchun bazada qo'lda o'zgartirish ham aniqlanadi:
+
+```bash
+python manage.py verify_audit_log   # butun bo'lsa: "Jurnal butun: N ta yozuv tekshirildi"
+```
+
+Server proksi (nginx) ortida bo'lsa, haqiqiy IP uchun `.env` ga `AUDIT_TRUST_X_FORWARDED_FOR=1` yozing.
+
 ## Bildirishnomalar va Telegram bot
 
 Muhim hodisalarda (yechim tekshirildi, yutuq tasdiqlandi, nishon olindi, jamoaga qabul qilindi, izoh yozildi) bildirishnoma saytda saqlanadi. Talaba Telegram orqali kirgan bo'lsa, botga ham xabar boradi.

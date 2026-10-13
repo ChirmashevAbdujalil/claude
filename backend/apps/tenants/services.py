@@ -23,6 +23,7 @@ ADMIN_MODELS = {
     "community": ["event"],
     "accounts": ["faculty", "user"],
     "profiles": ["achievement"],
+    "audit": ["auditlog"],
 }
 RESERVED_SLUGS = {"www", "admin", "api", "platform", "saas", "static", "media", "mail"}
 

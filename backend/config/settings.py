@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "apps.insights",
     "apps.ai",
     "apps.notifications",
+    "apps.audit",
     "apps.web",
 ]
 
@@ -69,6 +70,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "apps.audit.middleware.AuditMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -187,6 +189,8 @@ SITE_URL = os.environ.get("SITE_URL", "")
 # SaaS: bitta platformada bir nechta OTM. Har bir OTM o'z subdomenida ishlaydi: <slug>.SAAS_BASE_DOMAIN
 # Bo'sh bo'lsa, platforma bitta OTM (DEFAULT_INSTITUTION) uchun ishlaydi. Lokal sinov: <slug>.localhost:8000
 SAAS_BASE_DOMAIN = os.environ.get("SAAS_BASE_DOMAIN", "")
+# Harakatlar jurnali: proksi ortida haqiqiy IP X-Forwarded-For sarlavhasidan olinadi
+AUDIT_TRUST_X_FORWARDED_FOR = env_bool("AUDIT_TRUST_X_FORWARDED_FOR", False)
 DEFAULT_INSTITUTION_SLUG = os.environ.get("DEFAULT_INSTITUTION_SLUG", "andti")
 DEFAULT_INSTITUTION_NAME = os.environ.get("DEFAULT_INSTITUTION_NAME", "Andijon davlat texnika instituti")
 DEFAULT_INSTITUTION_SHORT = os.environ.get("DEFAULT_INSTITUTION_SHORT", "ANDTI")

@@ -1,0 +1,72 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Harakatlar jurnali{% endblock %}
+
+{% block content %}
+<a href="{% url 'web:institution-settings' %}" class="back-link">{% icon "arrow-left" "icon-sm" %} OTM sozlamalari</a>
+<div class="page-header">
+  <div><h1>Harakatlar jurnali 🛡️</h1><p>Kim, qachon va nimani o'zgartirdi. Yozuvlarni o'zgartirib ham, o'chirib ham bo'lmaydi.</p></div>
+  <div class="row-sm wrap">
+    <a href="?{{ csv_query }}" class="btn btn-ghost btn-sm">{% icon "download" "icon-sm" %} CSV (Excel)</a>
+    <a href="?verify=1" class="btn btn-primary btn-sm">{% icon "shield" "icon-sm" %} Yaxlitlikni tekshirish</a>
+  </div>
+</div>
+
+{% if integrity %}
+<div class="card audit-integrity {% if integrity.broken %}is-broken{% endif %}">
+  {% if integrity.broken %}
+  <b>⚠️ Jurnal buzilgan.</b> #{{ integrity.broken }} yozuvda zanjir uzilgan: bazada yozuv qo'lda o'zgartirilgan yoki o'chirilgan. Platforma administratoriga xabar bering.
+  {% else %}
+  <b>✅ Jurnal butun.</b> {{ integrity.checked }} ta yozuvning har biri oldingisi bilan SHA-256 xesh orqali bog'langan va hech biri o'zgartirilmagan.
+  {% endif %}
+</div>
+{% endif %}
+
+<form method="get" class="card audit-filters">
+  <select name="action" class="input" aria-label="Amal">
+    <option value="">Barcha amallar</option>
+    {% for value, label in actions %}<option value="{{ value }}" {% if filters.action == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+  </select>
+  <select name="type" class="input" aria-label="Obyekt turi">
+    <option value="">Barcha obyektlar</option>
+    {% for value, label in types %}<option value="{{ value }}" {% if filters.type == value %}selected{% endif %}>{{ label|capfirst }}</option>{% endfor %}
+  </select>
+  <input type="search" name="q" value="{{ filters.q }}" class="input" placeholder="Kim (login)" aria-label="Kim">
+  <input type="date" name="from" value="{{ filters.from }}" class="input" aria-label="Sanadan">
+  <input type="date" name="to" value="{{ filters.to }}" class="input" aria-label="Sanagacha">
+  <div class="row-sm"><button class="btn btn-primary btn-sm">Filtrlash</button>{% if filters %}<a href="?" class="btn btn-ghost btn-sm">Tozalash</a>{% endif %}</div>
+</form>
+
+<div class="card card-lg stack">
+  <div class="row-between wrap"><h2>Yozuvlar</h2><span class="muted small">{{ page.paginator.count }} / {{ total }}</span></div>
+  <div class="audit-list">
+    {% for e in page %}
+    <article class="audit-entry">
+      <div class="audit-time"><b>{{ e.created_at|date:"d.m.Y" }}</b><span>{{ e.created_at|date:"H:i:s" }}</span></div>
+      <div class="audit-body">
+        <div class="audit-head">
+          <b>{{ e.actor_repr }}</b>{% if e.actor_role %} <span class="muted small">· {{ e.actor_role }}</span>{% endif %}
+          <span class="chip audit-{{ e.action }}">{{ e.get_action_display }}</span>
+          {% if e.target_label %}<span class="small"><span class="muted">{{ e.target_label }}:</span> {{ e.target_repr }}</span>{% endif %}
+        </div>
+        {% if e.changes %}
+        <ul class="audit-changes">
+          {% for key, c in e.changes.items %}
+          <li><span class="muted">{{ c.label|capfirst }}:</span>
+            {% if "old" in c and "new" in c %}<del>{{ c.old }}</del> → <ins>{{ c.new }}</ins>
+            {% elif "new" in c %}<ins>{{ c.new }}</ins>{% else %}<del>{{ c.old }}</del>{% endif %}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+        <div class="tiny muted">{% if e.ip %}IP {{ e.ip }} · {% endif %}<span class="mono" title="SHA-256: {{ e.hash }}">#{{ e.hash|slice:":10" }}</span></div>
+      </div>
+    </article>
+    {% empty %}
+    <p class="muted small">Hozircha yozuv yo'q. Xodimlar biror narsani o'zgartirganda shu yerda paydo bo'ladi.</p>
+    {% endfor %}
+  </div>
+  {% include "web/partials/pagination.html" %}
+</div>
+
+<p class="tiny muted">Jurnalga xodimlar (o'qituvchi, dekanat, rektorat, administrator) harakatlari, tizimga kirishlar, muvaffaqiyatsiz kirish urinishlari va Payme/Click to'lovlari yoziladi. Talabalarning kundalik harakatlari yozilmaydi. Parollar hech qachon saqlanmaydi.</p>
+{% endblock %}

@@ -3,6 +3,7 @@ from datetime import timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
+from apps.audit.context import source as audit_source
 from apps.tenants.models import Institution
 
 GRACE_DAYS = 3
@@ -21,5 +22,6 @@ class Command(BaseCommand):
             self.stdout.write(f"{institution.short_name}: muddat {institution.paid_until:%d.%m.%Y} da tugagan")
             if not options["dry_run"]:
                 institution.is_active = False
-                institution.save(update_fields=["is_active"])
+                with audit_source("Tizim: obuna nazorati"):
+                    institution.save(update_fields=["is_active"])
         self.stdout.write(self.style.SUCCESS(f"Muddati o'tgan OTMlar: {len(expired)}"))

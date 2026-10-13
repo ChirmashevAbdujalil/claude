@@ -683,3 +683,23 @@ html, body { overflow-x: clip; }
 .qr-box .qr-svg { display: block; width: 240px; height: 240px; }
 @media (max-width: 640px) { .qr-box .qr-svg { width: 200px; height: 200px; } }
 @media (max-width: 480px) { .impact .kpi-grid .stat-icon { display: none; } }
+
+/* ---------- Harakatlar jurnali ---------- */
+.audit-filters { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); align-items: center; margin-bottom: 16px; }
+.audit-integrity { margin-bottom: 16px; border-left: 4px solid var(--success, #16a34a); }
+.audit-integrity.is-broken { border-left-color: var(--danger, #dc2626); }
+.audit-list { display: grid; }
+.audit-entry { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 14px; padding: 12px 0; border-top: 1px solid var(--border); }
+.audit-entry:first-child { border-top: 0; }
+.audit-time { display: flex; flex-direction: column; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.audit-time span { color: var(--muted); }
+.audit-body { display: grid; gap: 6px; min-width: 0; }
+.audit-head { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; }
+.audit-changes { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; font-size: 0.85rem; }
+.audit-changes li { overflow-wrap: anywhere; }
+.audit-changes del { color: var(--muted); }
+.audit-changes ins { text-decoration: none; font-weight: 600; }
+.chip.audit-create { background: var(--success-soft); color: var(--success, #15803d); }
+.chip.audit-delete, .chip.audit-login_failed { background: var(--danger-soft); color: var(--danger, #b91c1c); }
+.chip.audit-update, .chip.audit-password { background: var(--info-soft); color: var(--primary-text); }
+@media (max-width: 560px) { .audit-entry { grid-template-columns: minmax(0, 1fr); gap: 4px; } .audit-time { flex-direction: row; gap: 6px; } }

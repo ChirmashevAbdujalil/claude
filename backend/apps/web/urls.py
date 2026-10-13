@@ -1,5 +1,7 @@
 from django.urls import path
 
+from apps.audit import views as audit_views
+
 from .views import (
     ai,
     arena,
@@ -38,6 +40,7 @@ urlpatterns = [
     path("platform/users/<int:pk>/reset-password/", saas.platform_reset_password, name="platform-reset-password"),
     path("settings/otm/", saas.institution_settings, name="institution-settings"),
     path("settings/otm/faculties/<int:pk>/delete/", saas.faculty_delete, name="faculty-delete"),
+    path("settings/otm/jurnal/", audit_views.audit_log, name="audit-log"),
     path("arena/otm-ligasi/", saas.league, name="league"),
     path("notifications/", onboarding.notifications, name="notifications"),
     path("notifications/<int:pk>/go/", onboarding.notification_go, name="notification-go"),

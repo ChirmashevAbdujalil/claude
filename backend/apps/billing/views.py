@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
+from apps.audit.context import source as audit_source
 from apps.tenants.context import unscoped
 
 from . import click, payme, services
@@ -32,7 +33,7 @@ def payme_endpoint(request):
             "message": {"uz": "Ruxsat yo'q", "ru": "Недостаточно привилегий", "en": "Insufficient privileges"},
         }
         return JsonResponse({"jsonrpc": "2.0", "id": request_id, "error": error})
-    with unscoped():
+    with unscoped(), audit_source("Payme"):
         return JsonResponse(payme.dispatch(payload))
 
 
@@ -40,7 +41,7 @@ def payme_endpoint(request):
 @require_POST
 def click_prepare(request):
     """Click SHOP API, Prepare URL: https://<domen>/billing/click/prepare/"""
-    with unscoped():
+    with unscoped(), audit_source("Click"):
         return JsonResponse(click.prepare(request.POST))
 
 
@@ -48,7 +49,7 @@ def click_prepare(request):
 @require_POST
 def click_complete(request):
     """Click SHOP API, Complete URL: https://<domen>/billing/click/complete/"""
-    with unscoped():
+    with unscoped(), audit_source("Click"):
         return JsonResponse(click.complete(request.POST))
 
 

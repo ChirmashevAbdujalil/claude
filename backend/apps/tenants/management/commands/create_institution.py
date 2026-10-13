@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 
+from apps.audit.context import source as audit_source
 from apps.tenants import plans, services
 
 
@@ -15,17 +16,18 @@ class Command(BaseCommand):
         parser.add_argument("--email", default="")
 
     def handle(self, *args, **options):
-        try:
-            institution, admin, password = services.create_institution(
-                name=options["name"],
-                short_name=options["short_name"],
-                slug=options["slug"],
-                plan=options["plan"],
-                contact_email=options["email"],
-                admin_username=options["admin"],
-            )
-        except services.TenantError as exc:
-            raise CommandError(str(exc)) from exc
+        with audit_source("Tizim: create_institution buyrug'i"):
+            try:
+                institution, admin, password = services.create_institution(
+                    name=options["name"],
+                    short_name=options["short_name"],
+                    slug=options["slug"],
+                    plan=options["plan"],
+                    contact_email=options["email"],
+                    admin_username=options["admin"],
+                )
+            except services.TenantError as exc:
+                raise CommandError(str(exc)) from exc
         self.stdout.write(self.style.SUCCESS(f"OTM ulandi: {institution} ({institution.plan_info['name']})"))
         self.stdout.write(f"Manzil:  {institution.base_url() or institution.slug + '.localhost:8000'}")
         self.stdout.write(f"Login:   {admin.username}")
