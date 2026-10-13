@@ -1,0 +1,32 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Iqtidor diagnostikasi{% endblock %}
+
+{% block content %}
+<a href="{% url 'web:my-path' %}" class="back-link">{% icon "arrow-left" "icon-sm" %} Mening yo'lim</a>
+<div class="page-header">
+  <div><h1>Iqtidor diagnostikasi 🧭</h1><p>10 ta savol, taxminan 3 daqiqa. To'g'ri yoki noto'g'ri javob yo'q: o'zingizga eng yaqinini tanlang.</p></div>
+</div>
+
+{% if error %}<div class="form-errors" style="margin-bottom:16px">{{ error }}</div>{% endif %}
+
+<form method="post" class="stack diagnostic-form">{% csrf_token %}
+  {% for q in questions %}
+  <fieldset class="card diagnostic-question">
+    <legend><span class="diagnostic-no">{{ forloop.counter }}/{{ questions|length }}</span> {{ q.text }}</legend>
+    <div class="diagnostic-options">
+      {% for value, text in q.options %}
+      <label class="diagnostic-option">
+        <input type="radio" name="{{ q.key }}" value="{{ value }}" required {% for k, v in answers.items %}{% if k == q.key and v == value %}checked{% endif %}{% endfor %}>
+        <span>{{ text }}</span>
+      </label>
+      {% endfor %}
+    </div>
+  </fieldset>
+  {% endfor %}
+  <div class="card row-between wrap" style="position:sticky; bottom:12px; z-index:5">
+    <span class="small muted">Natija yo'nalishingizni va sizga mos imkoniyatlarni belgilaydi. Testni istalgan vaqtda qayta topshirish mumkin.</span>
+    <button class="btn btn-primary btn-lg">Natijani ko'rish {% icon "arrow-right" %}</button>
+  </div>
+</form>
+{% endblock %}

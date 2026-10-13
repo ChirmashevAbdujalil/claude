@@ -16,6 +16,7 @@ from .views import (
     public,
     saas,
     staff,
+    talent,
 )
 
 app_name = "web"
@@ -101,4 +102,17 @@ urlpatterns = [
     path("review/skills/<int:pk>/endorse/", staff.endorse_skill, name="endorse-skill"),
     path("review/students/<int:user_id>/flag/", staff.talent_flag, name="talent-flag"),
     path("insights/", staff.insights, name="insights"),
+    # Iqtidorli talabalar bilan ishlash
+    path("iqtidorlar/", talent.registry, name="talent-registry"),
+    path("iqtidorlar/qoshish/", talent.registry_add, name="talent-add"),
+    path("iqtidorlar/hisobot/", talent.report, name="talent-report"),
+    path("iqtidorlar/<int:pk>/", talent.profile_detail, name="talent-profile"),
+    path("iqtidorlar/<int:pk>/mentor/", talent.profile_mentor, name="talent-mentor"),
+    path("iqtidorlar/<int:pk>/tahrir/", talent.profile_update, name="talent-update"),
+    path("iqtidorlar/<int:pk>/maqsad/", talent.goal_create, name="talent-goal-create"),
+    path("maqsadlar/<int:pk>/", talent.goal_update, name="talent-goal-update"),
+    path("maqsadlar/<int:pk>/ochirish/", talent.goal_delete, name="talent-goal-delete"),
+    path("shogirdlarim/", talent.mentees, name="talent-mentees"),
+    path("mening-yolim/", talent.my_path, name="my-path"),
+    path("mening-yolim/test/", talent.diagnostic, name="talent-diagnostic"),
 ]

@@ -15,6 +15,8 @@ from apps.opportunities.models import Sponsor
 from apps.profiles.models import Achievement, UserSkill
 from apps.profiles.services import skill_map
 from apps.projects.models import Project
+from apps.talent import services as talent_services
+from apps.talent.models import TalentProfile
 
 from .. import impact as impact_service
 from ..forms import LoginForm, TalentFlagForm
@@ -107,6 +109,10 @@ def portfolio(request, slug):
         "flags": TalentFlag.objects.filter(student=profile).select_related("flagged_by") if is_reviewer else [],
         "share_url": request.build_absolute_uri(),
     }
+    if is_reviewer and not is_owner and profile.role == User.Role.STUDENT:
+        talent = TalentProfile.objects.filter(student=profile).first()
+        context["talent_profile"] = talent if talent and talent_services.can_view(request.user, talent) else None
+        context["can_add_talent"] = talent is None and request.user.is_management
     return render(request, "web/profile/portfolio.html", context)
 
 

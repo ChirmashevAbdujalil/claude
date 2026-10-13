@@ -22,6 +22,10 @@ from apps.opportunities.models import Opportunity, Redemption, Reward, Sponsor
 from apps.profiles.models import Achievement, Skill, UserSkill
 from apps.projects import services as project_services
 from apps.projects.models import Project, ProjectMember
+from apps.talent import diagnostics as talent_diagnostics
+from apps.talent import services as talent_services
+from apps.talent.models import DevelopmentGoal, TalentProfile
+from apps.talent.tracks import Track
 from apps.tenants.context import activate, default_institution
 from apps.tenants.models import Institution
 
@@ -331,7 +335,64 @@ class Command(BaseCommand):
         )
         self._demo_activity(teacher, students)
         self._demo_sponsors(students)
+        self._demo_talent(teacher, rector, students)
         self.stdout.write(self.style.SUCCESS("Demo ma'lumotlar yaratildi (parol: demo12345)"))
+
+    def _demo_talent(self, teacher, rector, students):
+        """Iqtidorlar reyestri: to'rt xil holatdagi talabalar, mentor, reja va diagnostika."""
+        if len(students) < 4 or DevelopmentGoal.objects.filter(title__startswith="Respublika dasturlash").exists():
+            return
+        today = timezone.localdate()
+        # Holat zanjiri to'liq ko'rinishi uchun: natijasi hali yo'q talabalar birinchi
+        fresh = [s for s in students if not talent_services.results([s.pk]).exists()]
+        ordered = fresh + [s for s in students if s not in fresh]
+        aziza, jasur, madina, bekzod = ordered[:4]
+
+        def answers_for(track):
+            chosen = {}
+            for key, _, options in talent_diagnostics.QUESTIONS:
+                chosen[key] = max(options, key=lambda option: option[2].get(track, 0))[0]
+            return chosen
+
+        for student, track in ((aziza, Track.IT), (jasur, Track.INVENTION), (madina, Track.RESEARCH)):
+            talent_services.save_diagnostic(student, answers_for(track))
+
+        profile, _ = talent_services.ensure_profile(
+            aziza, source=TalentProfile.Source.FLAG, track=Track.IT, by=teacher,
+            note="Murakkab algoritmik masalalarni mustaqil yechadi",
+        )  # fmt: skip
+        talent_services.assign_mentor(profile, teacher, by=rector)
+        for title, kind, days, status, progress in [
+            ("Respublika dasturlash olimpiadasiga tayyorlanish", "olympiad", 20, "in_progress", 60),
+            ("GitHub'da portfolio loyihasini e'lon qilish", "project", -10, "done", 100),
+            ("IELTS 6.5 sertifikati", "certificate", 75, "planned", 10),
+        ]:
+            goal = DevelopmentGoal(profile=profile, title=title, kind=kind, due_date=today + timedelta(days=days),
+                                   status=status, progress=progress)  # fmt: skip
+            goal.mentor_comment = "Haftalik uchrashuvda ko'rib chiqamiz"
+            talent_services.save_goal(goal, by=teacher)
+
+        note = "Aqlli sug'orish qurilmasi prototipini yasagan"
+        profile, _ = talent_services.ensure_profile(
+            jasur, source=TalentProfile.Source.FLAG, track=Track.INVENTION, by=teacher, note=note
+        )
+        talent_services.assign_mentor(profile, teacher, by=rector)
+        talent_services.save_goal(
+            DevelopmentGoal(profile=profile, title="Ixtiroga patent arizasini topshirish", kind="patent",
+                            due_date=today - timedelta(days=5), status="in_progress", progress=40),
+            by=teacher,
+        )  # fmt: skip
+        Achievement.objects.get_or_create(
+            user=jasur, title="«Yosh ixtirochilar» viloyat tanlovi g'olibi (demo)",
+            defaults={"kind": Achievement.Kind.PATENT, "achieved_on": today - timedelta(days=12),
+                      "status": Achievement.Status.APPROVED, "reviewed_by": teacher},
+        )  # fmt: skip
+
+        talent_services.ensure_profile(madina, source=TalentProfile.Source.RATING, track=Track.RESEARCH, by=rector)
+        profile, _ = talent_services.ensure_profile(bekzod, source=TalentProfile.Source.MANUAL, track=Track.OLYMPIAD,
+                                                    by=rector)  # fmt: skip
+        talent_services.assign_mentor(profile, teacher, by=rector)
+        Opportunity.objects.filter(title__endswith="(demo)", tracks=[]).update(tracks=[Track.IT, Track.INVENTION])
 
     def _demo_sponsors(self, students):
         """Demo homiylar: nomlari to'qima, «(demo)» belgisi bilan. Haqiqiy homiylar admin paneldan qo'shiladi."""

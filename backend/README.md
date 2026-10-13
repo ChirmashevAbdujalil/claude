@@ -149,6 +149,34 @@ Muddati o'tgan OTMlarni 3 kunlik imtiyozdan keyin to'xtatish uchun buyruqni har 
 python manage.py check_subscriptions            # --dry-run: faqat ro'yxatni ko'rsatadi
 ```
 
+## Iqtidorli talabalar bilan ishlash (`apps/talent/`)
+
+Rektorat topshirig'i asosida: iqtidorli talabalar bilan ishlashni tartibga solish, samarali yo'lga qo'yish va har
+bir talabani iqtidoriga qarab to'g'ri yo'naltirish.
+
+| Modul | Manzil | Kim uchun |
+|---|---|---|
+| **Iqtidorlar reyestri**: holat zanjiri, filtrlar, «E'tiborga loyiq» tavsiyalari | `/iqtidorlar/` | Dekanat (o'z fakulteti), rektorat |
+| **Iqtidor kartasi**: mentor biriktirish, rivojlanish rejasi, natijalar, diagnostika | `/iqtidorlar/<id>/` | Rahbariyat, mentor, talabaning o'zi |
+| **Shogirdlarim**: biriktirilgan talabalar, reja va kechikkan maqsadlar | `/shogirdlarim/` | O'qituvchi (mentor) |
+| **Mening yo'lim**: yo'nalish, mentor, reja, mos imkoniyatlar | `/mening-yolim/` | Talaba |
+| **Iqtidor diagnostikasi**: 10 savol + platformadagi faollik | `/mening-yolim/test/` | Talaba |
+| **Hisobot** (PDF, Excel/CSV): fakultetlar, yo'nalishlar, mentorlar, natijalar | `/iqtidorlar/hisobot/` | Rektorat |
+
+- **Holat zanjiri:** Aniqlangan → Mentor biriktirilgan → Rivojlanmoqda (rejasi bor) → Natijaga erishgan
+  (olimpiada, hakaton, maqola yoki patent tasdiqlangan). Holat haqiqiy ishdan avtomatik hisoblanadi.
+- **Avtomatik reyestr:** o'qituvchi «uchqun» belgisini qo'ysa yoki olimpiada, hakaton, maqola, patent tasdiqlansa,
+  talaba reyestrga o'zi tushadi.
+- **Yo'naltirish:** diagnostika yo'nalishni javoblar (70%) va ko'nikma, yutuq, yechimlar (30%) asosida aniqlaydi.
+  Yangi imkoniyat e'lon qilinganda yo'nalishi mos talabalarga sayt va Telegram orqali xabar boradi;
+  imkoniyatlar ro'yxatida «🎯 Sizga mos» belgisi chiqadi.
+- **Eslatmalar:** muddati 3 kun qolgan va o'tgan maqsadlar, 14 kundan beri mentorsiz qolgan iqtidorlar
+  (dushanba kunlari dekanga). Har kuni ishga tushiring:
+
+```bash
+python manage.py talent_reminders
+```
+
 ## Harakatlar jurnali (audit log)
 
 Kim, qachon, qayerdan (IP) va nimani o'zgartirgani `apps/audit/` da avtomatik yoziladi. Rektorat uni

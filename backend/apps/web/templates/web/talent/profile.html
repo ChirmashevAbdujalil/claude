@@ -1,0 +1,127 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}{{ student }}: iqtidor kartasi{% endblock %}
+
+{% block content %}
+{% if can_manage %}<a href="{% url 'web:talent-registry' %}" class="back-link">{% icon "arrow-left" "icon-sm" %} Iqtidorlar reyestri</a>
+{% elif can_plan %}<a href="{% url 'web:talent-mentees' %}" class="back-link">{% icon "arrow-left" "icon-sm" %} Shogirdlarim</a>{% endif %}
+
+<div class="card card-lg talent-hero">
+  {% avatar student "lg" %}
+  <div class="grow stack-sm" style="min-width:0">
+    <div class="row-sm wrap"><h1 style="margin:0">{{ student }}</h1><span class="chip talent-status-{{ profile.status }}">{{ profile.get_status_display }}</span></div>
+    <div class="muted small">{{ student.faculty.name|default:"Fakultet ko'rsatilmagan" }}{% if student.course %} · {{ student.course }}-kurs{% endif %} · {{ student.xp }} XP{% if student.portfolio_slug %} · <a href="{% url 'web:portfolio' student.portfolio_slug %}">portfolio</a>{% endif %}</div>
+    <div class="row-sm wrap">
+      <span class="chip chip-primary">{{ track_icon }} {{ profile.get_track_display|default:"Yo'nalish belgilanmagan" }}</span>
+      <span class="chip">{{ profile.get_source_display }} · {{ profile.created_at|date:"d.m.Y" }}</span>
+      {% if profile.mentor %}<span class="chip">🧑‍🏫 Mentor: {{ profile.mentor }}</span>{% endif %}
+    </div>
+  </div>
+</div>
+
+{% if profile.status != "archived" %}<div class="card" style="margin:16px 0">{% include "web/partials/stepper.html" with steps=pipeline %}</div>{% endif %}
+
+<div class="layout-main-aside">
+  <div class="stack">
+    <section class="card card-lg stack" id="reja">
+      <div class="row-between wrap"><h2>Rivojlanish rejasi 🎯</h2><span class="muted small">{{ goals|length }} ta maqsad</span></div>
+      {% for goal in goals %}
+      <article class="goal {% if goal.is_overdue %}is-overdue{% endif %} goal-{{ goal.status }}" id="maqsad-{{ goal.pk }}">
+        <div class="goal-head">
+          <div class="grow" style="min-width:0">
+            <div class="bold">{{ goal.title }}</div>
+            <div class="tiny muted">{{ goal.get_kind_display }} · muddat {{ goal.due_date|date:"d.m.Y" }}{% if goal.is_overdue %} · <span class="text-danger bold">muddati o'tgan</span>{% endif %}</div>
+          </div>
+          <span class="chip goal-chip-{{ goal.status }}">{{ goal.get_status_display }}</span>
+        </div>
+        <div class="progress goal-progress"><span style="width:{{ goal.progress }}%"></span></div>
+        {% if goal.student_note %}<div class="small"><span class="muted">Talaba:</span> {{ goal.student_note }}</div>{% endif %}
+        {% if goal.mentor_comment %}<div class="small"><span class="muted">Mentor:</span> {{ goal.mentor_comment }}</div>{% endif %}
+        {% if goal.form %}
+        <details class="goal-edit"><summary class="small bold">{% if can_plan %}Tahrirlash{% else %}Holatni yangilash{% endif %}</summary>
+          <form method="post" action="{% url 'web:talent-goal-update' goal.pk %}" class="form goal-form">{% csrf_token %}
+            {% include "web/partials/form_fields.html" with form=goal.form %}
+            <div class="row-sm"><button class="btn btn-primary btn-sm">Saqlash</button></div>
+          </form>
+          {% if can_plan %}<form method="post" action="{% url 'web:talent-goal-delete' goal.pk %}" onsubmit="return confirm('Maqsad o\'chirilsinmi?')" style="margin-top:6px">{% csrf_token %}<button class="btn btn-ghost btn-sm text-danger">O'chirish</button></form>{% endif %}
+        </details>
+        {% endif %}
+      </article>
+      {% empty %}
+      <p class="muted small">Reja hali tuzilmagan.{% if can_plan %} Semestr uchun 3–5 ta aniq va muddatli maqsad qo'ying: tizim muddatni eslatib turadi.{% endif %}</p>
+      {% endfor %}
+
+      {% if goal_form %}
+      <details class="goal-new" {% if not goals %}open{% endif %}><summary class="btn btn-ghost btn-sm">{% icon "plus" "icon-sm" %} Maqsad qo'shish</summary>
+        <form method="post" action="{% url 'web:talent-goal-create' profile.pk %}" class="form goal-form">{% csrf_token %}
+          {% include "web/partials/form_fields.html" with form=goal_form %}
+          <button class="btn btn-primary btn-sm">Rejaga qo'shish</button>
+        </form>
+      </details>
+      {% endif %}
+    </section>
+
+    <section class="card card-lg stack">
+      <h2>Natijalar 🏆</h2>
+      {% for r in results %}
+      <div class="list-item"><span style="font-size:20px">🏅</span><div class="grow"><div class="bold small">{{ r.title }}</div><div class="tiny muted">{{ r.get_kind_display }} · {{ r.achieved_on|date:"d.m.Y" }}</div></div></div>
+      {% empty %}<p class="muted small">Hali tasdiqlangan olimpiada, hakaton, maqola yoki patent yo'q. Natija tasdiqlansa, holat avtomatik «Natijaga erishgan» bo'ladi.</p>{% endfor %}
+    </section>
+
+    {% if matches %}
+    <section class="card card-lg stack">
+      <h2>Yo'nalishiga mos imkoniyatlar</h2>
+      <div class="list">
+        {% for o in matches %}<a href="{% url 'web:opportunity-detail' o.pk %}" class="list-item"><span class="chip chip-info">{{ o.get_kind_display }}</span><div class="grow small bold">{{ o.title }}</div><span class="tiny muted">{% if o.deadline %}{{ o.deadline|date:"d.m" }} gacha{% endif %}</span></a>{% endfor %}
+      </div>
+    </section>
+    {% endif %}
+  </div>
+
+  <aside class="stack">
+    {% if mentor_form %}
+    <div class="card stack-sm">
+      <h3>Mentor</h3>
+      <form method="post" action="{% url 'web:talent-mentor' profile.pk %}" class="form">{% csrf_token %}
+        {% include "web/partials/form_fields.html" with form=mentor_form %}
+        <button class="btn btn-primary btn-block">{% if profile.mentor %}O'zgartirish{% else %}Biriktirish{% endif %}</button>
+      </form>
+      <p class="tiny muted">Mentorga va talabaga sayt hamda Telegram orqali xabar boradi.</p>
+    </div>
+    {% endif %}
+
+    <div class="card stack-sm">
+      <h3>Diagnostika</h3>
+      {% if diagnostic %}
+      <div class="tiny muted">{{ diagnostic.taken_at|date:"d.m.Y" }} da o'tgan</div>
+      <div class="talent-scores">
+        {% for key, name, emoji, score in ranked %}
+        <div class="talent-score"><span>{{ emoji }} {{ name }}</span><span class="hbar-track"><span class="hbar-fill" style="width:{{ score }}%"></span></span><b>{{ score }}</b></div>
+        {% endfor %}
+      </div>
+      {% else %}<p class="small muted">Talaba hali diagnostikadan o'tmagan.</p>{% endif %}
+    </div>
+
+    {% if skills %}
+    <div class="card stack-sm">
+      <h3>Ko'nikmalari</h3>
+      <div class="row-sm wrap">{% for s in skills %}<span class="chip">{{ s.skill.name }} · {{ s.level }}</span>{% endfor %}</div>
+    </div>
+    {% endif %}
+
+    {% if profile_form %}
+    <div class="card stack-sm">
+      <h3>Yo'nalish va izoh</h3>
+      <form method="post" action="{% url 'web:talent-update' profile.pk %}" class="form">{% csrf_token %}
+        {% include "web/partials/form_fields.html" with form=profile_form %}
+        <button class="btn btn-ghost btn-block">Saqlash</button>
+      </form>
+      <form method="post" action="{% url 'web:talent-update' profile.pk %}">{% csrf_token %}<input type="hidden" name="archive" value="1">
+        <button class="btn btn-ghost btn-sm btn-block">{% if profile.status == "archived" %}Reyestrga qaytarish{% else %}Arxivga o'tkazish{% endif %}</button></form>
+    </div>
+    {% elif profile.note %}
+    <div class="card stack-sm"><h3>Izoh</h3><p class="small" style="white-space:pre-line">{{ profile.note }}</p></div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

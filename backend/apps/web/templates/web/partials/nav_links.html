@@ -6,6 +6,7 @@
 <a href="{% url 'web:arena' %}" class="nav-link {% active 'arena' %}">{% icon "trophy" %} Arena</a>
 {% if "league" in features %}<a href="{% url 'web:league' %}" class="nav-link {% active 'league' %}">{% icon "award" %} OTMlararo liga</a>{% endif %}
 <a href="{% url 'web:ai' %}" class="nav-link {% active 'ai' %}">{% icon "sparkles" %} AI Mentor</a>
+{% if user.role == "student" %}<a href="{% url 'web:my-path' %}" class="nav-link {% active 'my-path' 'talent-diagnostic' %}">{% icon "compass" %} Mening yo'lim</a>{% endif %}
 <a href="{% url 'web:notifications' %}" class="nav-link {% active 'notifications' 'notification' %}">{% icon "bell" %} Bildirishnomalar
   {% if unread_notifications %}<span class="chip chip-danger count">{{ unread_notifications }}</span>{% endif %}</a>
 
@@ -23,8 +24,10 @@
 <a href="{% url 'web:review' %}" class="nav-link {% active 'review' %}">{% icon "check-circle" %} Tekshiruv
   {% if review_count %}<span class="chip chip-danger count">{{ review_count }}</span>{% endif %}</a>
 <a href="{% url 'web:challenge-create' %}" class="nav-link">{% icon "plus" %} Challenge yaratish</a>
+<a href="{% url 'web:talent-mentees' %}" class="nav-link {% active 'talent-mentees' %}">{% icon "users" %} Shogirdlarim</a>
 {% endif %}
 {% if user.is_management %}
+<a href="{% url 'web:talent-registry' %}" class="nav-link {% active 'talent-registry' 'talent-profile' 'talent-report' %}">{% icon "compass" %} Iqtidorlar reyestri</a>
 <a href="{% url 'web:insights' %}" class="nav-link {% active 'insights' %}">{% icon "chart" %} Statistika</a>
 <a href="{% url 'web:impact' %}" class="nav-link {% active 'impact' %}">{% icon "trophy" %} Natijalar (ochiq sahifa)</a>
 {% endif %}

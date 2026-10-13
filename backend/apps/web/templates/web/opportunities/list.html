@@ -19,6 +19,7 @@
     <div class="row-between">
       <span class="chip chip-info">{{ o.get_kind_display }}</span>
       {% if o.applied %}<span class="chip chip-success">✓ Ariza yuborilgan</span>
+      {% elif o.matches and not o.locked %}<span class="chip chip-match">🎯 Sizga mos</span>
       {% elif o.locked %}<span class="chip">🔒 {{ o.min_level }}-darajadan</span>{% endif %}
     </div>
     <h3>{{ o.title }}</h3>

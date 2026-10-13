@@ -19,6 +19,7 @@ from apps.discovery.models import Challenge, Submission
 from apps.opportunities.models import Application, Redemption, Sponsor
 from apps.profiles.models import Achievement, Endorsement
 from apps.projects.models import Project, ProjectMember
+from apps.talent.models import TalentProfile
 
 WEEKS = 12
 CACHE_SECONDS = 300
@@ -173,6 +174,7 @@ def compute(now=None) -> dict:
         "applications": Application.objects.count(),
         "ai_dialogs": Conversation.objects.count(),
         "sponsors": Sponsor.objects.filter(is_active=True).count(),
+        "talent": _talent(),
         "weekly": _weekly(now),
         "faculties": _faculties(month_ago),
         "mix": _mix(month_ago),
@@ -187,6 +189,20 @@ def _active_ids_between(start, end) -> set:
     )
     ids |= set(Submission.objects.filter(created_at__gte=start, created_at__lt=end).values_list("user_id", flat=True))
     return ids
+
+
+def _talent() -> dict:
+    """Iqtidorlar reyestri: rektorat topshirig'i bo'yicha asosiy ko'rsatkichlar."""
+    profiles = TalentProfile.objects.exclude(status=TalentProfile.Status.ARCHIVED)
+    total = profiles.count()
+    mentored = profiles.filter(mentor__isnull=False).count()
+    return {
+        "registry": total,
+        "mentored": mentored,
+        "mentored_share": round(mentored * 100 / total) if total else 0,
+        "planned": profiles.filter(goals__isnull=False).distinct().count(),
+        "achieved": profiles.filter(status=TalentProfile.Status.ACHIEVED).count(),
+    }
 
 
 def impact(institution) -> dict:

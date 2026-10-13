@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "apps.ai",
     "apps.notifications",
     "apps.audit",
+    "apps.talent",
     "apps.web",
 ]
 

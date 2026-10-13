@@ -1,0 +1,115 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Iqtidorlar reyestri{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><h1>Iqtidorlar reyestri 🧭</h1><p>Har bir iqtidorli talaba, uning yo'nalishi, mentori va rivojlanish holati bitta joyda.</p></div>
+  <div class="row-sm wrap">
+    <a href="{% url 'web:talent-report' %}" class="btn btn-primary btn-sm">{% icon "file" "icon-sm" %} Hisobot</a>
+  </div>
+</div>
+
+<div class="talent-pipeline">
+  {% for item in counts %}
+  <a href="?status={{ item.status }}" class="card talent-stage {% if filters.status == item.status %}is-active{% endif %}">
+    <span class="talent-stage-no">{{ forloop.counter }}</span>
+    <div><div class="stat-value">{{ item.count }}</div><div class="stat-label">{{ item.label }}</div></div>
+  </a>
+  {% endfor %}
+  <a href="?mentor=none" class="card talent-stage talent-stage-alert {% if filters.mentor == 'none' %}is-active{% endif %}">
+    <span class="talent-stage-no">!</span>
+    <div><div class="stat-value">{{ unattended }}</div><div class="stat-label">mentorsiz</div></div>
+  </a>
+</div>
+
+<div class="layout-main-aside">
+  <div class="stack">
+    <form method="get" class="card talent-filters">
+      <input type="search" name="q" value="{{ filters.q }}" class="input" placeholder="Ism yoki login" aria-label="Qidirish">
+      <select name="track" class="input" aria-label="Yo'nalish">
+        <option value="">Barcha yo'nalishlar</option>
+        {% for value, label in tracks %}<option value="{{ value }}" {% if filters.track == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+      <select name="faculty" class="input" aria-label="Fakultet">
+        <option value="">Barcha fakultetlar</option>
+        {% for f in faculties %}<option value="{{ f.pk }}" {% if filters.faculty == f.pk|stringformat:"d" %}selected{% endif %}>{{ f.short_name }}</option>{% endfor %}
+      </select>
+      <select name="status" class="input" aria-label="Holat">
+        <option value="">Barcha holatlar</option>
+        {% for value, label in statuses %}<option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+      <div class="row-sm"><button class="btn btn-primary btn-sm">Filtrlash</button>{% if filters %}<a href="?" class="btn btn-ghost btn-sm">Tozalash</a>{% endif %}</div>
+    </form>
+
+    <div class="card card-lg">
+      {% if page.object_list %}
+      <div class="talent-list">
+        {% for p in page %}
+        <a href="{% url 'web:talent-profile' p.pk %}" class="talent-row">
+          {% avatar p.student %}
+          <div class="talent-row-main">
+            <div class="row-between" style="gap:8px; align-items:flex-start">
+              <div style="min-width:0"><div class="bold">{{ p.student }}</div>
+                <div class="tiny muted">{{ p.student.faculty.short_name|default:"Fakultetsiz" }}{% if p.student.course %} · {{ p.student.course }}-kurs{% endif %} · {{ p.get_source_display }}</div></div>
+              <span class="chip talent-status-{{ p.status }}">{{ p.get_status_display }}</span>
+            </div>
+            <div class="talent-row-meta">
+              <span class="chip">{% if p.track %}{{ p.get_track_display }}{% else %}Yo'nalish belgilanmagan{% endif %}</span>
+              {% if p.mentor %}<span>🧑‍🏫 {{ p.mentor }}</span>{% else %}<span class="chip chip-danger">Mentorsiz</span>{% endif %}
+              <span>{% if p.goals_total %}🎯 {{ p.goals_done }}/{{ p.goals_total }} maqsad{% if p.goals_overdue %} · <span class="text-danger bold">{{ p.goals_overdue }} kechikkan</span>{% endif %}{% else %}<span class="muted">Reja yo'q</span>{% endif %}</span>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% include "web/partials/pagination.html" %}
+      {% else %}
+      {% include "web/partials/empty.html" with emoji="🧭" title="Reyestr hozircha bo'sh" text="O'qituvchi talabaga «uchqun» belgisini qo'ysa yoki olimpiada natijasi tasdiqlansa, talaba avtomatik shu yerga tushadi. O'ng tomondan qo'lda ham qo'shishingiz mumkin." %}
+      {% endif %}
+    </div>
+  </div>
+
+  <aside class="stack">
+    <div class="card stack-sm">
+      <h3>Reyestrga qo'shish</h3>
+      <form method="post" action="{% url 'web:talent-add' %}" class="form">{% csrf_token %}
+        {% include "web/partials/form_fields.html" with form=add_form %}
+        <button class="btn btn-primary btn-block">{% icon "plus" "icon-sm" %} Qo'shish</button>
+      </form>
+    </div>
+
+    {% if suggestions %}
+    <div class="card stack-sm">
+      <h3>E'tiborga loyiq ✨</h3>
+      <p class="tiny muted">Natijasi bor yoki reytingda yuqori, lekin reyestrda yo'q talabalar.</p>
+      <div class="list">
+        {% for s in suggestions %}
+        <div class="list-item" style="align-items:flex-start">
+          {% avatar s.student "sm" %}
+          <div class="grow" style="min-width:0">
+            <div class="small bold">{{ s.student }}</div>
+            <div class="tiny muted">{{ s.reason }}</div>
+          </div>
+          <form method="post" action="{% url 'web:talent-add' %}">{% csrf_token %}
+            <input type="hidden" name="student_id" value="{{ s.student.pk }}"><input type="hidden" name="source" value="{{ s.source }}"><input type="hidden" name="track" value="{{ s.track }}">
+            <button class="btn btn-ghost btn-sm" title="Reyestrga qo'shish">{% icon "plus" "icon-sm" %}</button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="card stack-sm">
+      <h3>Qanday ishlaydi?</h3>
+      <ol class="small talent-howto">
+        <li><b>Aniqlash:</b> o'qituvchi «uchqun» qo'yadi, olimpiada natijasi tasdiqlanadi yoki siz qo'lda qo'shasiz.</li>
+        <li><b>Mentor:</b> har bir iqtidorga mas'ul o'qituvchi biriktiriladi.</li>
+        <li><b>Reja:</b> mentor semestr uchun muddatli maqsadlar qo'yadi, tizim eslatib turadi.</li>
+        <li><b>Natija:</b> olimpiada, maqola, patent tasdiqlansa, holat avtomatik yangilanadi.</li>
+      </ol>
+    </div>
+  </aside>
+</div>
+{% endblock %}

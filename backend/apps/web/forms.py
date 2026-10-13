@@ -10,6 +10,8 @@ from apps.discovery.models import Challenge, TalentFlag
 from apps.opportunities.models import Opportunity
 from apps.profiles.models import Achievement, Resume, Skill, UserSkill
 from apps.projects.models import Project
+from apps.talent.models import DevelopmentGoal, TalentProfile
+from apps.talent.tracks import Track
 from apps.tenants.models import Institution, InstitutionRequest
 
 User = get_user_model()
@@ -212,6 +214,23 @@ class OpportunityForm(forms.ModelForm):
         fields = ["kind", "title", "organization", "description", "reward", "external_url", "min_level", "deadline"]
         widgets = {"deadline": DATETIME_WIDGET, "description": forms.Textarea(attrs={"rows": 5})}
 
+    tracks = forms.MultipleChoiceField(
+        label="Qaysi iqtidor yo'nalishlariga mos?",
+        choices=Track.choices,
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        help_text="Shu yo'nalishdagi talabalarga sayt va Telegram orqali avtomatik xabar boradi. "
+        "Tanlanmasa, imkoniyat turiga qarab aniqlanadi.",
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["tracks"].initial = self.instance.tracks
+
+    def save(self, commit=True):
+        self.instance.tracks = list(self.cleaned_data.get("tracks") or [])
+        return super().save(commit)
+
 
 class ApplyForm(forms.Form):
     motivation = forms.CharField(
@@ -386,3 +405,64 @@ class FacultyForm(forms.ModelForm):
             if value and Faculty.objects.filter(**{f"{field}__iexact": value}).exclude(pk=self.instance.pk).exists():
                 self.add_error(field, "Bunday fakultet allaqachon bor")
         return cleaned
+
+
+# ---------------------------------------------------------------- iqtidorlar bilan ishlash
+
+
+class TalentAddForm(forms.Form):
+    username = forms.CharField(label="Talaba logini", max_length=150, help_text="Portfolio sahifasidagi login")
+    track = forms.ChoiceField(label="Yo'nalish", choices=[("", "Diagnostika bo'yicha aniqlansin")] + Track.choices,
+                              required=False)  # fmt: skip
+    note = forms.CharField(label="Nega iqtidorli?", required=False, widget=forms.Textarea(attrs={"rows": 2}))
+
+
+class TalentMentorForm(forms.Form):
+    mentor = forms.ModelChoiceField(label="Mentor", queryset=User.objects.none(), required=False,
+                                    empty_label="Mentor biriktirilmagan")  # fmt: skip
+
+    def __init__(self, *args, mentors=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if mentors is not None:
+            self.fields["mentor"].queryset = mentors
+            self.fields["mentor"].label_from_instance = lambda u: (
+                f"{u.get_full_name() or u.username} · {u.get_role_display()} · {u.mentee_count} shogird"
+            )
+
+
+class TalentProfileForm(forms.ModelForm):
+    class Meta:
+        model = TalentProfile
+        fields = ["track", "note"]
+        widgets = {"note": forms.Textarea(attrs={"rows": 3})}
+
+
+class GoalForm(forms.ModelForm):
+    class Meta:
+        model = DevelopmentGoal
+        fields = ["title", "kind", "due_date", "status", "progress", "mentor_comment"]
+        widgets = {
+            "due_date": DATE_WIDGET,
+            "progress": forms.NumberInput(attrs={"min": 0, "max": 100, "step": 10}),
+            "title": forms.TextInput(attrs={"placeholder": "Masalan: Respublika fizika olimpiadasiga tayyorlanish"}),
+        }
+
+    def clean_progress(self):
+        return max(0, min(100, self.cleaned_data["progress"] or 0))
+
+
+class StudentGoalForm(forms.ModelForm):
+    """Talaba o'z maqsadining holatini yangilaydi: muddat va matnni faqat mentor o'zgartiradi."""
+
+    status = forms.ChoiceField(
+        label="Holat",
+        choices=[(s.value, s.label) for s in DevelopmentGoal.Status if s != DevelopmentGoal.Status.CANCELLED],
+    )
+
+    class Meta:
+        model = DevelopmentGoal
+        fields = ["status", "progress", "student_note"]
+        widgets = {"progress": forms.NumberInput(attrs={"min": 0, "max": 100, "step": 10})}
+
+    def clean_progress(self):
+        return max(0, min(100, self.cleaned_data["progress"] or 0))

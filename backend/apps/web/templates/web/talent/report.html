@@ -1,0 +1,66 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Iqtidorlar bo'yicha hisobot{% endblock %}
+
+{% block content %}
+<a href="{% url 'web:talent-registry' %}" class="back-link">{% icon "arrow-left" "icon-sm" %} Iqtidorlar reyestri</a>
+<div class="page-header">
+  <div><h1>Hisobot 📄</h1><p>Iqtidorli talabalar bilan ishlash holati: {{ data.start|date:"d.m.Y" }} – {{ data.end|date:"d.m.Y" }}</p></div>
+  <div class="row-sm wrap">
+    <a href="?{{ query }}&format=pdf" class="btn btn-primary btn-sm">{% icon "download" "icon-sm" %} PDF</a>
+    <a href="?{{ query }}&format=csv" class="btn btn-ghost btn-sm">{% icon "download" "icon-sm" %} Excel (CSV)</a>
+  </div>
+</div>
+
+<form method="get" class="card talent-filters" style="margin-bottom:16px">
+  <label class="small">Davr boshi <input type="date" name="from" value="{{ data.start|date:'Y-m-d' }}" class="input"></label>
+  <label class="small">Davr oxiri <input type="date" name="to" value="{{ data.end|date:'Y-m-d' }}" class="input"></label>
+  <div class="row-sm" style="align-self:end"><button class="btn btn-primary btn-sm">Ko'rsatish</button></div>
+</form>
+
+<div class="kpi-grid">
+  <div class="card stat"><span class="stat-icon tone-primary">{% icon "users" %}</span><div><div class="stat-value">{{ data.totals.registry }}</div><div class="stat-label">reyestrda</div><div class="tiny muted">+{{ data.totals.new }} shu davrda</div></div></div>
+  <div class="card stat"><span class="stat-icon tone-info">{% icon "user" %}</span><div><div class="stat-value">{{ data.totals.mentored_pct }}%</div><div class="stat-label">mentor biriktirilgan</div><div class="tiny muted">{{ data.totals.mentored }} nafar</div></div></div>
+  <div class="card stat"><span class="stat-icon tone-accent">{% icon "target" %}</span><div><div class="stat-value">{{ data.totals.planned_pct }}%</div><div class="stat-label">rejasi bor</div><div class="tiny muted">{{ data.totals.goals_done }} maqsad bajarildi</div></div></div>
+  <div class="card stat"><span class="stat-icon tone-success">{% icon "trophy" %}</span><div><div class="stat-value">{{ data.totals.results }}</div><div class="stat-label">natija</div><div class="tiny muted">{{ data.totals.result_students }} talaba</div></div></div>
+</div>
+
+{% if data.totals.unattended or data.totals.goals_overdue %}
+<div class="card audit-integrity is-broken" style="margin-top:16px">
+  <b>⚠️ E'tibor talab qiladi:</b> {{ data.totals.unattended }} ta iqtidorli talabaga mentor biriktirilmagan, {{ data.totals.goals_overdue }} ta maqsad muddati o'tgan.
+  {% if data.totals.unattended %}<a href="{% url 'web:talent-registry' %}?mentor=none">Mentorsizlar ro'yxati →</a>{% endif %}
+</div>
+{% endif %}
+
+<div class="grid-2" style="margin-top:16px">
+  <section class="card card-lg stack">
+    <h2>Fakultetlar kesimida</h2>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>Fakultet</th><th>Reyestr</th><th>Mentorli</th><th>Rejali</th><th>Natijali</th></tr></thead>
+      <tbody>{% for r in data.by_faculty %}<tr><td title="{{ r.name }}">{{ r.short }}</td><td>{{ r.total }}</td><td>{{ r.mentored }} <span class="muted tiny">({{ r.mentored_pct }}%)</span></td><td>{{ r.planned }}</td><td>{{ r.results }}</td></tr>
+      {% empty %}<tr><td colspan="5" class="muted small">Ma'lumot yo'q</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </section>
+  <section class="card card-lg stack">
+    <h2>Yo'nalishlar</h2>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>Yo'nalish</th><th>Reyestr</th><th>Mentorli</th><th>Natijali</th></tr></thead>
+      <tbody>{% for r in data.by_track %}<tr><td>{{ r.name }}</td><td>{{ r.total }}</td><td>{{ r.mentored }}</td><td>{{ r.results }}</td></tr>
+      {% empty %}<tr><td colspan="4" class="muted small">Ma'lumot yo'q</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </section>
+  <section class="card card-lg stack">
+    <h2>Mentorlar faoliyati</h2>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>Mentor</th><th>Shogird</th><th>Maqsad</th><th>Bajarildi</th><th>Kechikkan</th></tr></thead>
+      <tbody>{% for m in data.mentors %}<tr><td>{{ m.name }}</td><td>{{ m.mentees }}</td><td>{{ m.goals }}</td><td>{{ m.done }}</td><td>{% if m.overdue %}<span class="text-danger bold">{{ m.overdue }}</span>{% else %}0{% endif %}</td></tr>
+      {% empty %}<tr><td colspan="5" class="muted small">Hali mentor biriktirilmagan</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </section>
+  <section class="card card-lg stack">
+    <h2>Davr natijalari</h2>
+    <div class="list">{% for r in data.results %}<div class="list-item"><span>🏅</span><div class="grow"><div class="small bold">{{ r.title }}</div><div class="tiny muted">{{ r.user }} · {{ r.get_kind_display }} · {{ r.achieved_on|date:"d.m.Y" }}</div></div></div>
+    {% empty %}<p class="muted small">Bu davrda tasdiqlangan olimpiada, hakaton, maqola yoki patent yo'q.</p>{% endfor %}</div>
+  </section>
+</div>
+{% endblock %}

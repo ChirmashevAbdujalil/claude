@@ -44,6 +44,8 @@ TRACKED = {
     "opportunities.redemption": {"fields": ["status"], "create": False},
     "arena.pointtransaction": {"when": lambda obj: obj.reason == "manual"},
     "billing.invoice": {},
+    "talent.talentprofile": {"fields": ["student", "track", "status", "mentor", "note"]},
+    "talent.developmentgoal": {"fields": ["title", "kind", "due_date", "status", "progress", "mentor_comment"]},
 }
 SKIP_FIELDS = {"id", "last_login", "date_joined", "created_at", "updated_at", "ai_suggestion", "ai_uses_date"}
 SECRET_FIELDS = {"password"}

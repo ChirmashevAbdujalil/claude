@@ -15,6 +15,7 @@ from apps.discovery.models import Challenge, Submission
 from apps.discovery.selectors import visible_challenges
 from apps.profiles.models import Achievement, UserSkill
 from apps.projects.models import ProjectMember
+from apps.talent.models import DiagnosticResult
 
 
 @dataclass
@@ -83,6 +84,17 @@ def next_steps(user, limit: int = 3) -> list[Step]:
                 reverse("web:challenge-detail", args=[daily.pk]),
                 "Yechish",
                 daily.xp_reward,
+            )
+        )
+
+    if not DiagnosticResult.objects.filter(user=user).exists():
+        steps.append(
+            Step(
+                "🧭",
+                "Iqtidor yo'nalishingizni aniqlang",
+                "10 ta savol, 3 daqiqa: sizga mos olimpiada, grant va tanlovlar avtomatik keladi.",
+                reverse("web:talent-diagnostic"),
+                "Testni boshlash",
             )
         )
 

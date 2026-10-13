@@ -42,6 +42,18 @@
     {% include "web/partials/impact_tile.html" with value=data.attended label="tadbirga keldi" note=data.events|stringformat:"d"|add:" ta tadbir o'tkazildi" icon="calendar" tone="tone-success" %}
   </section>
 
+  {% if data.talent.registry %}
+  <section class="card card-lg stack">
+    <div><h2>Iqtidorlar bilan ishlash</h2><p class="small muted">Har bir iqtidorli talaba reyestrda: yo'nalishi aniqlangan, mentori biriktirilgan va rivojlanish rejasi bor</p></div>
+    <div class="impact-talent">
+      <div><b>{{ data.talent.registry }}</b><span>iqtidorli talaba reyestrda</span></div>
+      <div><b>{{ data.talent.mentored_share }}%</b><span>ga mentor biriktirilgan ({{ data.talent.mentored }} nafar)</span></div>
+      <div><b>{{ data.talent.planned }}</b><span>tasining shaxsiy rivojlanish rejasi bor</span></div>
+      <div><b>{{ data.talent.achieved }}</b><span>nafari natijaga erishdi: olimpiada, maqola, patent</span></div>
+    </div>
+  </section>
+  {% endif %}
+
   {{ chart|json_script:"impact-weekly" }}
   <section class="grid-2">
     <article class="card card-lg stack">

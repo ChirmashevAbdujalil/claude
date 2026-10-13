@@ -37,6 +37,12 @@ class Opportunity(models.Model):
     reward = models.CharField("mukofot / maosh", max_length=200, blank=True)
     min_level = models.PositiveSmallIntegerField("minimal daraja", default=1)
     deadline = models.DateTimeField("muddat", null=True, blank=True)
+    tracks = models.JSONField(
+        "mos iqtidor yo'nalishlari",
+        default=list,
+        blank=True,
+        help_text="Tanlangan yo'nalishdagi talabalarga avtomatik xabar boradi. Bo'sh bo'lsa, turiga qarab aniqlanadi",
+    )
     is_active = models.BooleanField("faol", default=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)

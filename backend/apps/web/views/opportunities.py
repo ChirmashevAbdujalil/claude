@@ -9,6 +9,7 @@ from django.views.decorators.http import require_POST
 from apps.arena.levels import level_for_xp
 from apps.opportunities import services
 from apps.opportunities.models import Application, Opportunity, Redemption, Reward, Sponsor
+from apps.talent import services as talent_services
 
 from ..forms import ApplyForm, OpportunityForm
 from .common import paginate, run_service
@@ -40,9 +41,11 @@ def opportunity_list(request):
     applied = set(Application.objects.filter(user=request.user).values_list("opportunity_id", flat=True))
     page = paginate(request, opportunities.order_by("deadline", "-created_at"))
     my_level = level_for_xp(request.user.xp)["number"]
+    my_tracks = talent_services.user_tracks(request.user)
     for item in page:
         item.applied = item.pk in applied
         item.locked = item.min_level > my_level
+        item.matches = bool(my_tracks & set(talent_services.opportunity_tracks(item)))
     return render(
         request,
         "web/opportunities/list.html",

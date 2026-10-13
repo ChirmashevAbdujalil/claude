@@ -1,0 +1,31 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Shogirdlarim{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><h1>Shogirdlarim 🧑‍🏫</h1><p>Sizga biriktirilgan iqtidorli talabalar, ularning rejasi va muddatlari.</p></div>
+</div>
+
+<div class="kpi-grid" style="margin-bottom:16px">
+  <div class="card stat"><span class="stat-icon tone-primary">{% icon "users" %}</span><div><div class="stat-value">{{ profiles|length }}</div><div class="stat-label">shogird</div></div></div>
+  <div class="card stat"><span class="stat-icon tone-accent">{% icon "target" %}</span><div><div class="stat-value">{{ no_plan }}</div><div class="stat-label">rejasi tuzilmagan</div></div></div>
+  <div class="card stat"><span class="stat-icon tone-danger">{% icon "clock" %}</span><div><div class="stat-value">{{ overdue_total }}</div><div class="stat-label">muddati o'tgan maqsad</div></div></div>
+</div>
+
+<div class="grid-2">
+  {% for p in profiles %}
+  <a href="{% url 'web:talent-profile' p.pk %}" class="card card-link stack-sm">
+    <div class="row-sm">{% avatar p.student %}<div class="grow" style="min-width:0"><div class="bold">{{ p.student }}</div><div class="tiny muted">{{ p.student.faculty.short_name|default:"" }} · {{ p.get_track_display|default:"yo'nalish belgilanmagan" }}</div></div>
+      <span class="chip talent-status-{{ p.status }}">{{ p.get_status_display }}</span></div>
+    {% if p.goals_total %}
+    <div class="progress"><span style="width:{% widthratio p.goals_done p.goals_total 100 %}%"></span></div>
+    <div class="small">{{ p.goals_done }}/{{ p.goals_total }} maqsad bajarildi{% if p.next_goal %} · keyingisi: <b>{{ p.next_goal.title }}</b> ({{ p.next_goal.due_date|date:"d.m" }}){% endif %}</div>
+    {% if p.overdue %}<div class="small text-danger bold">⚠️ {{ p.overdue|length }} ta maqsad muddati o'tgan</div>{% endif %}
+    {% else %}<div class="small"><span class="chip chip-accent">Reja tuzing →</span></div>{% endif %}
+  </a>
+  {% empty %}
+  <div class="card">{% include "web/partials/empty.html" with emoji="🧑‍🏫" title="Hozircha shogird yo'q" text="Rahbariyat sizni iqtidorli talabaga mentor qilib biriktirsa, u shu yerda ko'rinadi va sizga xabar keladi." %}</div>
+  {% endfor %}
+</div>
+{% endblock %}

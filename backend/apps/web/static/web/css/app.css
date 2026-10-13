@@ -703,3 +703,61 @@ html, body { overflow-x: clip; }
 .chip.audit-delete, .chip.audit-login_failed { background: var(--danger-soft); color: var(--danger, #b91c1c); }
 .chip.audit-update, .chip.audit-password { background: var(--info-soft); color: var(--primary-text); }
 @media (max-width: 560px) { .audit-entry { grid-template-columns: minmax(0, 1fr); gap: 4px; } .audit-time { flex-direction: row; gap: 6px; } }
+
+/* ---------- Iqtidorlar bilan ishlash ---------- */
+.talent-pipeline { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-bottom: 16px; }
+.talent-stage { display: flex; align-items: center; gap: 12px; color: inherit; border: 2px solid transparent; }
+.talent-stage.is-active { border-color: var(--primary); }
+.talent-stage-no { width: 30px; height: 30px; flex: none; border-radius: 50%; display: grid; place-items: center; font-weight: 800; background: var(--primary-soft); color: var(--primary-text); }
+.talent-stage-alert .talent-stage-no { background: var(--danger-soft); color: var(--danger); }
+.talent-filters { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); align-items: center; }
+.talent-list { display: grid; }
+.talent-row { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start; padding: 14px 8px; color: inherit; border-top: 1px solid var(--border); border-radius: 8px; }
+.talent-row:first-child { border-top: 0; }
+.talent-row:hover { background: var(--surface-2); }
+.talent-row-main { min-width: 0; display: grid; gap: 8px; }
+.talent-row-meta { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 0.85rem; color: var(--text-2); }
+.talent-status-identified { background: var(--info-soft); color: var(--info); }
+.talent-status-mentored { background: var(--primary-soft); color: var(--primary-text); }
+.talent-status-developing { background: var(--accent-soft); color: var(--accent-text); }
+.talent-status-achieved { background: var(--success-soft); color: var(--success); }
+.talent-status-archived { background: var(--surface-3); color: var(--muted); }
+.text-danger { color: var(--danger); }
+.talent-howto { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.talent-hero { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.goal { display: grid; gap: 8px; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius); border-left: 4px solid var(--primary); }
+.goal.goal-done { border-left-color: var(--success); }
+.goal.goal-cancelled { border-left-color: var(--surface-3); opacity: 0.7; }
+.goal.is-overdue { border-left-color: var(--danger); background: color-mix(in srgb, var(--danger-soft) 45%, transparent); }
+.goal-head { display: flex; gap: 10px; align-items: flex-start; }
+.goal-progress { height: 6px; }
+.goal-progress > span { background: var(--primary); }
+.goal-done .goal-progress > span { background: var(--success); }
+.goal-chip-planned { background: var(--surface-3); color: var(--text-2); }
+.goal-chip-in_progress { background: var(--accent-soft); color: var(--accent-text); }
+.goal-chip-done { background: var(--success-soft); color: var(--success); }
+.goal-chip-cancelled { background: var(--surface-3); color: var(--muted); }
+.goal-edit summary, .goal-new summary { cursor: pointer; list-style: none; }
+.goal-edit summary::-webkit-details-marker, .goal-new summary::-webkit-details-marker { display: none; }
+.goal-form { margin-top: 10px; display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+.goal-form .field:first-of-type, .goal-form button { grid-column: 1 / -1; }
+.talent-scores { display: grid; gap: 8px; }
+.talent-score { display: grid; grid-template-columns: minmax(0, 1fr) 70px 28px; gap: 8px; align-items: center; font-size: 0.82rem; }
+.talent-score b { text-align: right; font-variant-numeric: tabular-nums; }
+.talent-score .hbar-track { height: 8px; background: var(--surface-3); border-radius: 4px; overflow: hidden; }
+.talent-track-hero { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+.talent-track-icon { font-size: 56px; line-height: 1; }
+.talent-steps { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.diagnostic-question { border: 0; margin: 0; }
+.diagnostic-question legend { font-weight: 700; margin-bottom: 12px; padding: 0; float: left; width: 100%; }
+.diagnostic-no { display: inline-block; min-width: 44px; padding: 2px 8px; margin-right: 6px; border-radius: 999px; background: var(--primary-soft); color: var(--primary-text); font-size: 0.75rem; text-align: center; }
+.diagnostic-options { clear: both; display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.diagnostic-option { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; font-size: 0.9rem; }
+.diagnostic-option:hover { border-color: var(--primary); }
+.diagnostic-option:has(input:checked) { border-color: var(--primary); background: var(--primary-soft); }
+.diagnostic-option input { margin-top: 3px; accent-color: var(--primary); }
+.chip-match { background: var(--success-soft); color: var(--success); }
+.impact-talent { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.impact-talent > div { display: grid; gap: 2px; padding: 14px; border-radius: var(--radius); background: var(--surface-2); }
+.impact-talent b { font-size: 1.6rem; color: var(--primary-text); line-height: 1.1; }
+.impact-talent span { font-size: 0.85rem; color: var(--text-2); }

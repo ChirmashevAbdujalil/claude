@@ -1,0 +1,94 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Mening yo'lim{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><h1>Mening yo'lim 🧭</h1><p>Iqtidor yo'nalishingiz, mentoringiz va rivojlanish rejangiz.</p></div>
+  <a href="{% url 'web:talent-diagnostic' %}" class="btn {% if diagnostic %}btn-ghost{% else %}btn-primary{% endif %} btn-sm">{% icon "compass" "icon-sm" %} {% if diagnostic %}Testni qayta topshirish{% else %}Diagnostikadan o'tish{% endif %}</a>
+</div>
+
+{% if track %}
+<section class="card card-lg hero-card talent-track-hero">
+  <div class="talent-track-icon">{{ track_icon }}</div>
+  <div class="stack-sm">
+    <span class="small" style="opacity:.85">Sizning yo'nalishingiz</span>
+    <h2 style="margin:0; color:#fff">{{ track_label }}</h2>
+    <p class="muted" style="max-width:560px">{{ track_description }}</p>
+  </div>
+</section>
+{% else %}
+<section class="card card-lg stack-sm center">
+  <div style="font-size:44px">🧭</div>
+  <h2>Iqtidoringiz qaysi yo'nalishda?</h2>
+  <p class="muted" style="max-width:520px; margin:0 auto">10 ta savoldan iborat test (3 daqiqa) va platformadagi natijalaringiz asosida yo'nalishingizni aniqlaymiz. Shundan keyin sizga mos olimpiada, grant va tanlovlar avtomatik keladi.</p>
+  <div><a href="{% url 'web:talent-diagnostic' %}" class="btn btn-primary btn-lg">Testni boshlash {% icon "arrow-right" %}</a></div>
+</section>
+{% endif %}
+
+<div class="layout-main-aside" style="margin-top:16px">
+  <div class="stack">
+    {% if profile %}
+    <section class="card card-lg stack">
+      <div class="row-between wrap"><h2>Rivojlanish rejam 🎯</h2>{% if goals %}<span class="chip chip-success">{{ done }}/{{ goals|length }} bajarildi</span>{% endif %}</div>
+      {% if pipeline and profile.status != "archived" %}{% include "web/partials/stepper.html" with steps=pipeline compact=True %}{% endif %}
+      {% for goal in goals %}
+      <article class="goal {% if goal.is_overdue %}is-overdue{% endif %} goal-{{ goal.status }}">
+        <div class="goal-head">
+          <div class="grow" style="min-width:0"><div class="bold">{{ goal.title }}</div>
+            <div class="tiny muted">{{ goal.get_kind_display }} · muddat {{ goal.due_date|date:"d.m.Y" }}{% if goal.is_overdue %} · <span class="text-danger bold">muddati o'tgan</span>{% endif %}</div></div>
+          <span class="chip goal-chip-{{ goal.status }}">{{ goal.get_status_display }}</span>
+        </div>
+        <div class="progress goal-progress"><span style="width:{{ goal.progress }}%"></span></div>
+        {% if goal.mentor_comment %}<div class="small"><span class="muted">Mentor:</span> {{ goal.mentor_comment }}</div>{% endif %}
+        {% if goal.form %}
+        <details class="goal-edit"><summary class="small bold">Holatni yangilash</summary>
+          <form method="post" action="{% url 'web:talent-goal-update' goal.pk %}" class="form goal-form">{% csrf_token %}<input type="hidden" name="next" value="/mening-yolim/">
+            {% include "web/partials/form_fields.html" with form=goal.form %}
+            <button class="btn btn-primary btn-sm">Saqlash</button>
+          </form>
+        </details>
+        {% endif %}
+      </article>
+      {% empty %}
+      <p class="muted small">{% if profile.mentor %}Mentoringiz {{ profile.mentor }} bilan uchrashib, semestr rejasini tuzing.{% else %}Tez orada sizga mentor biriktiriladi va birga reja tuzasiz.{% endif %}</p>
+      {% endfor %}
+    </section>
+    {% elif track %}
+    <section class="card card-lg stack-sm">
+      <h2>Birinchi qadamlar</h2>
+      <ul class="talent-steps">{% for step in first_steps %}<li>{{ step }}</li>{% endfor %}</ul>
+      <p class="small muted">Faol bo'ling: o'qituvchilar «uchqun» belgisini qo'ysa yoki natijangiz tasdiqlansa, iqtidorlar reyestriga kirasiz va sizga mentor biriktiriladi.</p>
+    </section>
+    {% endif %}
+
+    <section class="card card-lg stack">
+      <h2>Sizga mos imkoniyatlar</h2>
+      {% for o in matches %}
+      <a href="{% url 'web:opportunity-detail' o.pk %}" class="list-item"><span class="chip chip-info">{{ o.get_kind_display }}</span><div class="grow"><div class="small bold">{{ o.title }}</div><div class="tiny muted">{{ o.organization }}</div></div><span class="tiny muted">{% if o.deadline %}{{ o.deadline|date:"d.m" }} gacha{% endif %}</span></a>
+      {% empty %}<p class="muted small">{% if track %}Hozircha yo'nalishingizga mos ochiq imkoniyat yo'q. Yangisi chiqishi bilan sizga xabar beramiz.{% else %}Diagnostikadan o'ting: shundan keyin mos imkoniyatlar shu yerda chiqadi.{% endif %}</p>{% endfor %}
+    </section>
+  </div>
+
+  <aside class="stack">
+    {% if profile %}
+    <div class="card stack-sm">
+      <h3>Mentorim</h3>
+      {% if profile.mentor %}<div class="row-sm">{% avatar profile.mentor %}<div><div class="bold small">{{ profile.mentor }}</div><div class="tiny muted">{{ profile.mentor.get_role_display }}</div></div></div>
+      {% else %}<p class="small muted">Hali biriktirilmagan.</p>{% endif %}
+    </div>
+    {% endif %}
+    {% if ranked %}
+    <div class="card stack-sm">
+      <h3>Diagnostika natijasi</h3>
+      <div class="talent-scores">
+        {% for key, name, emoji, score in ranked %}
+        <div class="talent-score"><span>{{ emoji }} {{ name }}</span><span class="hbar-track"><span class="hbar-fill" style="width:{{ score }}%"></span></span><b>{{ score }}</b></div>
+        {% endfor %}
+      </div>
+      <p class="tiny muted">Ball javoblaringiz (70%) va platformadagi ko'nikma, yutuq va yechimlaringiz (30%) asosida hisoblangan.</p>
+    </div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

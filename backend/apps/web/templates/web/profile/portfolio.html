@@ -108,6 +108,12 @@
         {% for flag in flags %}
         <div class="small" style="border-top:1px solid var(--border); padding-top:8px"><b>{{ flag.get_area_display }}</b>: {{ flag.note }} <span class="muted">({{ flag.flagged_by|display_name }})</span></div>
         {% endfor %}
+        {% if talent_profile %}
+        <a href="{% url 'web:talent-profile' talent_profile.pk %}" class="btn btn-ghost btn-sm btn-block">🧭 Iqtidor kartasi · {{ talent_profile.get_status_display }}</a>
+        {% elif can_add_talent %}
+        <form method="post" action="{% url 'web:talent-add' %}">{% csrf_token %}<input type="hidden" name="student_id" value="{{ profile.pk }}">
+          <button class="btn btn-ghost btn-sm btn-block">🧭 Iqtidorlar reyestriga qo'shish</button></form>
+        {% endif %}
       </div>
       {% endif %}
     </aside>
