@@ -1,0 +1,121 @@
+@page { size: A4; margin: 0; }
+:root {
+  --ink: #0B1D24; --muted: #4A5D65; --soft: #7B8C93;
+  --dark: #062D3B; --teal: #168A9C; --deep: #0E5A73; --gold: #F59E0B;
+  --paper: #FFFFFF; --mist: #F3F6F7; --line: #DCE5E8; --tint: #E2F0F4;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: #fff; }
+body {
+  font-family: "Inter", "DejaVu Sans", sans-serif; color: var(--ink);
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  font-feature-settings: "cv11", "ss01";
+}
+.page {
+  width: 210mm; height: 297mm; overflow: hidden; position: relative;
+  padding: 18mm 18mm 22mm; page-break-after: always; break-after: page; background: var(--paper);
+}
+.page:last-child { page-break-after: auto; break-after: auto; }
+
+/* ---------- Muqova ---------- */
+.cover { background: var(--dark); color: #F3F6F7; padding: 20mm 18mm; display: flex; flex-direction: column; }
+.cover .glow {
+  position: absolute; width: 170mm; height: 170mm; right: -60mm; top: -40mm; border-radius: 50%;
+  background: radial-gradient(circle, rgba(22,138,156,.55), rgba(22,138,156,0) 65%);
+}
+.cover .ring {
+  position: absolute; width: 110mm; height: 110mm; right: -48mm; top: 22mm; border-radius: 50%;
+  border: 1.2mm solid rgba(245,158,11,.25);
+}
+.cover .eyebrow { position: relative; font-size: 9.5pt; font-weight: 700; letter-spacing: .25em; text-transform: uppercase; color: #8FC7D1; }
+.cover-main { position: relative; margin-top: 52mm; }
+.cover .kicker {
+  display: inline-block; font-size: 11pt; font-weight: 800; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--dark); background: var(--gold); padding: 2mm 4mm; border-radius: 2mm;
+}
+.cover h1 { font-family: "Inter Display", "Inter", sans-serif; font-size: 58pt; line-height: .98; font-weight: 800; letter-spacing: -.02em; margin-top: 7mm; }
+.cover .sub { font-size: 14pt; line-height: 1.45; color: #C9DDE2; max-width: 140mm; margin-top: 7mm; }
+.chain { display: flex; align-items: center; gap: 3mm; margin-top: 12mm; }
+.chain span { font-size: 11pt; font-weight: 700; padding: 2.4mm 4.5mm; border: .35mm solid rgba(143,199,209,.5); border-radius: 20mm; color: #E6F2F4; }
+.chain i { width: 6mm; height: .5mm; background: var(--gold); }
+.cover-nums { position: relative; display: flex; gap: 6mm; margin-top: auto; margin-bottom: 14mm; }
+.cn { flex: 1; border-top: .5mm solid rgba(143,199,209,.4); padding-top: 4mm; }
+.cn b { display: block; font-family: "Inter Display", "Inter", sans-serif; font-size: 28pt; font-weight: 800; color: var(--gold); }
+.cn span { font-size: 10pt; color: #9FBFC6; }
+.cover-foot { position: relative; display: flex; justify-content: space-between; border-top: .3mm solid rgba(255,255,255,.15); padding-top: 6mm; }
+.cover-foot small { display: block; font-size: 8.5pt; letter-spacing: .15em; text-transform: uppercase; color: #8FC7D1; margin-bottom: 1.5mm; }
+.cover-foot b { font-size: 13pt; }
+.cover-foot .r { text-align: right; }
+
+/* ---------- Umumiy ---------- */
+.label { font-size: 8.5pt; font-weight: 800; letter-spacing: .22em; text-transform: uppercase; color: var(--deep); margin-bottom: 6mm; }
+h2 { font-family: "Inter Display", "Inter", sans-serif; font-size: 22pt; font-weight: 800; letter-spacing: -.01em; line-height: 1.15; }
+h2.mt { margin-top: 10mm; }
+.lead { font-size: 11pt; line-height: 1.55; color: var(--muted); margin-top: 3mm; max-width: 160mm; }
+footer {
+  position: absolute; left: 18mm; right: 18mm; bottom: 10mm; display: flex; justify-content: space-between;
+  font-size: 8pt; color: var(--soft); border-top: .3mm solid var(--line); padding-top: 3mm;
+}
+footer span:last-child { font-weight: 800; color: var(--deep); }
+strong { font-weight: 750; color: var(--ink); background: linear-gradient(transparent 62%, rgba(245,158,11,.32) 62%); }
+.pause { color: var(--teal); font-weight: 800; margin: 0 .5mm; }
+.pause.big { font-size: 16pt; }
+
+/* ---------- Xarita ---------- */
+.timeline { display: flex; gap: 1.2mm; margin-top: 9mm; }
+.seg { border-radius: 2mm; padding: 3mm 2.5mm; color: #fff; min-height: 22mm; display: flex; flex-direction: column; }
+.seg b { font-size: 12pt; font-weight: 800; }
+.seg span { font-size: 8pt; font-weight: 700; line-height: 1.25; margin-top: 1mm; }
+.seg em { font-style: normal; font-size: 7.5pt; opacity: .8; margin-top: auto; }
+.s0 { background: var(--gold); color: var(--dark); } .s1 { background: var(--teal); } .s2 { background: var(--deep); }
+.s3 { background: var(--dark); } .s4 { background: #B45309; }
+.acts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5mm 6mm; margin-top: 9mm; }
+.act h3 { font-size: 11pt; font-weight: 800; display: flex; align-items: center; gap: 2.5mm; margin-bottom: 2.5mm; }
+.act h3 span { display: inline-grid; place-items: center; min-width: 7mm; height: 7mm; padding: 0 1.5mm; border-radius: 1.5mm; background: var(--tint); color: var(--deep); font-size: 9pt; }
+.act ul { list-style: none; }
+.act li { font-size: 9.5pt; line-height: 1.75; color: var(--muted); }
+.act li b { display: inline-block; width: 7mm; color: var(--teal); font-weight: 800; }
+.legend { margin-top: 8mm; background: var(--mist); border-radius: 3mm; padding: 6mm 7mm; display: grid; grid-template-columns: 1fr 1fr; gap: 4mm 8mm; }
+.legend h3 { grid-column: 1 / -1; font-size: 10pt; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; color: var(--deep); }
+.lg { display: flex; align-items: center; gap: 3mm; font-size: 9.5pt; color: var(--muted); }
+.lg strong { font-size: 10pt; }
+
+/* ---------- Nutq bloklari ---------- */
+.blk { display: grid; grid-template-columns: 32mm 1fr; gap: 6mm; padding: 6.5mm 0; border-bottom: .3mm solid var(--line); }
+.blk:last-of-type { border-bottom: none; }
+.meta { display: flex; flex-direction: column; gap: 1.5mm; }
+.num { font-family: "Inter Display", "Inter", sans-serif; font-size: 26pt; font-weight: 800; line-height: 1; color: var(--teal); }
+.name { font-size: 9.5pt; font-weight: 800; line-height: 1.3; }
+.time { font-size: 8.5pt; font-weight: 700; color: var(--deep); background: var(--tint); border-radius: 1.5mm; padding: 1mm 2mm; align-self: flex-start; font-variant-numeric: tabular-nums; }
+.speech { font-size: 13.5pt; line-height: 1.66; color: #1E3038; }
+.dir { margin-top: 3mm; font-size: 9.5pt; line-height: 1.5; color: var(--deep); font-style: italic; display: flex; gap: 2.5mm; align-items: baseline; }
+.dir-chip, .cut-chip { font-style: normal; font-size: 7pt; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; border-radius: 1.2mm; padding: .8mm 1.8mm; white-space: nowrap; }
+.dir-chip { background: var(--dark); color: #fff; }
+.cut-chip { background: #FEF3C7; color: #92400E; align-self: flex-start; }
+
+/* ---------- Qisqa variant ---------- */
+.short { margin-top: 7mm; background: var(--mist); border-left: 1.5mm solid var(--gold); border-radius: 0 3mm 3mm 0; padding: 7mm 8mm; }
+.short .speech { font-size: 11.5pt; }
+.nums { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3.5mm; margin-top: 6mm; }
+.nb { border: .3mm solid var(--line); border-radius: 2.5mm; padding: 4mm; }
+.nb b { display: block; font-family: "Inter Display", "Inter", sans-serif; font-size: 17pt; font-weight: 800; color: var(--deep); }
+.nb span { font-size: 8.5pt; color: var(--muted); }
+
+/* ---------- Savol-javob ---------- */
+.qas { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin-top: 7mm; }
+.qa { background: var(--mist); border-radius: 3mm; padding: 4.5mm 5mm; border-top: 1mm solid var(--teal); }
+.qa:nth-child(4n+2), .qa:nth-child(4n+3) { border-top-color: var(--gold); }
+.qa h4 { font-size: 10.5pt; font-weight: 800; margin-bottom: 1.8mm; }
+.qa p { font-size: 9.3pt; line-height: 1.5; color: var(--muted); }
+
+/* ---------- Maslahatlar ---------- */
+.tips { list-style: none; margin-top: 6mm; display: grid; gap: 3.5mm; }
+.tips li { display: flex; gap: 4mm; align-items: flex-start; }
+.tips li > span { flex: none; width: 8mm; height: 8mm; border-radius: 50%; background: var(--teal); color: #fff; display: grid; place-items: center; font-size: 10pt; font-weight: 800; }
+.tips li p { font-size: 11pt; line-height: 1.5; padding-top: 1mm; }
+.check { list-style: none; margin-top: 5mm; display: grid; grid-template-columns: 1fr 1fr; gap: 3.5mm 6mm; }
+.check li { display: flex; gap: 3mm; align-items: flex-start; font-size: 10pt; line-height: 1.45; color: var(--muted); }
+.check i { flex: none; width: 4.5mm; height: 4.5mm; border: .5mm solid var(--deep); border-radius: 1mm; margin-top: .4mm; }
+.final { position: absolute; left: 18mm; right: 18mm; bottom: 24mm; background: var(--dark); color: #F3F6F7; border-radius: 4mm; padding: 8mm 9mm; }
+.final p { font-size: 14pt; line-height: 1.45; font-weight: 600; }
+.final b { display: block; margin-top: 3mm; color: var(--gold); font-size: 12pt; }
