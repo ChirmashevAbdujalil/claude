@@ -88,18 +88,19 @@ def test_results_xlsx_is_valid_workbook(rector, survey):
     for name in archive.namelist():
         minidom.parseString(archive.read(name))  # har bir qism to'g'ri XML
     workbook = archive.read("xl/workbook.xml").decode()
-    for sheet in ("Umumiy natija", "Javoblar", "Kesimlar", "Klublar"):
+    for sheet in ("Umumiy natija", "Fakultetlar", "Javoblar", "Kesimlar", "Klublar"):
         assert f'name="{sheet}"' in workbook
-    answers = archive.read("xl/worksheets/sheet2.xml").decode()
+    assert "Akkaunt ochilgan" in archive.read("xl/worksheets/sheet2.xml").decode()
+    answers = archive.read("xl/worksheets/sheet3.xml").decode()
     assert (
         "Aliyev Ali" in answers and "K-21-05" in answers and "IT va dasturlash" in answers and "<autoFilter" in answers
     )
-    assert "IT va dasturlash klubi" in archive.read("xl/worksheets/sheet4.xml").decode()
+    assert "IT va dasturlash klubi" in archive.read("xl/worksheets/sheet5.xml").decode()
 
     filtered = web(rector).get(
         reverse("web:survey-export-xlsx", args=[survey.pk]), {"answer": f"{track.pk}:{Track.RESEARCH}"}
     )
-    sheet = zipfile.ZipFile(io.BytesIO(filtered.content)).read("xl/worksheets/sheet2.xml").decode()
+    sheet = zipfile.ZipFile(io.BytesIO(filtered.content)).read("xl/worksheets/sheet3.xml").decode()
     assert "Karimova Aziza" in sheet and "Aliyev Ali" not in sheet
 
 
@@ -108,3 +109,32 @@ def test_xlsx_helpers():
     assert xlsx.absolute("A4:K20") == "$A$4:$K$20"
     assert xlsx.bar(0.5, 10) == "█████░░░░░" and xlsx.bar(0) == ""
     assert xlsx.Sheet("a/b:c*?[d]" * 5).name.count("/") == 0
+
+
+def test_faculty_registration_counts_and_coverage(rector, survey, faculty):
+    from apps.accounts.models import Faculty
+
+    other = Faculty.objects.create(name="Energetika fakulteti", short_name="EN")
+    faculty.contingent = 40
+    faculty.save()
+    student = survey.responses.first().user
+    student.last_login = student.date_joined
+    student.save(update_fields=["last_login"])
+    data = analytics.faculty_registration(survey.responses.all(), [faculty, other])
+    first, second = data["rows"]
+    assert (first["short"], first["total"], first["accounts"], first["logged"], first["today"]) == ("KI", 3, 3, 1, 3)
+    assert first["coverage"] == 7.5 and first["medal"] == "🥇" and second["total"] == 0 and second["medal"] == ""
+    assert data["silent"] == ["EN"] and data["totals"]["coverage"] == 7.5 and data["has_contingent"]
+
+    page = web(rector).get(reverse("web:survey-results", args=[survey.pk])).content.decode()
+    assert "Fakultetlar bo'yicha ro'yxatga olish" in page and "3/40" in page and "Hali hech kim javob bermagan" in page
+
+
+def test_contingent_is_saved_in_settings(rector, faculty):
+    url = reverse("web:institution-settings")
+    web(rector).post(url, {"form": "contingent", f"contingent-{faculty.pk}": "850"})
+    faculty.refresh_from_db()
+    assert faculty.contingent == 850
+    web(rector).post(url, {"form": "contingent", f"contingent-{faculty.pk}": ""})
+    faculty.refresh_from_db()
+    assert faculty.contingent is None

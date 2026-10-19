@@ -3,7 +3,7 @@
 from collections import Counter, defaultdict
 from datetime import timedelta
 
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 
@@ -222,3 +222,69 @@ def insights(survey, responses, summary, timeline_data, complete) -> list[dict]:
             {"icon": "✅", "text": f"Talabalar savollarning o'rtacha {complete['average']}% iga javob bergan."}
         )
     return items
+
+
+# ---------------------------------------------------------------- fakultetlar bo'yicha ro'yxatga olish
+
+MEDALS = ["🥇", "🥈", "🥉"]
+
+
+def faculty_registration(responses, faculties) -> dict:
+    """Har bir fakultetdan nechta talaba javob bergan, akkaunt olgan va tizimga kirgan; kontingent bo'lsa, qamrov.
+
+    Javob bermagan fakultetlar ham ko'rsatiladi: qaysi fakultet orqada qolayotgani ko'rinib turishi uchun.
+    """
+    today = timezone.localdate()
+    stats = {
+        row["faculty_id"]: row
+        for row in responses.values("faculty_id").annotate(
+            total=Count("id"),
+            accounts=Count("id", filter=Q(user__isnull=False)),
+            logged=Count("id", filter=Q(user__last_login__isnull=False)),
+            today=Count("id", filter=Q(submitted_at__date=today)),
+        )
+    }
+    rows = []
+    for faculty in faculties:
+        row = stats.get(faculty.pk, {})
+        rows.append(_registration_row(faculty.pk, faculty.name, faculty.short_name, row, faculty.contingent))
+    if None in stats:
+        rows.append(_registration_row(None, "Fakultet ko'rsatilmagan", "—", stats[None], None))
+    rows.sort(key=lambda r: (-r["total"], r["name"]))
+    top = max([r["total"] for r in rows] + [1])
+    for index, row in enumerate(rows):
+        row["width"] = round(row["total"] * 100 / top)
+        row["medal"] = MEDALS[index] if index < 3 and row["total"] else ""
+    totals = {key: sum(r[key] for r in rows) for key in ("total", "accounts", "logged", "today")}
+    contingent = sum(r["contingent"] or 0 for r in rows)
+    totals["contingent"] = contingent or None
+    totals["coverage"] = _percent(totals["total"], contingent)
+    return {
+        "rows": rows,
+        "totals": totals,
+        "has_contingent": any(r["contingent"] for r in rows),
+        "silent": [r["short"] for r in rows if not r["total"] and r["short"] != "—"],
+    }
+
+
+def _registration_row(pk, name, short, row, contingent):
+    total = row.get("total", 0)
+    return {
+        "id": pk,
+        "name": name,
+        "short": short,
+        "total": total,
+        "accounts": row.get("accounts", 0),
+        "logged": row.get("logged", 0),
+        "today": row.get("today", 0),
+        "contingent": contingent,
+        "coverage": _percent(total, contingent),
+    }
+
+
+def _percent(part, whole):
+    """Qamrov foizi: 10% dan kichik bo'lsa bir xona kasr bilan (0 % deb adashtirmaslik uchun)."""
+    if not whole:
+        return None
+    value = min(part * 100 / whole, 100)
+    return round(value, 1) if value < 10 else round(value)

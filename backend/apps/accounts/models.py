@@ -15,6 +15,12 @@ class Faculty(models.Model):
     )
     name = models.CharField("nomi", max_length=200)
     short_name = models.CharField("qisqa nomi", max_length=20)
+    contingent = models.PositiveIntegerField(
+        "talabalar soni (kontingent)",
+        null=True,
+        blank=True,
+        help_text="Fakultetdagi jami talabalar: so'rovnoma qamrovi foizini hisoblash uchun",
+    )
 
     objects = TenantManager()
 

@@ -1255,3 +1255,45 @@ a.cr-kpi:hover { color: inherit; border-color: color-mix(in srgb, var(--primary)
 .club-telegram:hover { color: #fff; filter: brightness(1.05); }
 .club-telegram .club-role-icon { background: rgba(255,255,255,.2); }
 .club-todo { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+
+/* Fakultetlar bo'yicha ro'yxatga olish (reg-) */
+.reg { display: grid; gap: 16px; }
+.reg-head { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; }
+.reg-totals { display: flex; flex-wrap: wrap; gap: 8px; }
+.reg-totals > div { display: grid; min-width: 84px; padding: 8px 12px; border-radius: 12px; background: var(--surface-2); line-height: 1.15; }
+.reg-totals b { font-size: 1.3rem; }
+.reg-totals span { font-size: 11.5px; color: var(--muted); }
+.reg-totals .is-today b { color: var(--success); }
+.reg-totals .is-cover { background: var(--primary-soft); }
+.reg-totals .is-cover b { color: var(--primary-text); }
+.reg-table { display: grid; }
+.reg-row { display: grid; grid-template-columns: minmax(0, 1fr) repeat(var(--cols, 4), 78px); gap: 10px; align-items: center; padding: 10px 8px;
+  border-bottom: 1px solid var(--border); color: inherit; border-radius: 10px; }
+.reg:has(.reg-th span:nth-child(6)) .reg-row { grid-template-columns: minmax(0, 1fr) repeat(4, 74px) 96px; }
+a.reg-row:hover { color: inherit; background: var(--surface-2); }
+.reg-th { font-size: 11.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); padding-block: 6px; }
+.reg-th span:not(:first-child), .reg-num { text-align: center; }
+.reg-row:last-child { border-bottom: 0; }
+.reg-row.is-silent { opacity: .62; }
+.reg-name { display: flex; gap: 12px; align-items: center; min-width: 0; }
+.reg-rank { flex: none; width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; font-size: 14px; font-weight: 800;
+  background: var(--surface-2); color: var(--muted); }
+.reg-label { display: grid; gap: 2px; min-width: 0; flex: 1; }
+.reg-label small { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.reg-bar { display: block; height: 7px; border-radius: 4px; background: var(--surface-3); overflow: hidden; margin-top: 3px; }
+.reg-bar span { display: block; height: 100%; min-width: 2px; border-radius: 4px; background: var(--gradient); }
+.reg-num { font-size: 14px; display: grid; justify-items: center; }
+.reg-num b { font-size: 16px; }
+.reg-num small { font-size: 11px; color: var(--muted); }
+.reg-num.is-today { color: var(--success); font-weight: 800; }
+.reg-cover.is-high { color: var(--success); } .reg-cover.is-mid { color: var(--accent-text); } .reg-cover.is-low { color: var(--danger); }
+.reg-alert { margin: 0; padding: 10px 14px; border-radius: 12px; background: var(--accent-soft); color: var(--accent-text); font-size: 13.5px; }
+@media (max-width: 720px) {
+  .reg-th { display: none; }
+  .reg-row, .reg:has(.reg-th span:nth-child(6)) .reg-row { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 6px; padding: 12px 4px; }
+  .reg-name { grid-column: 1 / -1; }
+  .reg-num::before { content: attr(data-label); font-size: 10.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+}
+.contingent-input { flex: none; width: 120px; }
+.contingent-input .input { min-height: 36px; padding: 6px 10px; text-align: center; }
+@media (max-width: 720px) { .reg:has(.reg-th span:nth-child(6)) .reg-row { grid-template-columns: repeat(5, minmax(0, 1fr)); } }

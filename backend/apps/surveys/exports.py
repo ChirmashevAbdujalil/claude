@@ -132,14 +132,46 @@ def _summary_sheet(survey, responses, data, subtitle):
     return sheet
 
 
+def _registration_sheet(responses, faculties, subtitle):
+    """Fakultetlar bo'yicha ro'yxatga olish: javob, akkaunt, tizimga kirgan, bugun, kontingent va qamrov."""
+    data = analytics.faculty_registration(responses, faculties)
+    sheet = x.Sheet("Fakultetlar", tab_color="059669")
+    head = ["№", "Fakultet", "Qisqa nomi", "Javob bergan", "Akkaunt ochilgan", "Tizimga kirgan", "Bugun"]
+    head += ["Talabalar soni", "Qamrov", "Grafik"]
+    sheet.widths = [6, 44, 12, 14, 16, 15, 10, 15, 11, 24]
+    x.title_block(sheet, "Fakultetlar bo'yicha ro'yxatga olish", subtitle, len(head))
+    header = sheet.add([(h, "head") for h in head], height=32)
+    top = max([r["total"] for r in data["rows"]] + [1])
+    for i, r in enumerate(data["rows"], 1):
+        z = "_z" if i % 2 == 0 else ""
+        coverage = r["total"] / r["contingent"] if r["contingent"] else ""
+        sheet.add([
+            (i, f"num{z}"), (r["name"], f"bold{z}"), (r["short"], f"num{z}"), (r["total"], f"num{z}"),
+            (r["accounts"], f"num{z}"), (r["logged"], f"num{z}"), (r["today"], f"num{z}"),
+            (r["contingent"] or "", f"num{z}"), (min(coverage, 1) if coverage != "" else "", f"pct{z}"),
+            (x.bar(r["total"] / top), f"bar{z}"),
+        ])  # fmt: skip
+    t = data["totals"]
+    sheet.add([
+        ("", "kpi_label"), ("Jami", "kpi_label"), ("", "kpi_label"), (t["total"], "kpi_value"),
+        (t["accounts"], "kpi_value"), (t["logged"], "kpi_value"), (t["today"], "kpi_value"),
+        (t["contingent"] or "", "kpi_value"), ((t["coverage"] or 0) / 100 if t["coverage"] is not None else "", "pct"),
+        ("", "kpi_label"),
+    ], height=22)  # fmt: skip
+    if data["silent"]:
+        sheet.blank()
+        sheet.add([("", "note"), (f"Hali javob bermagan: {', '.join(data['silent'])}", "note")])
+    sheet.freeze = (header, 2)
+    return sheet
+
+
 def _breakdown_sheet(survey, responses, data, subtitle):
     sheet = x.Sheet("Kesimlar", tab_color=x.DARK, landscape=False)
     sheet.widths = [34, 10, 10, 34]
-    x.title_block(sheet, "Fakultet, kurs va guruh kesimi", subtitle, 4)
+    x.title_block(sheet, "Kurs va guruh kesimi", subtitle, 4)
     total = data["total"] or 1
     groups = Counter(g for g in responses.values_list("group", flat=True) if g)
     sections = [
-        ("Fakultetlar", data["faculties"]),
         ("Kurslar", data["courses"]),
         ("Guruhlar (eng faol 30 ta)", groups.most_common(30)),
     ]
@@ -189,7 +221,7 @@ def _clubs_sheet(survey, subtitle):
     return sheet
 
 
-def results_workbook(survey, responses, *, institution, conditions=()) -> bytes:
+def results_workbook(survey, responses, *, institution, conditions=(), faculties=None) -> bytes:
     now = timezone.localtime()
     data = summary(survey, responses)
     subtitle = f"{institution} · {data['total']} ta javob · {now:%d.%m.%Y %H:%M}"
@@ -200,6 +232,11 @@ def results_workbook(survey, responses, *, institution, conditions=()) -> bytes:
         _responses_sheet(survey, responses, subtitle),
     ]
     if survey.collect_identity:
+        if faculties is None:
+            from apps.accounts.models import Faculty
+
+            faculties = list(Faculty.objects.order_by("name"))
+        sheets.insert(1, _registration_sheet(responses, faculties, subtitle))
         sheets.append(_breakdown_sheet(survey, responses, data, subtitle))
     clubs_sheet = _clubs_sheet(survey, subtitle)
     if clubs_sheet is not None:

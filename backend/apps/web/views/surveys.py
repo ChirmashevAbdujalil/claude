@@ -238,6 +238,8 @@ def survey_results(request, pk):
         "active_answers": {c["raw"] for c in conditions},
         "clubs_count": survey.clubs.count(),
     }
+    if tab not in ("responses", "analysis", "clubs") and survey.collect_identity:
+        context["registration"] = analytics.faculty_registration(responses, _faculties_for(request.user))
     if tab == "analysis":
         context |= _analysis(request, survey, responses, summary)
     elif tab == "clubs":
@@ -249,6 +251,13 @@ def survey_results(request, pk):
             response.in_registry = response.user_id in registered
         context["page"] = page
     return render(request, "web/surveys/results.html", context)
+
+
+def _faculties_for(user):
+    faculties = Faculty.objects.order_by("name")
+    if user.role == user.Role.DEAN and not user.is_superuser and user.faculty_id:
+        faculties = faculties.filter(pk=user.faculty_id)
+    return list(faculties)
 
 
 def _analysis(request, survey, responses, summary):
@@ -335,7 +344,11 @@ def survey_export_xlsx(request, pk):
     institution = request.institution.name if request.institution else "Talent Hub"
     conditions = analytics.parse_conditions(survey, request.GET.getlist("answer"))
     content = exports.results_workbook(
-        survey, _filtered(request, survey), institution=institution, conditions=conditions
+        survey,
+        _filtered(request, survey),
+        institution=institution,
+        conditions=conditions,
+        faculties=_faculties_for(request.user),
     )
     response = HttpResponse(content, content_type=XLSX)
     stamp = timezone.localtime().strftime("%Y%m%d-%H%M")

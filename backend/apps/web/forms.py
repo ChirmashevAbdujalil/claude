@@ -392,8 +392,8 @@ class InstitutionSettingsForm(forms.ModelForm):
 class FacultyForm(forms.ModelForm):
     class Meta:
         model = Faculty
-        fields = ["name", "short_name"]
-        labels = {"name": "Fakultet nomi", "short_name": "Qisqa nomi"}
+        fields = ["name", "short_name", "contingent"]
+        labels = {"name": "Fakultet nomi", "short_name": "Qisqa nomi", "contingent": "Talabalar soni"}
         widgets = {
             "name": forms.TextInput(attrs={"placeholder": "Axborot texnologiyalari fakulteti"}),
             "short_name": forms.TextInput(attrs={"placeholder": "ATF"}),

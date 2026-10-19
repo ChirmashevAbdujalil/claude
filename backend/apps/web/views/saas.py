@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
@@ -127,6 +128,17 @@ def institution_settings(request):
             form.save()
             messages.success(request, "OTM sozlamalari saqlandi")
             return redirect("web:institution-settings")
+        if request.POST.get("form") == "contingent":
+            changed = 0
+            for faculty in Faculty.objects.all():
+                raw = request.POST.get(f"contingent-{faculty.pk}", "").strip()
+                value = int(raw) if raw.isdigit() and 0 < int(raw) <= 100000 else None
+                if faculty.contingent != value:
+                    faculty.contingent = value
+                    faculty.save(update_fields=["contingent"])
+                    changed += 1
+            messages.success(request, "Talabalar soni saqlandi" if changed else "O'zgarish yo'q")
+            return redirect(f"{reverse('web:institution-settings')}#fakultetlar")
         if request.POST.get("form") == "faculty" and faculty_form.is_valid():
             faculty = faculty_form.save()
             messages.success(request, f"«{faculty.name}» qo'shildi")

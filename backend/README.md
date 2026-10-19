@@ -209,6 +209,10 @@ orqali javob beradi. Asosiy vazifasi: butun institut bo'yicha iqtidorli talabala
   o'z fakultetini ko'radi, har bir yuklab olish harakatlar jurnaliga yoziladi.
 - **Xavfsizlik:** boshlang'ich parol faqat talaba birinchi marta kirguncha saqlanadi; birinchi kirishda talaba
   o'z parolini o'rnatadi va boshlang'ich parol ro'yxatdan o'chadi.
+- **Fakultetlar bo'yicha ro'yxatga olish** (natijalar → «Umumiy natija» tepasida): har bir fakultetdan nechta talaba
+  javob bergan, akkaunt ochilgan, tizimga kirgan va bugun qo'shilgan; reyting (🥇🥈🥉) va hali javob bermagan
+  fakultetlar ogohlantirishi. OTM sozlamalarida fakultet kontingenti kiritilsa, qamrov foizi ham ko'rinadi
+  (masalan, 120 / 800 · 15%). Excel faylda alohida «Fakultetlar» varag'i.
 - **Chuqur tahlil** (natijalar → «🔎 Tahlil»): avtomatik xulosalar, 21 kunlik javoblar dinamikasi, javoblar
   to'liqligi va kesishma jadval (istalgan savol × fakultet, kurs yoki boshqa savol; issiqlik rangi va ★ eng kuchli
   variant). Grafikdagi istalgan variantni bossangiz, butun sahifa, javoblar ro'yxati va Excel faqat shu javobni

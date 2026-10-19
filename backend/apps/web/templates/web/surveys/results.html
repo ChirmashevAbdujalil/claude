@@ -119,10 +119,11 @@
   {% elif tab == "clubs" %}
   {% include "web/surveys/_clubs.html" %}
   {% else %}
+  {% if registration %}{% include "web/surveys/_registration.html" %}{% endif %}
   {% if summary.total %}
   {% if summary.faculties or summary.courses %}
   <section class="grid grid-2">
-    {% if summary.faculties %}
+    {% if summary.faculties and not registration %}
     <div class="card stack-sm">
       <h3>Fakultetlar kesimida</h3>
       <div class="hbars hbars-wide">

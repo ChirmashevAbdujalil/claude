@@ -1,0 +1,50 @@
+{% load web_tags %}
+<section class="card card-lg reg">
+  <div class="reg-head">
+    <div class="an-head"><span class="an-head-icon">🏛</span><div>
+      <h2 class="survey-h2">Fakultetlar bo'yicha ro'yxatga olish</h2>
+      <p class="tiny muted">Har bir fakultetdan nechta talaba so'rovnomani to'ldirib, platformaga qo'shildi{% if filter_qs %} · filtr bo'yicha{% endif %}</p>
+    </div></div>
+    <div class="reg-totals">
+      <div><b>{{ registration.totals.total }}</b><span>javob bergan</span></div>
+      <div><b>{{ registration.totals.accounts }}</b><span>akkaunt ochilgan</span></div>
+      <div><b>{{ registration.totals.logged }}</b><span>tizimga kirgan</span></div>
+      <div class="is-today"><b>+{{ registration.totals.today }}</b><span>bugun</span></div>
+      {% if registration.totals.coverage is not None %}<div class="is-cover"><b>{{ registration.totals.coverage }}%</b><span>qamrov ({{ registration.totals.contingent }} dan)</span></div>{% endif %}
+    </div>
+  </div>
+
+  <div class="reg-table" role="table" aria-label="Fakultetlar bo'yicha ro'yxatga olish">
+    <div class="reg-row reg-th" role="row">
+      <span role="columnheader">Fakultet</span>
+      <span role="columnheader">Javob</span>
+      <span role="columnheader">Akkaunt</span>
+      <span role="columnheader">Kirgan</span>
+      <span role="columnheader">Bugun</span>
+      {% if registration.has_contingent %}<span role="columnheader">Qamrov</span>{% endif %}
+    </div>
+    {% for r in registration.rows %}
+    <a class="reg-row {% if not r.total %}is-silent{% endif %}" role="row" href="{% if r.id %}?tab=responses&faculty={{ r.id }}{% else %}?tab=responses{% endif %}" title="{{ r.name }}: javoblarni ko'rish">
+      <span class="reg-name" role="cell">
+        <span class="reg-rank">{% if r.medal %}{{ r.medal }}{% else %}{{ forloop.counter }}{% endif %}</span>
+        <span class="reg-label"><b>{{ r.short }}</b><small>{{ r.name }}</small>
+          <span class="reg-bar"><span style="width: {{ r.width }}%"></span></span></span>
+      </span>
+      <span class="reg-num" role="cell" data-label="Javob"><b>{{ r.total }}</b></span>
+      <span class="reg-num" role="cell" data-label="Akkaunt">{{ r.accounts }}</span>
+      <span class="reg-num" role="cell" data-label="Kirgan">{{ r.logged }}</span>
+      <span class="reg-num {% if r.today %}is-today{% endif %}" role="cell" data-label="Bugun">{% if r.today %}+{{ r.today }}{% else %}—{% endif %}</span>
+      {% if registration.has_contingent %}
+      <span class="reg-num" role="cell" data-label="Qamrov">{% if r.coverage is not None %}<b class="reg-cover {% if r.coverage >= 70 %}is-high{% elif r.coverage >= 30 %}is-mid{% else %}is-low{% endif %}">{{ r.coverage }}%</b><small>{{ r.total }}/{{ r.contingent }}</small>{% else %}<small class="muted">—</small>{% endif %}</span>
+      {% endif %}
+    </a>
+    {% endfor %}
+  </div>
+
+  {% if registration.silent %}
+  <p class="reg-alert">⚠️ Hali hech kim javob bermagan: <b>{{ registration.silent|join:", " }}</b>. Shu fakultetlar dekanatlariga havola yoki QR plakatni yuboring.</p>
+  {% endif %}
+  {% if not registration.has_contingent and user.is_institution_admin %}
+  <p class="tiny muted">💡 <a href="{% url 'web:institution-settings' %}#fakultetlar">OTM sozlamalarida</a> har bir fakultetning talabalar sonini kiritsangiz, qamrov foizi (masalan, 120 / 800 · 15%) ham ko'rinadi.</p>
+  {% endif %}
+</section>

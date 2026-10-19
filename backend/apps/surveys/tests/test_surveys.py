@@ -409,7 +409,7 @@ def test_results_pages_and_csv_export(web, rector, survey, faculty):
     )
     client = web(rector)
     results = reverse("web:survey-results", args=[survey.pk])
-    assert "Fakultetlar kesimida" in client.get(results).content.decode()
+    assert "Fakultetlar bo'yicha ro'yxatga olish" in client.get(results).content.decode()
     assert "Madina" in client.get(results + "?tab=responses").content.decode()
     response = survey.responses.get()
     detail = client.get(reverse("web:survey-response", args=[survey.pk, response.pk])).content.decode()

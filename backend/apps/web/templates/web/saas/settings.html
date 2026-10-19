@@ -49,19 +49,28 @@
     {% endif %}
   </div>
 
-  <div class="card card-lg stack">
+  <div class="card card-lg stack" id="fakultetlar">
     <h2>Fakultetlar</h2>
-    <div class="list">
-      {% for f in faculties %}
-      <div class="list-item"><span class="chip">{{ f.short_name }}</span><div class="grow small bold">{{ f.name }}</div>
-        <form method="post" action="{% url 'web:faculty-delete' f.pk %}" onsubmit="return confirm('Fakultetni o\'chirasizmi?')">{% csrf_token %}<button class="btn btn-ghost btn-sm btn-icon" aria-label="O'chirish">{% icon "trash" "icon-sm" %}</button></form></div>
-      {% empty %}<p class="muted small">Hali fakultet qo'shilmagan.</p>{% endfor %}
-    </div>
+    {% if faculties %}
+    <form method="post" class="stack-sm">{% csrf_token %}<input type="hidden" name="form" value="contingent">
+      <p class="tiny muted">«Talabalar soni» (kontingent) so'rovnoma natijalarida har bir fakultetning qamrov foizini hisoblash uchun kerak. Bilmasangiz, bo'sh qoldiring.</p>
+      <div class="list">
+        {% for f in faculties %}
+        <div class="list-item"><span class="chip">{{ f.short_name }}</span><div class="grow small bold">{{ f.name }}</div>
+          <label class="contingent-input"><span class="sr-only">{{ f.short_name }} talabalari soni</span><input type="number" name="contingent-{{ f.pk }}" value="{{ f.contingent|default_if_none:'' }}" min="1" max="100000" class="input" placeholder="talaba soni"></label>
+          <button form="faculty-delete-{{ f.pk }}" class="btn btn-ghost btn-sm btn-icon" aria-label="O'chirish">{% icon "trash" "icon-sm" %}</button></div>
+        {% endfor %}
+      </div>
+      <div class="form-actions"><button class="btn btn-primary btn-sm">{% icon "check" "icon-sm" %} Talabalar sonini saqlash</button></div>
+    </form>
+    {% for f in faculties %}<form method="post" action="{% url 'web:faculty-delete' f.pk %}" id="faculty-delete-{{ f.pk }}" onsubmit="return confirm('Fakultetni o\'chirasizmi?')">{% csrf_token %}</form>{% endfor %}
+    {% else %}<p class="muted small">Hali fakultet qo'shilmagan.</p>{% endif %}
     <form method="post" class="form">
       {% csrf_token %}<input type="hidden" name="form" value="faculty">
       <div class="grid-2">
         {% include "web/partials/field.html" with field=faculty_form.name %}
         {% include "web/partials/field.html" with field=faculty_form.short_name %}
+        {% include "web/partials/field.html" with field=faculty_form.contingent %}
       </div>
       <div class="form-actions"><button class="btn btn-soft">{% icon "plus" "icon-sm" %} Fakultet qo'shish</button></div>
     </form>
