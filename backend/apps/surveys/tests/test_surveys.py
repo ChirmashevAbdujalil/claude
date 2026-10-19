@@ -487,3 +487,20 @@ def test_answer_items_and_navigation(rector, survey, student, faculty):
 
     nav = services.neighbours(survey.responses.all(), first)
     assert nav == {"position": 2, "total": 2, "prev": second.pk, "next": None}
+
+
+def test_result_pages_share_link_and_missing_link(web, survey, faculty):
+    client = web()
+    url = reverse("web:survey-fill", args=[survey.token])
+    client.get(url)  # brauzer kalitini oladi
+    client.post(url, post_data(survey, faculty))
+    thanks = client.get(reverse("web:survey-thanks", args=[survey.token])).content.decode()
+    assert "t.me/share/url" in thanks and survey.token in thanks
+    assert "Kursdoshlaringizga ham ulashing" in client.get(url).content.decode()
+
+    missing = web().get(reverse("web:survey-fill", args=["yoqkalit1"]))
+    assert missing.status_code == 404 and "So'rovnoma topilmadi" in missing.content.decode()
+
+    services.close(survey)
+    closed = web().get(url).content.decode()
+    assert "So'rovnoma yopilgan" in closed and "tugagan" not in closed and "t.me/share" not in closed

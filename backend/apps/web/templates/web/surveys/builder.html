@@ -90,4 +90,4 @@
 <form method="post" action="{% url 'web:survey-delete' survey.pk %}" id="survey-delete-form" onsubmit="return confirm('So\'rovnoma va unga berilgan barcha javoblar o\'chiriladi. Davom etasizmi?')">{% csrf_token %}</form>
 {% endblock %}
 
-{% block scripts %}<script src="{% static 'web/js/survey-builder.js' %}" defer></script>{% endblock %}
+{% block scripts %}<script src="{% asset 'web/js/survey-builder.js' %}" defer></script>{% endblock %}

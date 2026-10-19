@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Q
-from django.http import Http404, HttpResponse
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -36,8 +36,12 @@ def _editable(request, pk):
     return survey
 
 
+def _fill_url(request, survey):
+    return request.build_absolute_uri(reverse("web:survey-fill", args=[survey.token]))
+
+
 def _share(request, survey):
-    url = request.build_absolute_uri(reverse("web:survey-fill", args=[survey.token]))
+    url = _fill_url(request, survey)
     return {"url": url, "qr": qr_svg(url, label=f"«{survey.title}» so'rovnomasining QR kodi")}
 
 
@@ -317,7 +321,9 @@ def _fields(questions, data, errors):
                 "other_checked": services.OTHER in values
                 or (bool(value) and value not in known and question.allow_other),
                 "error": errors.get(question.pk, ""),
-                "choices": question.choices,
+                "choices": [(v, f"{ICONS[v]} {text}") for v, text in question.choices]
+                if question.kind == Question.Kind.TRACK
+                else question.choices,
             }
         )
     return fields
@@ -329,14 +335,19 @@ def _identity_initial(user):
     return {"full_name": user.get_full_name(), "faculty": user.faculty_id, "course": user.course}
 
 
+def _missing(request):
+    """Noto'g'ri, o'chirilgan yoki hali e'lon qilinmagan so'rovnoma havolasi."""
+    return render(request, "web/surveys/done.html", {"survey": None, "state": "missing"}, status=404)
+
+
 def survey_fill(request, token):
     survey = Survey.objects.filter(token=token).first()
-    if survey is None:
-        raise Http404
     user = request.user
+    if survey is None:
+        return _missing(request)
     preview = survey.status == Survey.Status.DRAFT
     if preview and not (user.is_authenticated and user.is_management):
-        raise Http404
+        return _missing(request)
 
     browser_key = request.COOKIES.get(BROWSER_COOKIE, "")
     state = None
@@ -345,7 +356,8 @@ def survey_fill(request, token):
     elif not preview and services.already_answered(survey, user, browser_key):
         state = "answered"
     if state:
-        return render(request, "web/surveys/done.html", {"survey": survey, "state": state})
+        context = {"survey": survey, "state": state, "share_url": _fill_url(request, survey)}
+        return render(request, "web/surveys/done.html", context)
 
     questions = list(survey.questions.all())
     errors = {}
@@ -395,7 +407,7 @@ def survey_fill(request, token):
 def survey_thanks(request, token):
     survey = Survey.objects.filter(token=token).exclude(status=Survey.Status.DRAFT).first()
     if survey is None:
-        raise Http404
+        return _missing(request)
     user = request.user
     reward = (
         PointTransaction.objects.filter(user=user, reason=PointTransaction.Reason.SURVEY, ref=f"survey:{survey.pk}")
@@ -405,4 +417,5 @@ def survey_thanks(request, token):
         else None
     )
     xp = reward or 0
-    return render(request, "web/surveys/done.html", {"survey": survey, "state": "thanks", "xp": xp})
+    context = {"survey": survey, "state": "thanks", "xp": xp, "share_url": _fill_url(request, survey)}
+    return render(request, "web/surveys/done.html", context)

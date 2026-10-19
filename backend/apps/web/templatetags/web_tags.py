@@ -1,6 +1,9 @@
 import math
+import os
 
 from django import template
+from django.conf import settings
+from django.contrib.staticfiles import finders
 from django.templatetags.static import static
 from django.utils.html import format_html
 
@@ -11,6 +14,20 @@ register = template.Library()
 RADAR_SIZE = 220
 RADAR_RADIUS = 78
 RADAR_MAX = 5
+
+
+@register.simple_tag
+def asset(path):
+    """CSS/JS manzili. Ishlab chiqishda fayl o'zgarsa, brauzer eski nusxani keshdan olmasligi uchun versiya qo'shiladi.
+
+    Production'da manifest saqlagich fayl nomiga xesh qo'shadi, shuning uchun bu yerda faqat DEBUG holati.
+    """
+    url = static(path)
+    if settings.DEBUG:
+        found = finders.find(path)
+        if found:
+            url += f"?v={int(os.path.getmtime(found))}"
+    return url
 
 
 @register.simple_tag

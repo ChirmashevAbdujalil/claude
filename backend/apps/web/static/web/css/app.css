@@ -885,6 +885,13 @@ html, body { overflow-x: clip; }
 .sv-q.is-answered .sv-qno { background: var(--success); color: #fff; }
 .sv-q-help { margin: -4px 0 0 42px; font-size: 13.5px; color: var(--muted); }
 .sv-input { width: 100%; min-height: 50px; font-size: 16px; border-radius: 12px; }
+.sv-field { position: relative; }
+.sv-field.has-icon .sv-input { padding-left: 46px; }
+.sv-field-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 22px; text-align: center; font-size: 16px;
+  font-weight: 800; color: var(--muted); pointer-events: none; }
+select.sv-input { appearance: none; -webkit-appearance: none; padding-right: 44px; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%235f747c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 16px center; }
 textarea.sv-input { min-height: 110px; resize: vertical; line-height: 1.55; }
 .sv-q.has-error { border-color: var(--danger); box-shadow: 0 0 0 4px var(--danger-soft); }
 .sv-error { margin: 0; color: var(--danger); font-size: 13px; font-weight: 700; }
@@ -954,19 +961,45 @@ textarea.sv-input { min-height: 110px; resize: vertical; line-height: 1.55; }
 }
 @media (max-width: 380px) { .sv-scale-row { gap: 4px; } .sv-scale-item span { height: 42px; font-size: 14px; } }
 
-/* Javobdan keyingi sahifa */
-.sv-done { position: relative; overflow: hidden; text-align: center; display: grid; justify-items: center; gap: 12px; padding: 44px 22px 32px; margin-top: 12px; }
+/* Javobdan keyingi sahifa: rahmat, allaqachon javob bergan, yopilgan, topilmadi */
+.sv-wrap-narrow { max-width: 620px; }
+.sv-done { position: relative; overflow: hidden; text-align: center; display: grid; justify-items: center; gap: 14px; margin-top: 8px;
+  padding: 0 24px 28px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); }
+.sv-done-cover { position: relative; height: 112px; width: calc(100% + 48px); margin: 0 -24px; background: var(--gradient); overflow: hidden; }
+.sv-done-cover i { position: absolute; border-radius: 50%; }
+.sv-done-cover i:nth-child(1) { width: 200px; height: 200px; right: -50px; top: -100px; background: rgba(255,255,255,.1); }
+.sv-done-cover i:nth-child(2) { width: 90px; height: 90px; left: 24px; bottom: -50px; border: 2px solid rgba(245,158,11,.5); }
+.sv-done-closed .sv-done-cover, .sv-done-missing .sv-done-cover { background: linear-gradient(135deg, #3b4b52, #5f747c); }
+.sv-done-survey { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); max-width: calc(100% - 40px); white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; font-size: 12.5px; font-weight: 700; color: #fff; padding: 6px 12px; border-radius: 999px;
+  background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.22); }
 .sv-done h1 { font-size: clamp(1.4rem, 1.1rem + 1.4vw, 1.9rem); }
-.sv-done p { margin: 0; color: var(--muted); max-width: 460px; line-height: 1.6; }
-.sv-done-badge { width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center; font-size: 40px; background: var(--primary-soft); }
+.sv-done > p { margin: 0; color: var(--muted); max-width: 460px; line-height: 1.6; }
+.sv-done-badge { width: 104px; height: 104px; margin-top: -56px; border-radius: 50%; display: grid; place-items: center; font-size: 44px; position: relative;
+  background: var(--surface); border: 6px solid var(--surface); box-shadow: var(--shadow-lg); }
 .sv-done-badge.is-success { background: var(--success-soft); }
-.sv-check { width: 54px; height: 54px; }
+.sv-done-badge.is-muted { background: var(--surface-2); }
+.sv-check { width: 58px; height: 58px; }
 .sv-check circle { fill: none; stroke: var(--success); stroke-width: 3; stroke-dasharray: 166; stroke-dashoffset: 166; animation: sv-draw .6s ease forwards; }
 .sv-check path { fill: none; stroke: var(--success); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 48; stroke-dashoffset: 48; animation: sv-draw .35s .5s ease forwards; }
 @keyframes sv-draw { to { stroke-dashoffset: 0; } }
-.sv-done-xp { font-size: 15px; padding: 8px 16px; }
-.sv-done-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 8px; }
-@media (prefers-reduced-motion: reduce) { .sv-check circle, .sv-check path { animation: none; stroke-dashoffset: 0; } .sv-progress span { transition: none; } }
+.sv-done-xp { font-size: 15px; font-weight: 800; padding: 8px 16px; border-radius: 999px; background: var(--accent); color: #1f1300; animation: sv-pop .4s .8s both; }
+@keyframes sv-pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.sv-share { width: 100%; display: grid; gap: 12px; padding: 16px; margin-top: 4px; border-radius: 16px; background: var(--surface-2); text-align: left; }
+.sv-share-text { display: grid; gap: 2px; font-size: 14px; }
+.sv-share-text span { color: var(--muted); font-size: 13px; }
+.sv-share-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.btn-telegram { background: #229ed9; color: #fff; }
+.btn-telegram:hover { background: #1b8bc0; color: #fff; }
+.sv-done-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 4px; }
+.sv-done-hint { margin: 0; font-size: 12.5px; color: var(--muted); max-width: 420px; }
+@media (max-width: 420px) {
+  .sv-done { padding: 0 16px 22px; }
+  .sv-done-cover { width: calc(100% + 32px); margin: 0 -16px; }
+  .sv-share-actions { grid-template-columns: 1fr; }
+  .sv-done-actions .btn { flex: 1 1 100%; }
+}
+@media (prefers-reduced-motion: reduce) { .sv-check circle, .sv-check path, .sv-done-xp { animation: none; stroke-dashoffset: 0; } .sv-progress span { transition: none; } }
 
 /* Bitta javobni ko'rish (rv-) */
 .rv-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }

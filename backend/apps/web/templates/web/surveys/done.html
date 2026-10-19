@@ -1,30 +1,50 @@
 {% extends "web/base.html" %}
 {% load web_tags %}
-{% block title %}{{ survey.title }}{% endblock %}
+{% block title %}{% if survey %}{{ survey.title }}{% else %}So'rovnoma topilmadi{% endif %}{% endblock %}
 {% block body_class %}sv-body{% endblock %}
 
 {% block body %}
 <header class="sv-top">
   <a href="{% if user.is_authenticated %}{% url 'web:dashboard' %}{% else %}{% url 'web:landing' %}{% endif %}" class="brand">{% brand_logo 38 %}<span>{{ brand_name }}<small>{{ institution_name }}</small></span></a>
+  <button type="button" class="bell theme-toggle" data-theme-toggle aria-label="Yorug' yoki qorong'i rejim" title="Rejimni almashtirish">
+    <span class="when-light">{% icon "moon" %}</span><span class="when-dark">{% icon "sun" %}</span>
+  </button>
 </header>
 
-<main class="sv-wrap">
-  <section class="sv-card sv-done">
+<main class="sv-wrap sv-wrap-narrow">
+  <section class="sv-done sv-done-{{ state }}">
+    <div class="sv-done-cover" aria-hidden="true"><i></i><i></i></div>
+    {% if survey %}<span class="sv-done-survey">{% if survey.talent_census %}🧭{% else %}📝{% endif %} {{ survey.title }}</span>{% endif %}
+
     {% if state == "thanks" %}
     <div class="sv-done-badge is-success">
       <svg class="sv-check" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24"/><path d="m15 27 7 7 15-15"/></svg>
     </div>
     <h1>Javobingiz qabul qilindi!</h1>
     <p>{{ survey.thank_you|default:"Rahmat! Fikringiz biz uchun muhim." }}</p>
-    {% if xp %}<span class="chip chip-primary sv-done-xp">{% icon "bolt" "icon-sm" %} +{{ xp }} XP hisobingizga qo'shildi</span>{% endif %}
+    {% if xp %}<span class="sv-done-xp">⚡ +{{ xp }} XP hisobingizga qo'shildi</span>{% endif %}
     {% elif state == "answered" %}
     <div class="sv-done-badge">📬</div>
     <h1>Siz allaqachon javob bergansiz</h1>
-    <p>«{{ survey.title }}» so'rovnomasiga javob faqat bir marta qabul qilinadi. Rahmat!</p>
-    {% else %}
-    <div class="sv-done-badge">🔒</div>
+    <p>Bu so'rovnomaga javob faqat bir marta qabul qilinadi. Javobingiz saqlangan, rahmat!</p>
+    {% elif state == "closed" %}
+    <div class="sv-done-badge is-muted">🔒</div>
     <h1>So'rovnoma yopilgan</h1>
-    <p>«{{ survey.title }}» hozir javob qabul qilmayapti{% if survey.closes_at %}: muddat {{ survey.closes_at|date:"d.m.Y H:i" }} da tugagan{% endif %}.</p>
+    <p>Hozir javob qabul qilinmayapti{% if survey.is_expired %}: muddat <b>{{ survey.closes_at|date:"d.m.Y H:i" }}</b> da tugagan{% endif %}. Savollar bo'lsa, so'rovnoma tashkilotchisiga murojaat qiling.</p>
+    {% else %}
+    <div class="sv-done-badge is-muted">🔎</div>
+    <h1>So'rovnoma topilmadi</h1>
+    <p>Havola noto'g'ri, so'rovnoma o'chirilgan yoki hali e'lon qilinmagan. Havolani yuborgan odamdan qayta so'rang.</p>
+    {% endif %}
+
+    {% if share_url and state != "closed" %}
+    <div class="sv-share">
+      <div class="sv-share-text"><b>Kursdoshlaringizga ham ulashing</b><span>Qancha ko'p talaba javob bersa, shuncha ko'p iqtidor e'tiborga tushadi.</span></div>
+      <div class="sv-share-actions">
+        <a class="btn btn-telegram" href="https://t.me/share/url?url={{ share_url|urlencode }}&amp;text={{ survey.title|urlencode }}" target="_blank" rel="noopener">{% icon "send" "icon-sm" %} Telegram</a>
+        <button type="button" class="btn btn-ghost" data-copy="{{ share_url }}">{% icon "link" "icon-sm" %} <span data-label>Havolani nusxalash</span></button>
+      </div>
+    </div>
     {% endif %}
 
     <div class="sv-done-actions">
@@ -32,12 +52,12 @@
       <a href="{% url 'web:surveys' %}" class="btn btn-ghost">Boshqa so'rovnomalar</a>
       <a href="{% url 'web:dashboard' %}" class="btn btn-primary">Platformaga qaytish</a>
       {% else %}
-      <a href="{% url 'web:landing' %}" class="btn btn-ghost">Platforma haqida</a>
+      <a href="{% url 'web:landing' %}" class="btn btn-ghost">{{ brand_name }} haqida</a>
       {% if registration_open and state == "thanks" %}<a href="{% url 'web:register' %}" class="btn btn-primary">Ro'yxatdan o'tish</a>{% endif %}
       {% endif %}
     </div>
     {% if not user.is_authenticated and registration_open and state == "thanks" %}
-    <p class="tiny">Ixtiyoriy: ro'yxatdan o'tsangiz, iqtidoringizga mos olimpiada, grant va tanlovlar haqida birinchi bo'lib xabar olasiz.</p>
+    <p class="sv-done-hint">Ixtiyoriy: ro'yxatdan o'tsangiz, iqtidoringizga mos olimpiada, grant va tanlovlar haqida birinchi bo'lib xabar olasiz.</p>
     {% endif %}
   </section>
   <p class="sv-foot">{% brand_logo 28 %}<span>© {{ institution_name }} · {{ brand_name }}</span></p>
@@ -45,5 +65,5 @@
 {% endblock %}
 
 {% block scripts %}
-{% if state != "closed" %}<script>try { localStorage.removeItem("sv-draft:{{ survey.token|escapejs }}"); } catch (e) {}</script>{% endif %}
+{% if survey and state != "closed" %}<script>try { localStorage.removeItem("sv-draft:{{ survey.token|escapejs }}"); } catch (e) {}</script>{% endif %}
 {% endblock %}

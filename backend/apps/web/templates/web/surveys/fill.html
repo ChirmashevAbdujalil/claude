@@ -76,12 +76,15 @@
       {% if q.help_text %}<p class="sv-q-help">{{ q.help_text }}</p>{% endif %}
 
       {% if q.kind == "short" or q.kind == "email" or q.kind == "phone" or q.kind == "number" or q.kind == "date" %}
+      <div class="sv-field {% if q.kind != 'short' %}has-icon{% endif %}">
+      {% if q.kind == "email" %}<span class="sv-field-icon" aria-hidden="true">✉️</span>{% elif q.kind == "phone" %}<span class="sv-field-icon" aria-hidden="true">📞</span>{% elif q.kind == "number" %}<span class="sv-field-icon" aria-hidden="true">#</span>{% elif q.kind == "date" %}<span class="sv-field-icon" aria-hidden="true">📅</span>{% endif %}
       <input class="input sv-input" name="{{ f.name }}" value="{{ f.value }}" aria-label="{{ q.title }}"
         {% if q.kind == "email" %}type="email" autocomplete="email" inputmode="email" placeholder="ism@pochta.uz"
         {% elif q.kind == "phone" %}type="tel" inputmode="tel" autocomplete="tel" placeholder="+998 90 123 45 67"
         {% elif q.kind == "number" %}type="text" inputmode="decimal" placeholder="Raqam kiriting"
         {% elif q.kind == "date" %}type="date"
         {% else %}type="text" maxlength="500" placeholder="Javobingizni yozing"{% endif %}>
+      </div>
       {% elif q.kind == "long" %}
       <textarea class="input sv-input" name="{{ f.name }}" rows="4" maxlength="5000" placeholder="Javobingizni yozing" aria-label="{{ q.title }}" data-autogrow>{{ f.value }}</textarea>
       {% elif q.kind == "dropdown" %}
@@ -139,4 +142,4 @@
 </main>
 {% endblock %}
 
-{% block scripts %}<script src="{% static 'web/js/survey-fill.js' %}" defer></script>{% endblock %}
+{% block scripts %}<script src="{% asset 'web/js/survey-fill.js' %}" defer></script>{% endblock %}

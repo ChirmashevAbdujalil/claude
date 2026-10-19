@@ -1,4 +1,4 @@
-{% load static %}<!doctype html>
+{% load static web_tags %}<!doctype html>
 <html lang="uz">
 <head>
   <meta charset="utf-8">
@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'web/css/app.css' %}">
+  <link rel="stylesheet" href="{% asset 'web/css/app.css' %}">
   {% if theme_colors %}<style>:root, :root[data-theme] { --brand: {{ theme_colors.0 }}; --primary-strong: {{ theme_colors.0 }}; --gradient: linear-gradient(135deg, {{ theme_colors.0 }} 0%, {{ theme_colors.1 }} 100%); }</style>{% endif %}
   {% block head %}{% endblock %}
 </head>
@@ -28,6 +28,6 @@
   {% block body %}{% endblock %}
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   {% block scripts %}{% endblock %}
-  <script src="{% static 'web/js/app.js' %}"></script>
+  <script src="{% asset 'web/js/app.js' %}"></script>
 </body>
 </html>
