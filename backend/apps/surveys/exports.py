@@ -165,6 +165,36 @@ def _registration_sheet(responses, faculties, subtitle):
     return sheet
 
 
+def _tutors_sheet(responses, tutors, subtitle):
+    data = analytics.tutor_registration(responses, tutors)
+    sheet = x.Sheet("Tyutorlar", tab_color="7C3AED")
+    head = ["№", "Tyutor", "Telefon", "Fakultet", "To'ldirgan talabalar", "Akkaunt ochilgan", "Bugun", "Grafik"]
+    sheet.widths = [6, 32, 18, 14, 18, 16, 10, 24]
+    x.title_block(sheet, "Tyutorlar kesimida: so'rovnomani to'ldirgan talabalar", subtitle, len(head))
+    header = sheet.add([(h, "head") for h in head], height=32)
+    top = max([t["total"] for g in data["faculties"] for t in g["tutors"]] + [1])
+    number = 0
+    for group in data["faculties"]:
+        title = f"{group['faculty'].name} · {group['total']} talaba"
+        if group["silent"]:
+            title += f" · {group['silent']} tyutordan javob yo'q"
+        row = sheet.add([(title, "section")] + [("", "section")] * (len(head) - 1), height=22)
+        sheet.merge(row, 0, len(head) - 1)
+        for i, t in enumerate(group["tutors"], 1):
+            number += 1
+            z = "_z" if i % 2 == 0 else ""
+            sheet.add([
+                (number, f"num{z}"), (t["name"], f"bold{z}"), (t["phone"], f"text{z}"),
+                (group["faculty"].short_name, f"num{z}"), (t["total"], f"num{z}"), (t["accounts"], f"num{z}"),
+                (t["today"], f"num{z}"), (x.bar(t["total"] / top), f"bar{z}"),
+            ])  # fmt: skip
+    if data["without"]:
+        sheet.blank()
+        sheet.add([("", "note"), (f"Tyutor tanlamagan talabalar: {data['without']}", "note")])
+    sheet.freeze = (header, 2)
+    return sheet
+
+
 def _breakdown_sheet(survey, responses, data, subtitle):
     sheet = x.Sheet("Kesimlar", tab_color=x.DARK, landscape=False)
     sheet.widths = [34, 10, 10, 34]
@@ -221,7 +251,7 @@ def _clubs_sheet(survey, subtitle):
     return sheet
 
 
-def results_workbook(survey, responses, *, institution, conditions=(), faculties=None) -> bytes:
+def results_workbook(survey, responses, *, institution, conditions=(), faculties=None, tutors=None) -> bytes:
     now = timezone.localtime()
     data = summary(survey, responses)
     subtitle = f"{institution} · {data['total']} ta javob · {now:%d.%m.%Y %H:%M}"
@@ -237,6 +267,12 @@ def results_workbook(survey, responses, *, institution, conditions=(), faculties
 
             faculties = list(Faculty.objects.order_by("name"))
         sheets.insert(1, _registration_sheet(responses, faculties, subtitle))
+        if tutors is None:
+            from apps.accounts.models import Tutor
+
+            tutors = list(Tutor.objects.filter(is_active=True).select_related("faculty"))
+        if tutors:
+            sheets.insert(2, _tutors_sheet(responses, tutors, subtitle))
         sheets.append(_breakdown_sheet(survey, responses, data, subtitle))
     clubs_sheet = _clubs_sheet(survey, subtitle)
     if clubs_sheet is not None:

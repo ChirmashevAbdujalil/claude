@@ -20,6 +20,7 @@ from .views import (
     staff,
     surveys,
     talent,
+    tutors,
 )
 
 app_name = "web"
@@ -45,6 +46,9 @@ urlpatterns = [
     path("settings/otm/", saas.institution_settings, name="institution-settings"),
     path("settings/otm/faculties/<int:pk>/delete/", saas.faculty_delete, name="faculty-delete"),
     path("settings/otm/jurnal/", audit_views.audit_log, name="audit-log"),
+    path("settings/otm/tyutorlar/", tutors.tutors, name="tutors"),
+    path("settings/otm/tyutorlar/yuklash/", tutors.tutor_import, name="tutor-import"),
+    path("settings/otm/tyutorlar/<int:pk>/ochirish/", tutors.tutor_delete, name="tutor-delete"),
     path("arena/otm-ligasi/", saas.league, name="league"),
     path("notifications/", onboarding.notifications, name="notifications"),
     path("notifications/<int:pk>/go/", onboarding.notification_go, name="notification-go"),

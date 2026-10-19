@@ -56,6 +56,13 @@
       <option value="">Barcha kurslar</option>
       {% for c in courses %}<option value="{{ c }}" {% if filters.course == c|stringformat:"d" %}selected{% endif %}>{{ c }}-kurs</option>{% endfor %}
     </select>
+    {% if tutors %}
+    <select name="tutor" class="input" aria-label="Tyutor">
+      <option value="">Barcha tyutorlar</option>
+      {% regroup tutors by faculty as tutor_groups %}
+      {% for grp in tutor_groups %}<optgroup label="{{ grp.grouper.short_name }}">{% for t in grp.list %}<option value="{{ t.pk }}" {% if filters.tutor == t.pk|stringformat:"d" %}selected{% endif %}>{{ t.full_name }}</option>{% endfor %}</optgroup>{% endfor %}
+    </select>
+    {% endif %}
     {% if groups %}
     <select name="group" class="input" aria-label="Guruh">
       <option value="">Barcha guruhlar</option>
@@ -120,6 +127,7 @@
   {% include "web/surveys/_clubs.html" %}
   {% else %}
   {% if registration %}{% include "web/surveys/_registration.html" %}{% endif %}
+  {% if tutor_stats %}{% include "web/surveys/_tutors.html" %}{% endif %}
   {% if summary.total %}
   {% if summary.faculties or summary.courses %}
   <section class="grid grid-2">

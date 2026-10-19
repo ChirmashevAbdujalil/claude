@@ -14,7 +14,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from apps.accounts.models import Faculty
+from apps.accounts.models import Faculty, Tutor
 from apps.arena.models import PointTransaction
 from apps.surveys import analytics, clubs, exports, services
 from apps.surveys.models import Question, Response, Survey
@@ -54,6 +54,8 @@ def _filtered(request, survey):
         responses = responses.filter(course=params["course"])
     if params.get("group"):
         responses = responses.filter(group__iexact=params["group"].strip())
+    if params.get("tutor", "").isdigit():
+        responses = responses.filter(tutor_id=params["tutor"])
     if params.get("q"):
         q = params["q"].strip()
         responses = responses.filter(
@@ -232,6 +234,7 @@ def survey_results(request, pk):
         .distinct(),
         "can_edit": services.can_edit(request.user, survey),
         "share": _share(request, survey),
+        "tutors": _tutors_for(request.user),
         "summary": summary,
         "has_track": survey.questions.filter(kind=Question.Kind.TRACK).exists(),
         "conditions": conditions,
@@ -240,6 +243,9 @@ def survey_results(request, pk):
     }
     if tab not in ("responses", "analysis", "clubs") and survey.collect_identity:
         context["registration"] = analytics.faculty_registration(responses, _faculties_for(request.user))
+        tutors = _tutors_for(request.user)
+        if tutors:
+            context["tutor_stats"] = analytics.tutor_registration(responses, tutors)
     if tab == "analysis":
         context |= _analysis(request, survey, responses, summary)
     elif tab == "clubs":
@@ -258,6 +264,13 @@ def _faculties_for(user):
     if user.role == user.Role.DEAN and not user.is_superuser and user.faculty_id:
         faculties = faculties.filter(pk=user.faculty_id)
     return list(faculties)
+
+
+def _tutors_for(user):
+    tutors = Tutor.objects.filter(is_active=True).select_related("faculty").order_by("faculty__name", "full_name")
+    if user.role == user.Role.DEAN and not user.is_superuser and user.faculty_id:
+        tutors = tutors.filter(faculty_id=user.faculty_id)
+    return list(tutors)
 
 
 def _analysis(request, survey, responses, summary):
@@ -349,6 +362,7 @@ def survey_export_xlsx(request, pk):
         institution=institution,
         conditions=conditions,
         faculties=_faculties_for(request.user),
+        tutors=_tutors_for(request.user),
     )
     response = HttpResponse(content, content_type=XLSX)
     stamp = timezone.localtime().strftime("%Y%m%d-%H%M")

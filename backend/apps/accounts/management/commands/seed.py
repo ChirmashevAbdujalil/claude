@@ -11,6 +11,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
+from apps.accounts import tutors
 from apps.accounts.models import Faculty, User
 from apps.arena import services as arena
 from apps.arena.models import Badge
@@ -224,6 +225,9 @@ class Command(BaseCommand):
                 faculty.name, faculty.short_name = name, short
                 faculty.save()
         self.stdout.write(self.style.SUCCESS(f"Fakultetlar: {Faculty.objects.count()}"))
+        added = tutors.ensure_andti_tutors()
+        if added:
+            self.stdout.write(self.style.SUCCESS(f"Tyutorlar fakultetlarga biriktirildi: {added}"))
 
     def _demo(self):
         if self.institution.is_default:

@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.db import models
 
-from apps.accounts.models import Faculty
+from apps.accounts.models import Faculty, Tutor
 from apps.ai.models import Conversation
 from apps.community.models import Comment, Event, Post
 from apps.discovery.models import Challenge, TalentFlag
@@ -502,11 +502,35 @@ class SurveyForm(forms.ModelForm):
         return xp
 
 
+class TutorSelect(forms.Select):
+    """Tyutorlar ro'yxati: har bir variantda fakulteti bor, sahifa faqat tanlangan fakultet tyutorlarini ko'rsatadi."""
+
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+        option = super().create_option(name, value, label, selected, index, subindex, attrs)
+        instance = getattr(value, "instance", None)
+        if instance is not None:
+            option["attrs"]["data-faculty"] = instance.faculty_id
+        return option
+
+
+class TutorChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return f"{obj.full_name} ({obj.faculty.short_name})"
+
+
 class SurveyIdentityForm(forms.Form):
     """So'rovnomada talaba haqidagi umumiy ma'lumotlar (platformaga kirgan bo'lsa, o'zi to'ldiriladi)."""
 
     full_name = forms.CharField(label="Familiya, ism, sharif", max_length=150)
     faculty = forms.ModelChoiceField(label="Fakultet", queryset=Faculty.objects.none(), empty_label="Tanlang")
+    tutor = TutorChoiceField(
+        label="Tyutoringiz",
+        queryset=Tutor.objects.none(),
+        required=False,
+        empty_label="Tanlang",
+        widget=TutorSelect(attrs={"data-tutor-select": ""}),
+        help_text="Avval fakultetni tanlang: ro'yxatda shu fakultet tyutorlari chiqadi",
+    )
     course = forms.TypedChoiceField(
         label="Kurs", coerce=int, choices=[("", "Tanlang")] + [(n, f"{n}-kurs") for n in range(1, 7)]
     )
@@ -535,8 +559,26 @@ class SurveyIdentityForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, prefix="who", **kwargs)
         self.fields["faculty"].queryset = Faculty.objects.order_by("name")
+        self.fields["faculty"].widget.attrs["data-faculty-select"] = ""
+        tutors = Tutor.objects.filter(is_active=True).select_related("faculty").order_by("faculty__name", "full_name")
+        self.fields["tutor"].queryset = tutors
         if not self.fields["faculty"].queryset.exists():
             del self.fields["faculty"]
+        if "faculty" not in self.fields or not tutors.exists():
+            del self.fields["tutor"]
+
+    def clean(self):
+        cleaned = super().clean()
+        if "tutor" not in self.fields:
+            return cleaned
+        faculty, tutor = cleaned.get("faculty"), cleaned.get("tutor")
+        if faculty is None:
+            return cleaned
+        if tutor is not None and tutor.faculty_id != faculty.pk:
+            self.add_error("tutor", "Bu tyutor tanlangan fakultetga tegishli emas")
+        elif tutor is None and Tutor.objects.filter(faculty=faculty, is_active=True).exists():
+            self.add_error("tutor", "Tyutoringizni tanlang")
+        return cleaned
 
     def clean_group(self):
         group = survey_services.normalize_group(self.cleaned_data["group"])

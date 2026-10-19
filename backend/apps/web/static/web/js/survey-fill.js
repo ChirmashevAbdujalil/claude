@@ -144,6 +144,31 @@
     if (input.value) input.value = formatGroup(input.value);
   });
 
+  /* Tyutor: faqat tanlangan fakultet tyutorlari ko'rinadi */
+  var facultySelect = form.querySelector("[data-faculty-select]");
+  var tutorSelect = form.querySelector("[data-tutor-select]");
+  function syncTutors() {
+    if (!facultySelect || !tutorSelect) return;
+    var faculty = facultySelect.value;
+    var visible = 0;
+    Array.prototype.forEach.call(tutorSelect.options, function (option) {
+      if (!option.value) return;
+      var match = option.dataset.faculty === faculty;
+      option.hidden = !match;
+      option.disabled = !match;
+      if (match) visible++;
+      if (!match && option.selected) tutorSelect.value = "";
+    });
+    var field = tutorSelect.closest("[data-tutor-field]");
+    if (field) field.hidden = Boolean(faculty) && visible === 0;
+    tutorSelect.disabled = !faculty;
+    tutorSelect.options[0].textContent = faculty ? "Tanlang" : "Avval fakultetni tanlang";
+  }
+  if (facultySelect && tutorSelect) {
+    facultySelect.addEventListener("change", syncTutors);
+    syncTutors();
+  }
+
   /* Batafsil javob maydoni matnga qarab o'sadi */
   form.querySelectorAll("[data-autogrow]").forEach(function (area) {
     function grow() { area.style.height = "auto"; area.style.height = Math.min(area.scrollHeight + 2, 480) + "px"; }
@@ -166,6 +191,10 @@
         first = first || el.closest(".field");
       }
     });
+    if (tutorSelect && !tutorSelect.disabled && !tutorSelect.closest("[data-tutor-field]").hidden && !tutorSelect.value) {
+      tutorSelect.closest(".field").classList.add("has-error");
+      first = first || tutorSelect.closest(".field");
+    }
     form.querySelectorAll("[data-group-input]").forEach(function (el) {
       if (el.value && !GROUP_RE.test(el.value)) {
         groupError(el, "Guruhni K-21-05 ko'rinishida yozing");

@@ -21,7 +21,7 @@ ADMIN_MODELS = {
     "opportunities": ["reward", "sponsor", "opportunity", "redemption", "application"],
     "discovery": ["challenge", "submission"],
     "community": ["event"],
-    "accounts": ["faculty", "user"],
+    "accounts": ["faculty", "user", "tutor"],
     "profiles": ["achievement"],
     "audit": ["auditlog"],
     "talent": ["talentprofile", "developmentgoal", "diagnosticresult"],

@@ -1,0 +1,41 @@
+{% load web_tags %}
+<section class="card card-lg tut">
+  <div class="reg-head">
+    <div class="an-head"><span class="an-head-icon">🧑‍🏫</span><div>
+      <h2 class="survey-h2">Tyutorlar kesimida</h2>
+      <p class="tiny muted">Har bir tyutor guruhidan nechta talaba so'rovnomani to'ldirdi{% if filter_qs %} · filtr bo'yicha{% endif %}</p>
+    </div></div>
+    <div class="reg-totals">
+      <div><b>{{ tutor_stats.tutors_count }}</b><span>tyutor</span></div>
+      <div><b>{{ tutor_stats.active }}</b><span>javob kelgan</span></div>
+      <div><b>{{ tutor_stats.total }}</b><span>talaba to'ldirdi</span></div>
+      {% if tutor_stats.without %}<div><b>{{ tutor_stats.without }}</b><span>tyutor tanlanmagan</span></div>{% endif %}
+    </div>
+  </div>
+  {% if tutor_stats.leader %}<p class="tut-leader">🏆 Eng faol tyutor: <b>{{ tutor_stats.leader.name }}</b> — {{ tutor_stats.leader.total }} ta talaba</p>{% endif %}
+
+  <div class="tut-groups">
+    {% for g in tutor_stats.faculties %}
+    <details class="tut-group" {% if forloop.counter <= 2 or filters.tutor %}open{% endif %}>
+      <summary>
+        <span class="chip">{{ g.faculty.short_name }}</span>
+        <span class="grow bold tut-faculty">{{ g.faculty.name }}</span>
+        {% if g.silent %}<span class="chip chip-danger">{{ g.silent }} tyutordan javob yo'q</span>{% endif %}
+        <span class="tut-sum"><b>{{ g.total }}</b> talaba</span>
+      </summary>
+      <div class="tut-list">
+        {% for t in g.tutors %}
+        <a href="?tab=responses&tutor={{ t.id }}" class="tut-row {% if not t.total %}is-silent{% endif %}" title="{{ t.name }}: javoblarni ko'rish">
+          <span class="tut-medal">{% if t.medal %}{{ t.medal }}{% else %}🧑‍🏫{% endif %}</span>
+          <span class="tut-name"><b>{{ t.name }}</b>{% if t.phone %}<small>{{ t.phone }}</small>{% endif %}<span class="reg-bar"><span style="width: {{ t.width }}%"></span></span></span>
+          <span class="reg-num" data-label="Javob"><b>{{ t.total }}</b></span>
+          <span class="reg-num" data-label="Akkaunt">{{ t.accounts }}</span>
+          <span class="reg-num {% if t.today %}is-today{% endif %}" data-label="Bugun">{% if t.today %}+{{ t.today }}{% else %}—{% endif %}</span>
+        </a>
+        {% endfor %}
+      </div>
+    </details>
+    {% endfor %}
+  </div>
+  <p class="tiny muted">Javobi yo'q tyutorlarga eslating: ular o'z guruhlaridagi talabalarga havola yoki QR plakatni yuborishsin.{% if user.is_institution_admin %} Ro'yxatni <a href="{% url 'web:tutors' %}">tyutorlar sahifasida</a> o'zgartirasiz.{% endif %}</p>
+</section>

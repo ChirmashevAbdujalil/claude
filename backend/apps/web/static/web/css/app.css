@@ -1297,3 +1297,30 @@ a.reg-row:hover { color: inherit; background: var(--surface-2); }
 .contingent-input { flex: none; width: 120px; }
 .contingent-input .input { min-height: 36px; padding: 6px 10px; text-align: center; }
 @media (max-width: 720px) { .reg:has(.reg-th span:nth-child(6)) .reg-row { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+
+/* Tyutorlar kesimida (tut-) */
+.tut { display: grid; gap: 14px; }
+.tut-leader { margin: 0; padding: 10px 14px; border-radius: 12px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; }
+.tut-groups { display: grid; gap: 10px; }
+.tut-group { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+.tut-group summary { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 12px 14px; cursor: pointer; background: var(--surface-2); list-style: none; }
+.tut-group summary::-webkit-details-marker { display: none; }
+.tut-group summary::after { content: "▾"; color: var(--muted); transition: transform .15s; }
+.tut-group[open] summary::after { transform: rotate(180deg); }
+.tut-group .tut-faculty { flex: 1 1 200px; min-width: 0; font-size: 14px; }
+.tut-sum { font-size: 13px; color: var(--muted); }
+.tut-sum b { font-size: 16px; color: var(--text); }
+.tut-list { display: grid; padding: 4px 8px 8px; }
+.tut-row { display: grid; grid-template-columns: 34px minmax(0, 1fr) repeat(3, 70px); gap: 10px; align-items: center; padding: 9px 6px; border-radius: 10px; color: inherit; }
+.tut-row + .tut-row { border-top: 1px solid var(--border); }
+.tut-row:hover { color: inherit; background: var(--surface-2); }
+.tut-row.is-silent { opacity: .6; }
+.tut-medal { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: var(--primary-soft); font-size: 16px; }
+.tut-name { display: grid; gap: 1px; min-width: 0; }
+.tut-name small { font-size: 11.5px; color: var(--muted); }
+@media (max-width: 560px) {
+  .tut-row { grid-template-columns: 34px repeat(3, minmax(0, 1fr)); }
+  .tut-name { grid-column: 2 / -1; }
+  .tut-row > :nth-child(3) { grid-column: 2; }
+  .tut-row .reg-num::before { content: attr(data-label); font-size: 10.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+}

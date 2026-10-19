@@ -1,4 +1,5 @@
 import io
+import re
 import zipfile
 from xml.dom import minidom
 
@@ -79,6 +80,13 @@ def test_group_filter_and_crosstab_dimension(rector, survey):
     assert {r["label"]: r["total"] for r in table["rows"]} == {"K-21-05": 2, "M-22-01": 1}
 
 
+def sheets_of(content) -> dict:
+    """Varaq nomi -> varaq XML matni."""
+    archive = zipfile.ZipFile(io.BytesIO(content))
+    names = re.findall(r'<sheet name="([^"]+)"', archive.read("xl/workbook.xml").decode())
+    return {name: archive.read(f"xl/worksheets/sheet{i}.xml").decode() for i, name in enumerate(names, 1)}
+
+
 def test_results_xlsx_is_valid_workbook(rector, survey):
     clubs.form_clubs(survey, survey.questions.get(kind=Kind.TRACK), survey.responses.all(), by=rector, min_members=2)
     track = survey.questions.get(kind=Kind.TRACK)
@@ -87,20 +95,19 @@ def test_results_xlsx_is_valid_workbook(rector, survey):
     archive = zipfile.ZipFile(io.BytesIO(response.content))
     for name in archive.namelist():
         minidom.parseString(archive.read(name))  # har bir qism to'g'ri XML
-    workbook = archive.read("xl/workbook.xml").decode()
-    for sheet in ("Umumiy natija", "Fakultetlar", "Javoblar", "Kesimlar", "Klublar"):
-        assert f'name="{sheet}"' in workbook
-    assert "Akkaunt ochilgan" in archive.read("xl/worksheets/sheet2.xml").decode()
-    answers = archive.read("xl/worksheets/sheet3.xml").decode()
+    sheets = sheets_of(response.content)
+    assert {"Umumiy natija", "Fakultetlar", "Javoblar", "Kesimlar", "Klublar"} <= set(sheets)
+    assert "Akkaunt ochilgan" in sheets["Fakultetlar"]
+    answers = sheets["Javoblar"]
     assert (
         "Aliyev Ali" in answers and "K-21-05" in answers and "IT va dasturlash" in answers and "<autoFilter" in answers
     )
-    assert "IT va dasturlash klubi" in archive.read("xl/worksheets/sheet5.xml").decode()
+    assert "IT va dasturlash klubi" in sheets["Klublar"]
 
     filtered = web(rector).get(
         reverse("web:survey-export-xlsx", args=[survey.pk]), {"answer": f"{track.pk}:{Track.RESEARCH}"}
     )
-    sheet = zipfile.ZipFile(io.BytesIO(filtered.content)).read("xl/worksheets/sheet3.xml").decode()
+    sheet = sheets_of(filtered.content)["Javoblar"]
     assert "Karimova Aziza" in sheet and "Aliyev Ali" not in sheet
 
 

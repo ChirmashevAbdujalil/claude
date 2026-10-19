@@ -50,7 +50,7 @@
   </div>
 
   <div class="card card-lg stack" id="fakultetlar">
-    <h2>Fakultetlar</h2>
+    <div class="row-between wrap"><h2>Fakultetlar</h2><a href="{% url 'web:tutors' %}" class="btn btn-soft btn-sm">🧑‍🏫 Tyutorlar</a></div>
     {% if faculties %}
     <form method="post" class="stack-sm">{% csrf_token %}<input type="hidden" name="form" value="contingent">
       <p class="tiny muted">«Talabalar soni» (kontingent) so'rovnoma natijalarida har bir fakultetning qamrov foizini hisoblash uchun kerak. Bilmasangiz, bo'sh qoldiring.</p>

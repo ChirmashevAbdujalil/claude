@@ -158,6 +158,14 @@ class Response(models.Model):
     )
     course = models.PositiveSmallIntegerField("kurs", null=True, blank=True)
     group = models.CharField("guruh", max_length=40, blank=True)
+    tutor = models.ForeignKey(
+        "accounts.Tutor",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="responses",
+        verbose_name="tyutor",
+    )
     phone = models.CharField("telefon", max_length=30, blank=True)
     answers = models.JSONField("javoblar", default=dict)
     browser_key = models.CharField(max_length=32, blank=True, db_index=True, editable=False)

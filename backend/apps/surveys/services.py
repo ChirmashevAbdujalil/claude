@@ -389,6 +389,7 @@ def submit(survey, *, answers, identity=None, user=None, browser_key="") -> Resp
         faculty=identity.get("faculty") or (user.faculty if user else None),
         course=identity.get("course") or (user.course if user else None),
         group=identity.get("group", ""),
+        tutor=identity.get("tutor"),
         phone=identity.get("phone", ""),
         answers=answers,
         browser_key="" if user else browser_key[:32],

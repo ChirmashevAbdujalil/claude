@@ -16,6 +16,7 @@ TRACKED = {
     "tenants.institution": {},
     "tenants.institutionrequest": {"fields": ["status"], "create": False},
     "accounts.faculty": {},
+    "accounts.tutor": {"fields": ["faculty", "full_name", "phone", "is_active"]},
     "accounts.user": {
         "fields": [
             "username",

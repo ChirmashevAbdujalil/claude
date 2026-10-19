@@ -213,6 +213,12 @@ orqali javob beradi. Asosiy vazifasi: butun institut bo'yicha iqtidorli talabala
   javob bergan, akkaunt ochilgan, tizimga kirgan va bugun qo'shilgan; reyting (🥇🥈🥉) va hali javob bermagan
   fakultetlar ogohlantirishi. OTM sozlamalarida fakultet kontingenti kiritilsa, qamrov foizi ham ko'rinadi
   (masalan, 120 / 800 · 15%). Excel faylda alohida «Fakultetlar» varag'i.
+- **Tyutorlar** (`/settings/otm/tyutorlar/`): har bir tyutor o'z fakultetiga biriktiriladi (ANDTIning 25 tyutori
+  migratsiyada avtomatik qo'shiladi). Ro'yxatni qo'lda to'ldirish yoki Word jadvalidan («Fakultet nomi»,
+  «Lavozimi», «F.I.Sh» ustunlari) yuklash mumkin. Talaba so'rovnomada fakultetini tanlagach, faqat shu fakultet
+  tyutorlari ichidan o'z tyutorini belgilaydi (fakultetda tyutor bo'lsa, majburiy). Natijalarda «Tyutorlar
+  kesimida» bo'limi chiqadi: har bir tyutor guruhidan nechta talaba javob bergani, eng faol tyutor va javobi yo'q
+  tyutorlar. Shuningdek tyutor filtri, kesishma jadvalda «Tyutor» o'lchovi va Excel'da «Tyutorlar» varag'i bor.
 - **Chuqur tahlil** (natijalar → «🔎 Tahlil»): avtomatik xulosalar, 21 kunlik javoblar dinamikasi, javoblar
   to'liqligi va kesishma jadval (istalgan savol × fakultet, kurs yoki boshqa savol; issiqlik rangi va ★ eng kuchli
   variant). Grafikdagi istalgan variantni bossangiz, butun sahifa, javoblar ro'yxati va Excel faqat shu javobni

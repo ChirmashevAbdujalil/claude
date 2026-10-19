@@ -1,0 +1,58 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Tyutorlar{% endblock %}
+
+{% block content %}
+<a href="{% url 'web:institution-settings' %}" class="back-link">{% icon "arrow-left" "icon-sm" %} OTM sozlamalari</a>
+<div class="page-header">
+  <div><h1>Tyutorlar 🧑‍🏫</h1>
+    <p>Har bir tyutor o'z fakultetiga biriktirilgan. Talaba so'rovnomada fakultetini tanlagach, faqat shu fakultet tyutorlari ichidan o'z tyutorini belgilaydi.</p></div>
+  <span class="chip chip-primary">{{ total }} ta tyutor</span>
+</div>
+
+<div class="layout-main-aside">
+  <div class="stack">
+    {% for faculty, items in groups %}
+    <section class="card stack-sm">
+      <div class="row-between wrap">
+        <div class="row-sm"><span class="chip">{{ faculty.short_name }}</span><h3>{{ faculty.name }}</h3></div>
+        <span class="tiny muted">{{ items|length }} ta tyutor</span>
+      </div>
+      {% if items %}
+      <div class="list">
+        {% for t in items %}
+        <div class="list-item">
+          <span class="tut-medal">🧑‍🏫</span>
+          <div class="grow" style="min-width:0"><div class="bold">{{ t.full_name }}</div><div class="tiny muted">{% if t.phone %}{{ t.phone }} · {% endif %}so'rovnomalarda {{ t.responses_count }} ta talaba belgilagan</div></div>
+          <form method="post" action="{% url 'web:tutor-delete' t.pk %}" onsubmit="return confirm('{{ t.full_name|escapejs }} ro\'yxatdan olib tashlansinmi?')">{% csrf_token %}<button class="btn btn-ghost btn-sm btn-icon" aria-label="O'chirish">{% icon "trash" "icon-sm" %}</button></form>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="small muted">Bu fakultetga hali tyutor biriktirilmagan: talabalar tyutor tanlamasdan javob beradi.</p>
+      {% endif %}
+    </section>
+    {% empty %}
+    <div class="card">{% include "web/partials/empty.html" with emoji="🏛" title="Avval fakultetlarni qo'shing" text="OTM sozlamalarida fakultetlarni qo'shganingizdan keyin tyutorlarni biriktirasiz." %}</div>
+    {% endfor %}
+  </div>
+
+  <aside class="stack">
+    <div class="card stack-sm">
+      <h3>Tyutor qo'shish</h3>
+      <form method="post" class="form">{% csrf_token %}
+        {% include "web/partials/form_fields.html" %}
+        <button class="btn btn-primary btn-block">{% icon "plus" "icon-sm" %} Qo'shish</button>
+      </form>
+    </div>
+    <div class="card stack-sm">
+      <h3>Word fayldan yuklash</h3>
+      <p class="tiny muted">Jadvalda «Fakultet nomi», «Lavozimi» va «F.I.Sh» ustunlari bo'lsin. Fakultet nomi qisqa yoki biroz boshqacha yozilgan bo'lsa ham mos fakultet topiladi; takrorlar qo'shilmaydi.</p>
+      <form method="post" action="{% url 'web:tutor-import' %}" enctype="multipart/form-data" class="form">{% csrf_token %}
+        <input type="file" name="file" accept=".docx" class="input" required>
+        <button class="btn btn-soft btn-block">{% icon "download" "icon-sm" %} Yuklash</button>
+      </form>
+    </div>
+  </aside>
+</div>
+{% endblock %}

@@ -4,7 +4,7 @@ from django.db import models
 
 from apps.tenants.admin import TenantAdminMixin
 
-from .models import Faculty, User
+from .models import Faculty, Tutor, User
 
 
 @admin.register(Faculty)
@@ -56,3 +56,11 @@ class UserAdmin(TenantAdminMixin, BaseUserAdmin):
         main = self.fieldsets[:-1]
         name, options = self.fieldsets[-1]
         return (*main, (name, {"fields": ("institution", *options["fields"])}))
+
+
+@admin.register(Tutor)
+class TutorAdmin(TenantAdminMixin, admin.ModelAdmin):
+    list_display = ["full_name", "faculty", "phone", "is_active"]
+    list_filter = ["faculty", "is_active"]
+    search_fields = ["full_name", "phone"]
+    autocomplete_fields = ["user"]

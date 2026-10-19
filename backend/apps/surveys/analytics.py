@@ -116,7 +116,7 @@ def completeness(survey, responses) -> dict:
 def dimensions(survey) -> list[tuple[str, str]]:
     dims = []
     if survey.collect_identity:
-        dims += [("faculty", "Fakultet"), ("course", "Kurs"), ("group", "Guruh")]
+        dims += [("faculty", "Fakultet"), ("tutor", "Tyutor"), ("course", "Kurs"), ("group", "Guruh")]
     dims += [(f"q{q.pk}", q.title) for q in choice_questions(survey)]
     return dims
 
@@ -127,6 +127,11 @@ def _row_keys(responses, dim, survey):
         return {
             pk: [(name or "—", name or "Ko'rsatilmagan")]
             for pk, name in responses.values_list("pk", "faculty__short_name")
+        }
+    if dim == "tutor":
+        return {
+            pk: [(name or "—", name or "Tyutor tanlanmagan")]
+            for pk, name in responses.values_list("pk", "tutor__full_name")
         }
     if dim == "group":
         return {pk: [(g or "—", g or "Ko'rsatilmagan")] for pk, g in responses.values_list("pk", "group")}
@@ -288,3 +293,62 @@ def _percent(part, whole):
         return None
     value = min(part * 100 / whole, 100)
     return round(value, 1) if value < 10 else round(value)
+
+
+# ---------------------------------------------------------------- tyutorlar kesimida
+
+
+def tutor_registration(responses, tutors) -> dict:
+    """Har bir tyutor guruhidan nechta talaba so'rovnomani to'ldirgan: fakultetlar bo'yicha guruhlangan.
+
+    `tutors` — faol tyutorlar (fakulteti bilan). Javobi yo'q tyutorlar ham ko'rsatiladi.
+    """
+    today = timezone.localdate()
+    stats = {
+        row["tutor_id"]: row
+        for row in responses.values("tutor_id").annotate(
+            total=Count("id"),
+            accounts=Count("id", filter=Q(user__isnull=False)),
+            logged=Count("id", filter=Q(user__last_login__isnull=False)),
+            today=Count("id", filter=Q(submitted_at__date=today)),
+        )
+    }
+    groups, order = {}, []
+    for tutor in tutors:
+        row = stats.get(tutor.pk, {})
+        item = {
+            "id": tutor.pk,
+            "name": tutor.full_name,
+            "phone": tutor.phone,
+            "total": row.get("total", 0),
+            "accounts": row.get("accounts", 0),
+            "logged": row.get("logged", 0),
+            "today": row.get("today", 0),
+        }
+        if tutor.faculty_id not in groups:
+            groups[tutor.faculty_id] = {"faculty": tutor.faculty, "tutors": []}
+            order.append(tutor.faculty_id)
+        groups[tutor.faculty_id]["tutors"].append(item)
+    top = max([t["total"] for g in groups.values() for t in g["tutors"]] + [1])
+    faculties = []
+    for key in order:
+        group = groups[key]
+        group["tutors"].sort(key=lambda t: (-t["total"], t["name"]))
+        for t in group["tutors"]:
+            t["width"] = round(t["total"] * 100 / top)
+        group["total"] = sum(t["total"] for t in group["tutors"])
+        group["silent"] = sum(1 for t in group["tutors"] if not t["total"])
+        faculties.append(group)
+    faculties.sort(key=lambda g: (-g["total"], g["faculty"].name))
+    ranked = sorted((t for g in faculties for t in g["tutors"] if t["total"]), key=lambda t: -t["total"])
+    for index, tutor in enumerate(ranked[:3]):
+        tutor["medal"] = MEDALS[index]
+    without = stats.get(None, {}).get("total", 0)
+    return {
+        "faculties": faculties,
+        "tutors_count": sum(len(g["tutors"]) for g in faculties),
+        "active": len(ranked),
+        "total": sum(g["total"] for g in faculties),
+        "without": without,
+        "leader": ranked[0] if ranked else None,
+    }

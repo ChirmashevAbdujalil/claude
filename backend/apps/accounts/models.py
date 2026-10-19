@@ -105,3 +105,41 @@ class User(GlobalUniqueChecksMixin, AbstractUser):
     @property
     def is_management(self) -> bool:
         return self.is_superuser or self.role in self.MANAGEMENT_ROLES
+
+
+class Tutor(models.Model):
+    """Fakultetga biriktirilgan tyutor: talabalar so'rovnomada o'z tyutorini belgilaydi."""
+
+    institution = models.ForeignKey(
+        "tenants.Institution",
+        on_delete=models.CASCADE,
+        related_name="tutors",
+        default=default_institution_id,
+        verbose_name="OTM",
+    )
+    faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, related_name="tutors", verbose_name="fakultet")
+    full_name = models.CharField("F.I.Sh.", max_length=150)
+    phone = models.CharField("telefon", max_length=30, blank=True)
+    user = models.OneToOneField(
+        "accounts.User",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="tutor_profile",
+        verbose_name="platformadagi akkaunti",
+    )
+    is_active = models.BooleanField("faol", default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = TenantManager()
+
+    class Meta:
+        verbose_name = "tyutor"
+        verbose_name_plural = "tyutorlar"
+        ordering = ["faculty__name", "full_name"]
+        constraints = [
+            models.UniqueConstraint(fields=["faculty", "full_name"], name="tutor_unique_name_per_faculty"),
+        ]
+
+    def __str__(self):
+        return self.full_name
