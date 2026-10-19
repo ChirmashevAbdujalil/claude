@@ -169,7 +169,6 @@ def duplicate(survey, by) -> Survey:
     copy = Survey.objects.create(
         title=f"{survey.title} (nusxa)"[:200],
         description=survey.description,
-        access=survey.access,
         collect_identity=survey.collect_identity,
         one_response=survey.one_response,
         talent_census=survey.talent_census,
@@ -360,8 +359,6 @@ def submit(survey, *, answers, identity=None, user=None, browser_key="") -> Resp
     user = user if user is not None and user.is_authenticated else None
     if not survey.is_accepting:
         raise SurveyError("So'rovnoma hozir javob qabul qilmayapti")
-    if survey.access == Survey.Access.STUDENTS and user is None:
-        raise SurveyError("Javob berish uchun platformaga kiring")
     if already_answered(survey, user, browser_key):
         raise SurveyError("Siz bu so'rovnomaga javob bergansiz")
     identity = identity or {}

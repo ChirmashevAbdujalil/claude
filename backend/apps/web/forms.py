@@ -476,7 +476,7 @@ class StudentGoalForm(forms.ModelForm):
 class SurveyForm(forms.ModelForm):
     class Meta:
         model = Survey
-        fields = ["title", "description", "access", "collect_identity", "one_response", "talent_census", "xp_reward",
+        fields = ["title", "description", "collect_identity", "one_response", "talent_census", "xp_reward",
                   "closes_at", "thank_you"]  # fmt: skip
         widgets = {
             "description": forms.Textarea(

@@ -5,7 +5,6 @@ import secrets
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Q
@@ -321,8 +320,6 @@ def survey_fill(request, token):
     preview = survey.status == Survey.Status.DRAFT
     if preview and not (user.is_authenticated and user.is_management):
         raise Http404
-    if survey.access == Survey.Access.STUDENTS and not user.is_authenticated:
-        return redirect_to_login(request.get_full_path(), reverse("web:login"))
 
     browser_key = request.COOKIES.get(BROWSER_COOKIE, "")
     state = None

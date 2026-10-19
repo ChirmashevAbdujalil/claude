@@ -13,16 +13,15 @@ def new_token() -> str:
 
 
 class Survey(models.Model):
-    """Google Forms kabi so'rovnoma: rahbariyat tuzadi, talabalar havola yoki QR orqali javob beradi."""
+    """Google Forms kabi so'rovnoma: rahbariyat tuzadi, har qanday talaba havola yoki QR orqali javob beradi.
+
+    Javob berish uchun ro'yxatdan o'tish shart emas; platformaga kirgan talabaning javobi profiliga bog'lanadi.
+    """
 
     class Status(models.TextChoices):
         DRAFT = "draft", "Qoralama"
         OPEN = "open", "Javob qabul qilinmoqda"
         CLOSED = "closed", "Yopilgan"
-
-    class Access(models.TextChoices):
-        PUBLIC = "public", "Havolasi bor hamma (kirish shart emas)"
-        STUDENTS = "students", "Faqat platformaga kirgan talabalar"
 
     institution = models.ForeignKey(
         "tenants.Institution",
@@ -35,7 +34,6 @@ class Survey(models.Model):
     description = models.TextField("tavsif", blank=True)
     token = models.CharField("ochiq havola kaliti", max_length=16, unique=True, default=new_token, editable=False)
     status = models.CharField("holat", max_length=10, choices=Status.choices, default=Status.DRAFT, db_index=True)
-    access = models.CharField("kim javob bera oladi", max_length=10, choices=Access.choices, default=Access.PUBLIC)
     collect_identity = models.BooleanField(
         "talaba ma'lumotlarini so'rash",
         default=True,

@@ -8,7 +8,7 @@
   <div>
     <div class="row-sm wrap"><h1>{{ survey.title }}</h1><span class="chip survey-status-{{ survey.status }}">{{ survey.get_status_display }}</span>
       {% if survey.talent_census %}<span class="chip chip-accent">🧭 Iqtidorlarni ro'yxatga olish</span>{% endif %}</div>
-    <p>{{ survey.get_access_display }}{% if survey.closes_at %} · muddat {{ survey.closes_at|date:"d.m.Y H:i" }}{% endif %}{% if survey.created_by %} · muallif: {{ survey.created_by }}{% endif %}</p>
+    <p>Ro'yxatdan o'tmasdan ham javob berish mumkin{% if survey.closes_at %} · muddat {{ survey.closes_at|date:"d.m.Y H:i" }}{% endif %}{% if survey.created_by %} · muallif: {{ survey.created_by }}{% endif %}</p>
   </div>
   <div class="row-sm wrap">
     {% if can_edit %}<a href="{% url 'web:survey-builder' survey.pk %}" class="btn btn-ghost btn-sm">{% icon "edit" "icon-sm" %} Tahrirlash</a>{% endif %}
@@ -33,7 +33,7 @@
         <a href="{% url 'web:survey-poster' survey.pk %}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">{% icon "file" "icon-sm" %} QR plakatni chop etish</a>
         <a href="{% url 'web:survey-fill' survey.token %}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">{% icon "external" "icon-sm" %} Ochish</a>
       </div>
-      <p class="tiny muted">Telegram guruhlariga havolani yuboring yoki plakatni o'quv binolariga osing. Talaba platformaga kirmasdan ham javob bera oladi{% if survey.access == "students" %} (bu so'rovnomada kirish talab qilinadi){% endif %}.</p>
+      <p class="tiny muted">Telegram guruhlariga havolani yuboring yoki plakatni o'quv binolariga osing. Talaba ro'yxatdan o'tmasdan, profilsiz javob bera oladi.</p>
     </div>
   </section>
 

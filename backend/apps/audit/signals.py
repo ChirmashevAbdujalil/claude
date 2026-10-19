@@ -38,7 +38,7 @@ TRACKED = {
     "profiles.achievement": {"fields": ["status", "xp_awarded"], "create": False},
     "community.event": {},
     "opportunities.opportunity": {},
-    "surveys.survey": {"fields": ["title", "status", "access", "talent_census", "xp_reward", "closes_at"]},
+    "surveys.survey": {"fields": ["title", "status", "talent_census", "xp_reward", "closes_at"]},
     "opportunities.application": {"fields": ["status"], "create": False},
     "opportunities.reward": {},
     "opportunities.sponsor": {},

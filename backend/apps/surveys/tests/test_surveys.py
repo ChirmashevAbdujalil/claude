@@ -263,13 +263,14 @@ def test_logged_in_student_gets_xp_once(web, survey, student, faculty):
     assert services.open_for(student).count() == 0
 
 
-def test_students_only_survey_requires_login(web, survey):
-    survey.access = Survey.Access.STUDENTS
-    survey.save()
-    response = web().get(reverse("web:survey-fill", args=[survey.token]))
-    assert response.status_code == 302 and reverse("web:login") in response.url
-    with pytest.raises(SurveyError, match="platformaga kiring"):
-        services.submit(survey, answers={})
+def test_anyone_can_answer_without_account(web, survey, faculty):
+    """Ro'yxatdan o'tmagan, profilsiz talaba ham javob yuboradi: login sahifasiga yo'naltirilmaydi."""
+    url = reverse("web:survey-fill", args=[survey.token])
+    page = web().get(url)
+    assert page.status_code == 200 and "Javobni yuborish" in page.content.decode()
+    web().post(url, post_data(survey, faculty))
+    saved = Response.objects.get(survey=survey)
+    assert saved.user is None and saved.full_name == "Aziza Karimova"
 
 
 def test_draft_is_hidden_but_management_can_preview(web, rector, student, faculty):
@@ -318,7 +319,6 @@ def test_builder_saves_and_publishes_with_notifications(web, rector, student, fa
         {
             "title": "Kurs so'rovnomasi",
             "description": "",
-            "access": "public",
             "collect_identity": "on",
             "one_response": "on",
             "xp_reward": "10",
@@ -342,7 +342,7 @@ def test_builder_shows_error_and_keeps_draft_schema(web, rector):
     survey = services.create_survey(rector, "blank")
     page = web(rector).post(
         reverse("web:survey-builder", args=[survey.pk]),
-        {"title": "X", "access": "public", "xp_reward": "0", "schema": json.dumps([{"kind": "single", "title": "Y"}])},
+        {"title": "X", "xp_reward": "0", "schema": json.dumps([{"kind": "single", "title": "Y"}])},
         follow=True,
     )
     assert "kamida bitta variant" in page.content.decode()

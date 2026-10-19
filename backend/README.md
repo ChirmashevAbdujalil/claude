@@ -194,8 +194,8 @@ orqali javob beradi. Asosiy vazifasi: butun institut bo'yicha iqtidorli talabala
   (1–10), raqam, sana, elektron pochta, telefon, iqtidor yo'nalishi va bo'lim sarlavhasi. Variantlarda «Boshqa» bor.
 - **Iqtidorlar reyestriga bir bosishda:** javob bergan talabalarni belgilab reyestrga qo'shasiz, yo'nalishi
   «Iqtidor yo'nalishi» savolidan olinadi (manba: «So'rovnoma»).
-- **Kim javob beradi:** havolasi bor hamma yoki faqat platformaga kirgan talabalar. Talaba ma'lumotlari (F.I.Sh.,
-  fakultet, kurs, guruh, telefon) so'raladi, kirgan talabada profildan to'ldiriladi.
+- **Kim javob beradi:** havolasi bor har qanday talaba, ro'yxatdan o'tmasdan va profilsiz. Talaba ma'lumotlari
+  (F.I.Sh., fakultet, kurs, guruh, telefon) formada so'raladi; platformaga kirgan talabada profildan to'ldiriladi.
 - **Takrorlanmaslik:** har kim bir marta javob beradi (akkaunt yoki brauzer bo'yicha); botlar uchun tuzoq maydon.
 - **Rag'bat:** platformaga kirib javob bergan talabaga XP (bir marta). E'lon qilishda barcha talabalarga
   bildirishnoma yuborish mumkin.

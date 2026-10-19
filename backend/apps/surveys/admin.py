@@ -13,8 +13,8 @@ class QuestionInline(admin.StackedInline):
 
 @admin.register(Survey)
 class SurveyAdmin(TenantAdminMixin, admin.ModelAdmin):
-    list_display = ["title", "status", "access", "talent_census", "closes_at", "created_by", "created_at"]
-    list_filter = ["status", "access", "talent_census"]
+    list_display = ["title", "status", "talent_census", "closes_at", "created_by", "created_at"]
+    list_filter = ["status", "talent_census"]
     search_fields = ["title", "description"]
     readonly_fields = ["token", "published_at", "created_by"]
     inlines = [QuestionInline]
