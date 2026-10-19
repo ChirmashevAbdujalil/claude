@@ -3,46 +3,120 @@
 {% block title %}{{ response.display_name }} · {{ survey.title }}{% endblock %}
 
 {% block content %}
-<a href="{% url 'web:survey-results' survey.pk %}?tab=responses" class="back-link">{% icon "arrow-left" "icon-sm" %} Javoblar</a>
-<div class="page-header">
-  <div><h1>{{ response.display_name }}</h1>
-    <p>«{{ survey.title }}» · {{ response.submitted_at|date:"d.m.Y H:i" }}</p></div>
-  <div class="row-sm wrap">
-    {% if response.user_id and response.user.role == "student" %}
-      {% if in_registry %}<a href="{% url 'web:talent-profile' response.user.talent_profile.pk %}" class="btn btn-soft btn-sm">{% icon "compass" "icon-sm" %} Reyestrdagi profili</a>
-      {% else %}<form method="post" action="{% url 'web:survey-register' survey.pk %}">{% csrf_token %}<input type="hidden" name="response" value="{{ response.pk }}">
-        <button class="btn btn-accent btn-sm">{% icon "plus" "icon-sm" %} Iqtidorlar reyestriga qo'shish</button></form>{% endif %}
-    {% endif %}
-    {% if can_edit %}<form method="post" action="{% url 'web:survey-response-delete' survey.pk response.pk %}" onsubmit="return confirm('Javob o\'chirilsinmi?')">{% csrf_token %}<button class="btn btn-ghost btn-sm text-danger">{% icon "trash" "icon-sm" %} O'chirish</button></form>{% endif %}
-  </div>
+<div class="rv-bar">
+  <a href="{% url 'web:survey-results' survey.pk %}?tab=responses" class="back-link" style="margin:0">{% icon "arrow-left" "icon-sm" %} Barcha javoblar</a>
+  {% if nav.total %}
+  <nav class="rv-nav" aria-label="Javoblar bo'ylab">
+    {% if nav.prev %}<a href="{% url 'web:survey-response' survey.pk nav.prev %}" class="btn btn-ghost btn-sm btn-icon" title="Oldingi javob" aria-label="Oldingi javob">{% icon "arrow-left" "icon-sm" %}</a>
+    {% else %}<span class="btn btn-ghost btn-sm btn-icon is-disabled" aria-hidden="true">{% icon "arrow-left" "icon-sm" %}</span>{% endif %}
+    <span class="rv-pos"><b>{{ nav.position }}</b> / {{ nav.total }}</span>
+    {% if nav.next %}<a href="{% url 'web:survey-response' survey.pk nav.next %}" class="btn btn-ghost btn-sm btn-icon" title="Keyingi javob" aria-label="Keyingi javob">{% icon "arrow-right" "icon-sm" %}</a>
+    {% else %}<span class="btn btn-ghost btn-sm btn-icon is-disabled" aria-hidden="true">{% icon "arrow-right" "icon-sm" %}</span>{% endif %}
+  </nav>
+  {% endif %}
 </div>
 
-<div class="layout-main-aside">
-  <div class="stack">
-    {% for question, answer in rows %}
-    {% if answer is None %}
-    <h2 class="survey-h2 survey-result-section">{{ question.title }}</h2>
+<div class="rv-layout">
+  <aside class="rv-aside">
+    <section class="rv-profile">
+      <div class="rv-cover"></div>
+      <div class="rv-avatar" style="--hue: {{ hue }}">{{ initials }}</div>
+      <h1 class="rv-name">{{ response.display_name }}</h1>
+      <div class="rv-sub">
+        {% if response.user_id %}<span class="chip chip-primary">@{{ response.user.username }}</span>
+        {% else %}<span class="chip">Akkauntsiz javob</span>{% endif %}
+      </div>
+
+      <dl class="rv-meta">
+        <div><dt>🏛 Fakultet</dt><dd>{{ response.faculty.name|default:"—" }}</dd></div>
+        <div><dt>🎓 Kurs</dt><dd>{% if response.course %}{{ response.course }}-kurs{% else %}—{% endif %}</dd></div>
+        <div><dt>👥 Guruh</dt><dd>{{ response.group|default:"—" }}</dd></div>
+        <div><dt>📞 Telefon</dt><dd>{% if response.phone %}<a href="tel:{{ response.phone }}">{{ response.phone }}</a>{% else %}—{% endif %}</dd></div>
+        <div><dt>🕒 Yuborilgan</dt><dd>{{ response.submitted_at|date:"d.m.Y, H:i" }}</dd></div>
+      </dl>
+
+      <div class="rv-complete">
+        <div class="row-between small"><span class="bold">To'liqlik</span><span class="muted">{{ answered }} / {{ answerable }} savol</span></div>
+        <div class="progress"><span style="width: {{ completeness }}%"></span></div>
+      </div>
+
+      {% if track %}
+      <div class="rv-track">
+        <span class="rv-track-icon">{{ track.icon }}</span>
+        <div><div class="tiny muted bold">Iqtidor yo'nalishi</div><div class="bold">{{ track.label }}</div></div>
+      </div>
+      {% endif %}
+
+      <div class="rv-registry">
+        {% if registry %}
+        <div class="rv-registry-state is-in"><span>✓</span><div><b>Iqtidorlar reyestrida</b><div class="tiny">{{ registry.get_status_display }}{% if registry.mentor %} · mentor: {{ registry.mentor }}{% endif %}</div></div></div>
+        <a href="{% url 'web:talent-profile' registry.pk %}" class="btn btn-soft btn-sm btn-block">{% icon "compass" "icon-sm" %} Reyestrdagi kartasi</a>
+        {% elif response.user_id and response.user.role == "student" %}
+        <form method="post" action="{% url 'web:survey-register' survey.pk %}">{% csrf_token %}
+          <input type="hidden" name="response" value="{{ response.pk }}">
+          <button class="btn btn-accent btn-block">{% icon "plus" "icon-sm" %} Iqtidorlar reyestriga qo'shish</button>
+        </form>
+        {% else %}
+        <p class="tiny muted rv-registry-note">Talaba platformada ro'yxatdan o'tmagan. Reyestrga qo'shish uchun akkaunt kerak; aloqa uchun telefon raqamidan foydalaning.</p>
+        {% endif %}
+        {% if response.user_id and response.user.portfolio_slug and response.user.is_public %}
+        <a href="{% url 'web:portfolio' response.user.portfolio_slug %}" class="btn btn-ghost btn-sm btn-block">{% icon "user" "icon-sm" %} Ommaviy portfolio</a>
+        {% endif %}
+      </div>
+
+      <div class="rv-actions">
+        <button type="button" class="btn btn-ghost btn-sm" onclick="window.print()">{% icon "file" "icon-sm" %} Chop etish</button>
+        {% if can_edit %}<form method="post" action="{% url 'web:survey-response-delete' survey.pk response.pk %}" onsubmit="return confirm('Javob o\'chirilsinmi?')">{% csrf_token %}<button class="btn btn-ghost btn-sm text-danger">{% icon "trash" "icon-sm" %} O'chirish</button></form>{% endif %}
+      </div>
+    </section>
+  </aside>
+
+  <div class="rv-main">
+    <header class="rv-head">
+      <span class="eyebrow">So'rovnoma javobi</span>
+      <h2>{{ survey.title }}</h2>
+    </header>
+
+    {% for item in items %}
+    {% with q=item.question %}
+    {% if item.view == "section" %}
+    <h3 class="rv-section">{{ q.title }}</h3>
     {% else %}
-    <div class="card survey-answer">
-      <div class="tiny muted bold">{{ question.title }}</div>
-      {% if answer %}<div class="survey-answer-text">{{ answer|linebreaksbr }}</div>{% else %}<div class="muted small">Javob berilmagan</div>{% endif %}
-    </div>
+    <article class="rv-qa {% if item.view == 'empty' %}is-empty{% endif %}">
+      <div class="rv-q">
+        <span class="rv-qno">{{ item.number }}</span>
+        <div class="grow">
+          <div class="rv-q-title">{{ q.title }}{% if q.required %} <span class="sv-req">*</span>{% endif %}</div>
+          <div class="rv-q-kind">{{ q.get_kind_display }}</div>
+        </div>
+      </div>
+      <div class="rv-a">
+        {% if item.view == "empty" %}
+        <span class="rv-empty">Javob berilmagan</span>
+        {% elif item.view == "chips" %}
+        <div class="rv-chips">{% for c in item.chips %}<span class="rv-chip {% if c.other %}is-other{% endif %}">{% if c.other %}<small>Boshqa</small>{% else %}✓{% endif %} {{ c.text }}</span>{% endfor %}</div>
+        {% elif item.view == "track" %}
+        <div class="rv-track rv-track-inline"><span class="rv-track-icon">{{ item.icon }}</span><span class="bold">{{ item.text }}</span></div>
+        {% elif item.view == "scale" %}
+        <div class="rv-scale">
+          <div class="rv-dots" style="--n: {{ item.max }}">{% for on in item.dots %}<span class="{% if on %}is-on{% endif %}">{{ forloop.counter }}</span>{% endfor %}</div>
+          <div class="rv-score"><b>{{ item.score }}</b>/{{ item.max }}</div>
+        </div>
+        {% if q.scale_min_label or q.scale_max_label %}<div class="rv-scale-labels"><span>1 — {{ q.scale_min_label }}</span><span>{{ item.max }} — {{ q.scale_max_label }}</span></div>{% endif %}
+        {% elif q.kind == "email" %}
+        <a href="mailto:{{ item.text }}" class="rv-text bold">{{ item.text }}</a>
+        {% elif q.kind == "phone" %}
+        <a href="tel:{{ item.text }}" class="rv-text bold">{{ item.text }}</a>
+        {% elif item.long %}
+        <blockquote class="rv-quote">{{ item.text|linebreaksbr }}</blockquote>
+        {% else %}
+        <div class="rv-text">{{ item.text|urlize }}</div>
+        {% endif %}
+      </div>
+    </article>
     {% endif %}
+    {% endwith %}
     {% endfor %}
   </div>
-  <aside class="stack">
-    <div class="card stack-sm">
-      <h3>Talaba</h3>
-      <div class="list">
-        <div class="list-item"><span class="muted small grow">F.I.Sh.</span><b class="small">{{ response.full_name|default:"—" }}</b></div>
-        <div class="list-item"><span class="muted small grow">Fakultet</span><b class="small">{{ response.faculty.short_name|default:"—" }}</b></div>
-        <div class="list-item"><span class="muted small grow">Kurs</span><b class="small">{% if response.course %}{{ response.course }}-kurs{% else %}—{% endif %}</b></div>
-        <div class="list-item"><span class="muted small grow">Guruh</span><b class="small">{{ response.group|default:"—" }}</b></div>
-        <div class="list-item"><span class="muted small grow">Telefon</span><b class="small">{% if response.phone %}<a href="tel:{{ response.phone }}">{{ response.phone }}</a>{% else %}—{% endif %}</b></div>
-        <div class="list-item"><span class="muted small grow">Akkaunt</span><b class="small">{% if response.user_id %}{{ response.user.username }}{% else %}platformada yo'q{% endif %}</b></div>
-      </div>
-      {% if response.user_id and response.user.portfolio_slug and response.user.is_public %}<a href="{% url 'web:portfolio' response.user.portfolio_slug %}" class="btn btn-ghost btn-sm">{% icon "user" "icon-sm" %} Portfolio</a>{% endif %}
-    </div>
-  </aside>
 </div>
 {% endblock %}

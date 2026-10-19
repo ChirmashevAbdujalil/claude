@@ -410,7 +410,8 @@ def test_results_pages_and_csv_export(web, rector, survey, faculty):
     assert "Madina" in client.get(results + "?tab=responses").content.decode()
     response = survey.responses.get()
     detail = client.get(reverse("web:survey-response", args=[survey.pk, response.pk])).content.decode()
-    assert "Startap va tadbirkorlik" in detail
+    assert "Startap va tadbirkorlik" in detail and "+998901112233" in detail and "Akkauntsiz javob" in detail
+    assert "<b>1</b> / 1" in detail
     assert survey.token in client.get(reverse("web:survey-poster", args=[survey.pk])).content.decode()
 
     export = client.get(reverse("web:survey-export", args=[survey.pk]) + f"?faculty={faculty.pk}")
@@ -460,3 +461,29 @@ def test_demo_seed_creates_census_with_responses():
     survey = Survey.objects.get(title__endswith="(demo)")
     assert survey.status == Survey.Status.OPEN and survey.responses.count() == 6
     assert survey.responses.filter(user__isnull=True).count() == 2
+
+
+def test_answer_items_and_navigation(rector, survey, student, faculty):
+    track, scale, did = (
+        q(survey, Kind.TRACK),
+        q(survey, Kind.SCALE),
+        q(survey, title="Qaysi faoliyatlarda qatnashgansiz?"),
+    )
+    first = services.submit(survey, answers={str(track.pk): Track.IT}, identity={"full_name": "A", "faculty": faculty})
+    second = services.submit(
+        survey,
+        answers={str(scale.pk): 4, str(did.pk): ["Fan olimpiadasi", "Robototexnika"]},
+        user=student,
+    )
+    items = {i["question"].pk: i for i in services.answer_items(survey, second) if i["view"] != "section"}
+    assert items[scale.pk]["view"] == "scale" and items[scale.pk]["dots"] == [True, True, True, True, False]
+    assert items[did.pk]["chips"] == [
+        {"text": "Fan olimpiadasi", "other": False},
+        {"text": "Robototexnika", "other": True},
+    ]
+    assert items[track.pk]["view"] == "empty"
+    first_items = {i["question"].pk: i for i in services.answer_items(survey, first) if i["view"] != "section"}
+    assert first_items[track.pk]["view"] == "track" and first_items[track.pk]["text"] == "IT va dasturlash"
+
+    nav = services.neighbours(survey.responses.all(), first)
+    assert nav == {"position": 2, "total": 2, "prev": second.pk, "next": None}

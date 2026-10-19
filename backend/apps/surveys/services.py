@@ -519,16 +519,51 @@ def summary(survey, responses) -> dict:
     }
 
 
-def answer_rows(survey, response) -> list[tuple]:
-    """Bitta javobni ko'rish uchun: (savol, javob matni) juftliklari."""
-    rows = []
+def answer_items(survey, response) -> list[dict]:
+    """Bitta javobni ko'rish uchun: har bir savol va javobi, turiga qarab ko'rsatish shakli bilan.
+
+    view: section (bo'lim), empty (javob yo'q), chips (variantlar), scale (shkala), track (yo'nalish), text.
+    """
+    from apps.talent.tracks import ICONS
+
+    items, number = [], 0
     for question in survey.questions.all():
         if not question.is_answerable:
-            rows.append((question, None))
+            items.append({"question": question, "view": "section"})
             continue
+        number += 1
         value = response.answers.get(str(question.pk))
-        rows.append((question, _label(question, value) if value not in (None, "", []) else ""))
-    return rows
+        item = {"question": question, "number": number}
+        if value in (None, "", []):
+            item["view"] = "empty"
+        elif question.kind == Kind.TRACK:
+            item |= {"view": "track", "text": _label(question, value), "icon": ICONS.get(value, "✨")}
+        elif question.kind == Kind.SCALE:
+            score = int(value)
+            item |= {"view": "scale", "score": score, "max": question.scale_max,
+                     "dots": [n <= score for n in range(1, question.scale_max + 1)]}  # fmt: skip
+        elif question.kind in Question.CHOICE_KINDS:
+            known = set(question.options)
+            values = value if isinstance(value, list) else [value]
+            item |= {"view": "chips", "chips": [{"text": str(v), "other": str(v) not in known} for v in values]}
+        else:
+            item |= {"view": "text", "text": str(value), "long": question.kind == Kind.LONG}
+        items.append(item)
+    return items
+
+
+def neighbours(responses, response) -> dict:
+    """Javoblar ro'yxatidagi o'rni: oldingi va keyingi javob, tartib raqami."""
+    ids = list(responses.values_list("pk", flat=True))
+    if response.pk not in ids:
+        return {"position": 0, "total": len(ids), "prev": None, "next": None}
+    index = ids.index(response.pk)
+    return {
+        "position": index + 1,
+        "total": len(ids),
+        "prev": ids[index - 1] if index > 0 else None,
+        "next": ids[index + 1] if index + 1 < len(ids) else None,
+    }
 
 
 def render_csv(survey, responses) -> str:

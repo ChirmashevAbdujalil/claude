@@ -19,6 +19,7 @@ from apps.arena.models import PointTransaction
 from apps.surveys import services
 from apps.surveys.models import Question, Response, Survey
 from apps.surveys.services import SurveyError
+from apps.talent.tracks import ICONS, Track
 
 from ..forms import SurveyForm, SurveyIdentityForm
 from ..qr import qr_svg
@@ -219,15 +220,31 @@ def survey_results(request, pk):
     return render(request, "web/surveys/results.html", context)
 
 
+def _track_badge(track):
+    return {"label": dict(Track.choices)[track], "icon": ICONS.get(track, "✨")} if track else None
+
+
 @management_required
 def survey_response(request, pk, rid):
     survey = get_object_or_404(Survey, pk=pk)
-    response = get_object_or_404(services.responses_for(request.user, survey), pk=rid)
+    visible = services.responses_for(request.user, survey)
+    response = get_object_or_404(visible, pk=rid)
+    items = services.answer_items(survey, response)
+    answerable = [i for i in items if i["view"] != "section"]
+    answered = sum(1 for i in answerable if i["view"] != "empty")
+    registry = response.user.talent_profile if response.user_id and services.in_registry([response]) else None
     context = {
         "survey": survey,
         "response": response,
-        "rows": services.answer_rows(survey, response),
-        "in_registry": bool(response.user_id and services.in_registry([response])),
+        "items": items,
+        "answered": answered,
+        "answerable": len(answerable),
+        "completeness": round(answered * 100 / len(answerable)) if answerable else 0,
+        "nav": services.neighbours(visible, response),
+        "registry": registry,
+        "track": _track_badge(services.track_of(survey, response)),
+        "initials": "".join(part[0] for part in response.display_name.split()[:2]).upper() or "?",
+        "hue": response.pk * 47 % 360,
         "can_edit": services.can_edit(request.user, survey),
     }
     return render(request, "web/surveys/response.html", context)
