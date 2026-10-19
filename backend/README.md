@@ -188,7 +188,8 @@ orqali javob beradi. Asosiy vazifasi: butun institut bo'yicha iqtidorli talabala
 | **Konstruktor**: savol qo'shish, tartiblash, nusxalash, majburiy belgisi, sozlamalar, e'lon qilish | `/sorovnomalar/<id>/tahrir/` | Muallif, rektorat va admin |
 | **Ommaviy to'ldirish sahifasi** (login shart emas, telefonga moslashgan) | `/s/<kalit>/` | Har qanday talaba |
 | **Natijalar**: grafiklar, fakultet va kurs kesimi, javoblar jadvali, filtrlar | `/sorovnomalar/<id>/natijalar/` | Rahbariyat (dekan boshqalar tuzgan so'rovnomada o'z fakultetini ko'radi) |
-| **Excel (CSV) eksport**, **QR plakat** (A4, chop etish uchun) | `.../eksport.csv`, `.../plakat/` | Rahbariyat |
+| **Excel (.xlsx)**: umumiy natija grafiklar bilan, barcha javoblar (filtr, qotirilgan sarlavha), kesimlar, klublar; CSV ham bor | `.../natijalar.xlsx`, `.../eksport.csv` | Rahbariyat |
+| **QR plakat** (A4, chop etish uchun) | `.../plakat/` | Rahbariyat |
 
 - **12 xil savol turi:** qisqa va batafsil javob, bitta va bir nechta variant, ro'yxatdan tanlash, baholash shkalasi
   (1–10), raqam, sana, elektron pochta, telefon, iqtidor yo'nalishi va bo'lim sarlavhasi. Variantlarda «Boshqa» bor.
@@ -196,6 +197,9 @@ orqali javob beradi. Asosiy vazifasi: butun institut bo'yicha iqtidorli talabala
   «Iqtidor yo'nalishi» savolidan olinadi (manba: «So'rovnoma»).
 - **Kim javob beradi:** havolasi bor har qanday talaba, ro'yxatdan o'tmasdan va profilsiz. Talaba ma'lumotlari
   (F.I.Sh., fakultet, kurs, guruh, telefon) formada so'raladi; platformaga kirgan talabada profildan to'ldiriladi.
+- **Guruh majburiy va bir xil formatda:** `K-21-05` (harf(lar), chiziqcha, ikki raqam, chiziqcha, ikki raqam).
+  Talaba yozayotganda avtomatik formatlanadi: «k2105», «К 21 05» → `K-21-05`. Natijalarda guruh bo'yicha filtr va
+  kesishma jadvalda «Guruh» kesimi bor.
 - **Takrorlanmaslik:** har kim bir marta javob beradi (akkaunt yoki brauzer bo'yicha); botlar uchun tuzoq maydon.
 - **Avtomatik akkaunt:** platformada akkaunti yo'q talaba so'rovnomani yuborishi bilan unga talaba akkaunti
   ochiladi: login ism-familiyadan (kirill ham lotinga o'giriladi), parol tasodifiy (masalan `kmr7-4tqx`). Shu talaba

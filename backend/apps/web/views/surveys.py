@@ -16,7 +16,7 @@ from django.views.decorators.http import require_POST
 
 from apps.accounts.models import Faculty
 from apps.arena.models import PointTransaction
-from apps.surveys import analytics, clubs, services
+from apps.surveys import analytics, clubs, exports, services
 from apps.surveys.models import Question, Response, Survey
 from apps.surveys.services import SurveyError
 from apps.talent.tracks import ICONS, Track
@@ -52,6 +52,8 @@ def _filtered(request, survey):
         responses = responses.filter(faculty_id=params["faculty"])
     if params.get("course", "").isdigit():
         responses = responses.filter(course=params["course"])
+    if params.get("group"):
+        responses = responses.filter(group__iexact=params["group"].strip())
     if params.get("q"):
         q = params["q"].strip()
         responses = responses.filter(
@@ -223,6 +225,11 @@ def survey_results(request, pk):
         "filter_qs": _filter_qs(request),
         "faculties": Faculty.objects.order_by("name"),
         "courses": range(1, 7),
+        "groups": services.responses_for(request.user, survey)
+        .exclude(group="")
+        .order_by("group")
+        .values_list("group", flat=True)
+        .distinct(),
         "can_edit": services.can_edit(request.user, survey),
         "share": _share(request, survey),
         "summary": summary,
@@ -317,6 +324,23 @@ def survey_response_delete(request, pk, rid):
     get_object_or_404(survey.responses, pk=rid).delete()
     messages.success(request, "Javob o'chirildi")
     return redirect(f"{reverse('web:survey-results', args=[survey.pk])}?tab=responses")
+
+
+XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
+@management_required
+def survey_export_xlsx(request, pk):
+    survey = get_object_or_404(Survey, pk=pk)
+    institution = request.institution.name if request.institution else "Talent Hub"
+    conditions = analytics.parse_conditions(survey, request.GET.getlist("answer"))
+    content = exports.results_workbook(
+        survey, _filtered(request, survey), institution=institution, conditions=conditions
+    )
+    response = HttpResponse(content, content_type=XLSX)
+    stamp = timezone.localtime().strftime("%Y%m%d-%H%M")
+    response["Content-Disposition"] = f'attachment; filename="sorovnoma-{survey.pk}-natijalar-{stamp}.xlsx"'
+    return response
 
 
 @management_required

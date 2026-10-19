@@ -439,7 +439,7 @@ class Command(BaseCommand):
                 survey,
                 answers=answers,
                 identity={"full_name": name, "faculty": faculties[index % len(faculties)], "course": 1 + index % 4,
-                          "group": f"{210 + index}-21", "phone": f"+998 90 12{index} 45 67"},
+                          "group": f"K-2{index % 4}-0{index + 1}", "phone": f"+998 90 12{index} 45 67"},
                 user=student,
                 browser_key=f"demo-{index}" if student is None else "",
             )  # fmt: skip

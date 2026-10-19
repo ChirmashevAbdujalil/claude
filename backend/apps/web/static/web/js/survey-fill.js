@@ -105,6 +105,45 @@
   form.addEventListener("input", onChange);
   form.addEventListener("change", onChange);
 
+  /* Guruh: K-21-05 ko'rinishida avtomatik formatlanadi */
+  var CYR = { "А": "A", "Б": "B", "В": "V", "Г": "G", "Ғ": "G", "Д": "D", "Е": "E", "Ж": "J", "З": "Z", "И": "I",
+    "Й": "Y", "К": "K", "Қ": "Q", "Л": "L", "М": "M", "Н": "N", "О": "O", "Ў": "O", "П": "P", "Р": "R", "С": "S",
+    "Т": "T", "У": "U", "Ф": "F", "Х": "X", "Ҳ": "H", "Ш": "SH", "Ч": "CH", "Э": "E", "Ю": "YU", "Я": "YA" };
+  var GROUP_RE = /^[A-Z]{1,5}-\d{2}-\d{2}$/;
+  function formatGroup(value) {
+    var upper = value.toUpperCase().split("").map(function (ch) { return CYR[ch] || ch; }).join("");
+    var letters = (upper.match(/[A-Z]/g) || []).join("").slice(0, 5);
+    var digits = (upper.match(/\d/g) || []).join("").slice(0, 4);
+    var out = letters;
+    if (digits.length) out += "-" + digits.slice(0, 2);
+    if (digits.length > 2) out += "-" + digits.slice(2);
+    return out;
+  }
+  function groupError(input, message) {
+    var field = input.closest(".field");
+    if (!field) return;
+    var box = field.querySelector(".error[data-js]");
+    if (message && !box) {
+      box = document.createElement("span");
+      box.className = "error";
+      box.setAttribute("data-js", "");
+      field.appendChild(box);
+    }
+    if (box) box.textContent = message || "";
+    field.classList.toggle("has-error", !!message);
+  }
+  form.querySelectorAll("[data-group-input]").forEach(function (input) {
+    input.addEventListener("input", function () {
+      var formatted = formatGroup(input.value);
+      if (formatted !== input.value) input.value = formatted;
+      if (GROUP_RE.test(input.value)) groupError(input, "");
+    });
+    input.addEventListener("blur", function () {
+      if (input.value && !GROUP_RE.test(input.value)) groupError(input, "Guruhni K-21-05 ko'rinishida yozing");
+    });
+    if (input.value) input.value = formatGroup(input.value);
+  });
+
   /* Batafsil javob maydoni matnga qarab o'sadi */
   form.querySelectorAll("[data-autogrow]").forEach(function (area) {
     function grow() { area.style.height = "auto"; area.style.height = Math.min(area.scrollHeight + 2, 480) + "px"; }
@@ -124,6 +163,12 @@
     form.querySelectorAll(".sv-identity [required]").forEach(function (el) {
       if (!el.value.trim()) {
         el.closest(".field").classList.add("has-error");
+        first = first || el.closest(".field");
+      }
+    });
+    form.querySelectorAll("[data-group-input]").forEach(function (el) {
+      if (el.value && !GROUP_RE.test(el.value)) {
+        groupError(el, "Guruhni K-21-05 ko'rinishida yozing");
         first = first || el.closest(".field");
       }
     });

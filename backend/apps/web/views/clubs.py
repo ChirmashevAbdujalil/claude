@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 
-from apps.surveys import clubs
+from apps.surveys import clubs, exports
 from apps.surveys import services as survey_services
 from apps.surveys.models import Club, Survey
 
@@ -140,8 +140,16 @@ def club_action(request, pk, cid, action):
 @management_required
 def club_export(request, pk, cid):
     club = _club(request, pk, cid)
-    response = HttpResponse(clubs.members_csv(club), content_type="text/csv; charset=utf-8")
-    response["Content-Disposition"] = f'attachment; filename="klub-{club.pk}-azolar.csv"'
+    if request.GET.get("format") == "csv":
+        response = HttpResponse(clubs.members_csv(club), content_type="text/csv; charset=utf-8")
+        response["Content-Disposition"] = f'attachment; filename="klub-{club.pk}-azolar.csv"'
+        return response
+    institution = request.institution.name if request.institution else "Talent Hub"
+    response = HttpResponse(
+        exports.club_workbook(club, institution=institution),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    response["Content-Disposition"] = f'attachment; filename="klub-{club.pk}-azolar.xlsx"'
     return response
 
 

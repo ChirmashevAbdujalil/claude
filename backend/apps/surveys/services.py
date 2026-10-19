@@ -33,11 +33,31 @@ MAX_OPTIONS = 50
 MAX_XP = 200
 OTHER = "__other__"
 PHONE_RE = re.compile(r"^\+?[\d\s()-]{7,20}$")
+# Guruh: 1–5 lotin harf, chiziqcha, ikki raqam, chiziqcha, ikki raqam. Masalan: K-21-05, IBKT-23-01
+GROUP_RE = re.compile(r"^[A-Z]{1,5}-\d{2}-\d{2}$")
+GROUP_EXAMPLE = "K-21-05"
 TEXT_LIMITS = {Kind.SHORT: 500, Kind.LONG: 5000, Kind.EMAIL: 200, Kind.PHONE: 30}
 
 
 class SurveyError(Exception):
     pass
+
+
+def normalize_group(value: str) -> str:
+    """Talaba qanday yozmasin («k2105», «К 21 05», «k-21/05»), K-21-05 ko'rinishiga keltiradi.
+
+    Keltirib bo'lmasa, katta harfli asl matnni qaytaradi (tekshiruv uni rad etadi).
+    """
+    from .accounts import latin
+
+    raw = (value or "").strip()
+    if not raw:
+        return ""
+    letters = latin("".join(ch for ch in raw if ch.isalpha())).upper()
+    digits = "".join(ch for ch in raw if ch.isdigit())
+    if letters and len(digits) == 4:
+        return f"{letters}-{digits[:2]}-{digits[2:]}"
+    return raw.upper()
 
 
 # ---------------------------------------------------------------- shablonlar

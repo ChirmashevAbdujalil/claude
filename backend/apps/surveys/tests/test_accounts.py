@@ -118,6 +118,7 @@ def test_thanks_page_tells_student_about_account(survey, faculty):
         "who-full_name": "Yusupova Madina",
         "who-faculty": faculty.pk,
         "who-course": "1",
+        "who-group": "K-23-01",
     }
     page = client.post(url, data, follow=True).content.decode()
     assert "akkaunt ochildi" in page

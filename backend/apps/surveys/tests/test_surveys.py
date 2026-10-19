@@ -66,7 +66,7 @@ def post_data(survey, faculty, **extra):
         "who-full_name": "Aziza Karimova",
         "who-faculty": faculty.pk,
         "who-course": "2",
-        "who-group": "210-21",
+        "who-group": "k2105",
         "who-phone": "+998 90 123 45 67",
     }
     data.update(extra)
@@ -218,7 +218,7 @@ def test_anonymous_student_fills_public_survey_once(web, survey, faculty):
     response = client.post(url, post_data(survey, faculty))
     assert response.status_code == 302 and response.url == reverse("web:survey-thanks", args=[survey.token])
     saved = Response.objects.get(survey=survey)
-    assert saved.full_name == "Aziza Karimova" and saved.faculty == faculty
+    assert saved.full_name == "Aziza Karimova" and saved.faculty == faculty and saved.group == "K-21-05"
     assert saved.user.issued_account.initial_password  # akkaunt avtomatik ochildi
     assert saved.course == 2 and saved.answers[str(q(survey, Kind.TRACK).pk)] == Track.IT
     assert "qabul qilindi" in client.get(response.url).content.decode()

@@ -510,7 +510,21 @@ class SurveyIdentityForm(forms.Form):
     course = forms.TypedChoiceField(
         label="Kurs", coerce=int, choices=[("", "Tanlang")] + [(n, f"{n}-kurs") for n in range(1, 7)]
     )
-    group = forms.CharField(label="Guruh", max_length=40, required=False)
+    group = forms.CharField(
+        label="Guruh",
+        max_length=20,
+        help_text=f"Masalan: {survey_services.GROUP_EXAMPLE}. Harf(lar), chiziqcha, ikki raqam, chiziqcha, ikki raqam",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": survey_services.GROUP_EXAMPLE,
+                "autocapitalize": "characters",
+                "autocomplete": "off",
+                "spellcheck": "false",
+                "data-group-input": "",
+                "pattern": "[A-Za-z]{1,5}-[0-9]{2}-[0-9]{2}",
+            }
+        ),
+    )
     phone = forms.CharField(
         label="Telefon raqam",
         max_length=30,
@@ -523,6 +537,15 @@ class SurveyIdentityForm(forms.Form):
         self.fields["faculty"].queryset = Faculty.objects.order_by("name")
         if not self.fields["faculty"].queryset.exists():
             del self.fields["faculty"]
+
+    def clean_group(self):
+        group = survey_services.normalize_group(self.cleaned_data["group"])
+        if not survey_services.GROUP_RE.match(group):
+            raise forms.ValidationError(
+                f"Guruhni {survey_services.GROUP_EXAMPLE} ko'rinishida yozing: harf(lar), chiziqcha, "
+                "ikki raqam, chiziqcha, ikki raqam"
+            )
+        return group
 
     def clean_phone(self):
         phone = self.cleaned_data["phone"].strip()

@@ -116,7 +116,7 @@ def completeness(survey, responses) -> dict:
 def dimensions(survey) -> list[tuple[str, str]]:
     dims = []
     if survey.collect_identity:
-        dims += [("faculty", "Fakultet"), ("course", "Kurs")]
+        dims += [("faculty", "Fakultet"), ("course", "Kurs"), ("group", "Guruh")]
     dims += [(f"q{q.pk}", q.title) for q in choice_questions(survey)]
     return dims
 
@@ -128,6 +128,8 @@ def _row_keys(responses, dim, survey):
             pk: [(name or "—", name or "Ko'rsatilmagan")]
             for pk, name in responses.values_list("pk", "faculty__short_name")
         }
+    if dim == "group":
+        return {pk: [(g or "—", g or "Ko'rsatilmagan")] for pk, g in responses.values_list("pk", "group")}
     if dim == "course":
         return {
             pk: [(c or 0, f"{c}-kurs" if c else "Ko'rsatilmagan")] for pk, c in responses.values_list("pk", "course")

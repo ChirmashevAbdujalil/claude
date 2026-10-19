@@ -1,5 +1,6 @@
 import csv
 import io
+import zipfile
 
 import pytest
 from django.test import Client
@@ -196,8 +197,11 @@ def test_club_pages_and_actions(rector, survey, filled, make_user, student):
     assert Notification.objects.filter(title="🖥 Uchrashuv").count() == 4
     action("register")
     assert TalentProfile.objects.filter(source=TalentProfile.Source.SURVEY).count() == 4
-    export = web(rector).get(reverse("web:club-export", args=[survey.pk, club.pk])).content.decode("utf-8-sig")
-    assert "Aliyev Ali" in export and "Sardor" in export
+    export = web(rector).get(reverse("web:club-export", args=[survey.pk, club.pk]))
+    sheet = zipfile.ZipFile(io.BytesIO(export.content)).read("xl/worksheets/sheet1.xml").decode()
+    assert "Aliyev Ali" in sheet and "Sardor" in sheet
+    csv_export = web(rector).get(reverse("web:club-export", args=[survey.pk, club.pk]), {"format": "csv"})
+    assert "Aliyev Ali" in csv_export.content.decode("utf-8-sig")
 
     member_user = filled[0].user
     assert "Har payshanba" in web(member_user).get(reverse("web:club-page", args=[club.pk])).content.decode()

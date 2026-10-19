@@ -12,7 +12,8 @@
   </div>
   <div class="row-sm wrap">
     {% if can_edit %}<a href="{% url 'web:survey-builder' survey.pk %}" class="btn btn-ghost btn-sm">{% icon "edit" "icon-sm" %} Tahrirlash</a>{% endif %}
-    <a href="{% url 'web:survey-export' survey.pk %}?{{ filter_qs }}" class="btn btn-soft btn-sm">{% icon "download" "icon-sm" %} Excel (CSV)</a>
+    <a href="{% url 'web:survey-export-xlsx' survey.pk %}?{{ filter_qs }}" class="btn btn-primary btn-sm" title="Umumiy natija, barcha javoblar, kesimlar va klublar alohida varaqlarda">{% icon "download" "icon-sm" %} Excel (.xlsx)</a>
+    <a href="{% url 'web:survey-export' survey.pk %}?{{ filter_qs }}" class="btn btn-ghost btn-sm" title="Oddiy jadval: boshqa dasturlarga import qilish uchun">CSV</a>
     {% if can_edit %}
     <form method="post" action="{% url 'web:survey-status' survey.pk %}" class="row-sm">{% csrf_token %}
       {% if survey.status == "open" %}<button class="btn btn-ghost btn-sm" name="action" value="close">Javoblarni to'xtatish</button>
@@ -55,6 +56,12 @@
       <option value="">Barcha kurslar</option>
       {% for c in courses %}<option value="{{ c }}" {% if filters.course == c|stringformat:"d" %}selected{% endif %}>{{ c }}-kurs</option>{% endfor %}
     </select>
+    {% if groups %}
+    <select name="group" class="input" aria-label="Guruh">
+      <option value="">Barcha guruhlar</option>
+      {% for g in groups %}<option value="{{ g }}" {% if filters.group == g %}selected{% endif %}>{{ g }}</option>{% endfor %}
+    </select>
+    {% endif %}
     <label class="check small"><input type="checkbox" name="linked" value="1" {% if filters.linked == "1" %}checked{% endif %}> Faqat platformadagilar</label>
     <div class="row-sm"><button class="btn btn-primary btn-sm">Filtrlash</button>{% if filter_qs %}<a href="?tab={{ tab }}" class="btn btn-ghost btn-sm">Tozalash</a>{% endif %}</div>
   </form>
