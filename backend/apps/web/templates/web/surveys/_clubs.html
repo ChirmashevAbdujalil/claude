@@ -1,0 +1,71 @@
+{% load web_tags %}
+{% if club_rows %}
+<section class="stack-sm">
+  <div class="row-between wrap">
+    <h2 class="survey-h2">Tuzilgan klublar · {{ club_rows|length }} ta</h2>
+    <span class="tiny muted">Klubni bosing: a'zolar, sardor, mentor va Telegram guruh</span>
+  </div>
+  <div class="club-grid">
+    {% for row in club_rows %}
+    <a href="{% url 'web:club-detail' survey.pk row.club.pk %}" class="card card-link club-card">
+      <div class="club-card-top">
+        <span class="club-emoji">{{ row.club.emoji }}</span>
+        <div class="grow" style="min-width:0"><h3>{{ row.club.name }}</h3><span class="tiny muted">{{ row.club.question.title|default:"Savol o'chirilgan"|truncatechars:48 }}</span></div>
+        <div class="club-count"><b>{{ row.count }}</b><span>a'zo</span></div>
+      </div>
+      {% if row.faculties %}<div class="club-chips">{% for name, n in row.faculties %}<span class="chip">{{ name }} · {{ n }}</span>{% endfor %}</div>{% endif %}
+      <div class="club-people">
+        <span>👑 {% if row.club.leader %}{{ row.club.leader }}{% else %}<span class="muted">sardor tanlanmagan</span>{% endif %}</span>
+        <span>🧑‍🏫 {% if row.club.mentor %}{{ row.club.mentor }}{% else %}<span class="muted">mentor yo'q</span>{% endif %}</span>
+      </div>
+      <span class="club-open">Boshqarish →</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="card card-lg stack club-builder">
+  <div class="an-head"><span class="an-head-icon">🧩</span><div>
+    <h2 class="survey-h2">{% if club_rows %}Yana klub tuzish{% else %}Javoblardan klublar tuzish{% endif %}</h2>
+    <p class="tiny muted">Savolni tanlang: bir xil javob bergan talabalar shu javob nomi bilan bitta klubga yig'iladi. Bir nechta variant tanlangan savolda talaba bir nechta klubga kiradi.</p>
+  </div></div>
+
+  {% if club_questions %}
+  <form method="get" class="club-question-pick">
+    <input type="hidden" name="tab" value="clubs">
+    <select name="cq" class="input" onchange="this.form.submit()" aria-label="Klublar qaysi savol bo'yicha tuziladi">
+      {% for q in club_questions %}<option value="{{ q.pk }}" {% if q.pk == club_question.pk %}selected{% endif %}>{{ q.title|truncatechars:80 }} · {{ q.get_kind_display }}</option>{% endfor %}
+    </select>
+    <noscript><button class="btn btn-ghost btn-sm">Tanlash</button></noscript>
+  </form>
+
+  {% if can_edit %}
+  <form method="post" action="{% url 'web:survey-clubs-create' survey.pk %}" class="stack">{% csrf_token %}
+    <input type="hidden" name="question" value="{{ club_question.pk }}">
+    <div class="club-options">
+      {% for item in club_preview %}
+      <label class="club-option {% if item.exists %}is-exists{% elif item.count < club_min %}is-small{% endif %}">
+        <input type="checkbox" name="option" value="{{ item.value }}" {% if item.exists or item.count >= club_min %}checked{% endif %} {% if not item.count and not item.exists %}disabled{% endif %}>
+        <span class="club-emoji sm">{{ item.emoji }}</span>
+        <span class="grow"><b>{{ item.label }}</b><span class="tiny muted">{% if item.exists %}klub bor · yangi a'zolar qo'shiladi{% elif item.count >= club_min %}yangi klub{% elif item.count %}kam a'zo{% else %}hech kim tanlamagan{% endif %}</span></span>
+        <span class="club-option-count">{{ item.count }}</span>
+      </label>
+      {% endfor %}
+    </div>
+    <div class="row-between wrap">
+      <span class="small muted">Kamida {{ club_min }} talaba tanlagan variantlar avtomatik belgilangan. Kerakli variantlarni o'zingiz belgilang.</span>
+      <button class="btn btn-gradient">{% icon "users" "icon-sm" %} Belgilanganlardan klub tuzish</button>
+    </div>
+    <p class="tiny muted">Platformada akkaunti bor a'zolarga «Siz klubga qo'shildingiz» bildirishnomasi boradi. Sardor avtomatik taklif qilinadi: ko'proq savolga javob bergan va o'zini yuqori baholagan talaba. Uni keyin o'zgartirasiz.</p>
+  </form>
+  {% else %}
+  <div class="club-options">
+    {% for item in club_preview %}<div class="club-option"><span class="club-emoji sm">{{ item.emoji }}</span><span class="grow"><b>{{ item.label }}</b></span><span class="club-option-count">{{ item.count }}</span></div>{% endfor %}
+  </div>
+  <p class="tiny muted">Klublarni so'rovnoma muallifi yoki rektorat tuzadi.</p>
+  {% endif %}
+  {% else %}
+  <p class="small muted">Klub tuzish uchun so'rovnomada «Bitta variant», «Bir nechta variant», «Ro'yxatdan tanlash» yoki «Iqtidor yo'nalishi» savoli bo'lishi kerak.</p>
+  {% endif %}
+</section>

@@ -59,8 +59,18 @@
     <div class="row-sm"><button class="btn btn-primary btn-sm">Filtrlash</button>{% if filter_qs %}<a href="?tab={{ tab }}" class="btn btn-ghost btn-sm">Tozalash</a>{% endif %}</div>
   </form>
 
+  {% if conditions %}
+  <div class="an-conditions">
+    <span class="tiny bold muted">Faqat shu javobni berganlar:</span>
+    {% for c in conditions %}<a href="?tab={{ tab }}&{{ c.remove }}" class="an-condition" title="Filtrni olib tashlash"><span class="muted">{{ c.question.title|truncatechars:40 }}:</span> <b>{{ c.label }}</b> <span aria-hidden="true">×</span></a>{% endfor %}
+    <span class="tiny muted">{{ summary.total }} ta talaba · grafiklar, javoblar va Excel shu bo'yicha</span>
+  </div>
+  {% endif %}
+
   <nav class="tabs" aria-label="Natijalar ko'rinishi">
-    <a href="?tab=summary&{{ filter_qs }}" class="tab {% if tab != 'responses' %}active{% endif %}">📊 Umumiy natija</a>
+    <a href="?tab=summary&{{ filter_qs }}" class="tab {% if tab != 'responses' and tab != 'analysis' and tab != 'clubs' %}active{% endif %}">📊 Umumiy natija</a>
+    <a href="?tab=analysis&{{ filter_qs }}" class="tab {% if tab == 'analysis' %}active{% endif %}">🔎 Tahlil</a>
+    <a href="?tab=clubs&{{ filter_qs }}" class="tab {% if tab == 'clubs' %}active{% endif %}">👥 Klublar{% if clubs_count %} ({{ clubs_count }}){% endif %}</a>
     <a href="?tab=responses&{{ filter_qs }}" class="tab {% if tab == 'responses' %}active{% endif %}">👤 Javoblar ({{ summary.total }})</a>
   </nav>
 
@@ -97,6 +107,10 @@
     {% include "web/partials/empty.html" with emoji="📭" title="Javob hali yo'q" text="Havolani yoki QR kodni tarqating: javoblar shu yerda real vaqtda paydo bo'ladi." %}
     {% endif %}
   </section>
+  {% elif tab == "analysis" %}
+  {% include "web/surveys/_analysis.html" %}
+  {% elif tab == "clubs" %}
+  {% include "web/surveys/_clubs.html" %}
   {% else %}
   {% if summary.total %}
   {% if summary.faculties or summary.courses %}
@@ -137,9 +151,16 @@
     {% if b.bars %}
     <div class="hbars hbars-wide survey-bars">
       {% for bar in b.bars %}
-      <div class="hbar" title="{{ bar.label }}: {{ bar.count }} ({{ bar.pct }}%)"><span class="hbar-label">{{ bar.label }}</span><span class="hbar-track"><span class="hbar-fill" style="width:{{ bar.width }}%"></span></span><span class="hbar-value">{{ bar.count }} · {{ bar.pct }}%</span></div>
+      {% with raw=b.question.pk|stringformat:"d"|add:":"|add:bar.value %}
+      {% if bar.count and raw not in active_answers %}
+      <a href="?tab=summary&{{ filter_qs }}&answer={{ raw|urlencode }}" class="hbar an-bar-link" title="Faqat «{{ bar.label }}» deb javob berganlarni ko'rish ({{ bar.count }} ta)"><span class="hbar-label">{{ bar.label }}</span><span class="hbar-track"><span class="hbar-fill" style="width:{{ bar.width }}%"></span></span><span class="hbar-value">{{ bar.count }} · {{ bar.pct }}%</span></a>
+      {% else %}
+      <div class="hbar {% if raw in active_answers %}is-active{% endif %}" title="{{ bar.label }}: {{ bar.count }} ({{ bar.pct }}%)"><span class="hbar-label">{{ bar.label }}</span><span class="hbar-track"><span class="hbar-fill" style="width:{{ bar.width }}%"></span></span><span class="hbar-value">{{ bar.count }} · {{ bar.pct }}%</span></div>
+      {% endif %}
+      {% endwith %}
       {% endfor %}
     </div>
+    <p class="tiny muted an-hint">💡 Variantni bosing: sahifa faqat shu javobni berganlar bo'yicha qayta hisoblanadi.</p>
     {% if b.others %}
     <details class="small"><summary class="muted">«Boshqa» javoblari ({{ b.others|length }})</summary>
       <ul class="survey-texts">{% for t in b.others %}<li>{{ t }}</li>{% endfor %}</ul></details>

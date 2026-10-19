@@ -1,0 +1,86 @@
+{% if summary.total %}
+<section class="card card-lg an-insights">
+  <div class="an-head"><span class="an-head-icon">💡</span><div><h2 class="survey-h2">Asosiy xulosalar</h2><p class="tiny muted">Javoblar asosida avtomatik hisoblangan{% if conditions %} · tanlangan filtr bo'yicha{% endif %}</p></div></div>
+  <ul class="an-insight-list">
+    {% for i in insights %}<li><span class="an-insight-icon">{{ i.icon }}</span><span>{{ i.text }}</span></li>{% endfor %}
+  </ul>
+</section>
+
+<section class="an-grid">
+  <div class="card stack-sm">
+    <div class="row-between wrap" style="align-items:flex-start">
+      <div><h3>Javoblar dinamikasi</h3><p class="tiny muted">Oxirgi 21 kun</p></div>
+      <div class="an-week"><b>{{ timeline.week }}</b><span>shu hafta</span>
+        {% if timeline.trend is not None %}<em class="{% if timeline.trend >= 0 %}is-up{% else %}is-down{% endif %}">{% if timeline.trend >= 0 %}▲{% else %}▼{% endif %} {{ timeline.trend }}%</em>{% endif %}</div>
+    </div>
+    <div class="an-columns" role="img" aria-label="Kunlar bo'yicha javoblar soni">
+      {% for d in timeline.days %}
+      <div class="an-col {% if d.today %}is-today{% endif %}" title="{{ d.date|date:'d.m' }}: {{ d.count }} ta">
+        <span class="an-col-bar" style="height: {{ d.height }}%">{% if d.count %}<i>{{ d.count }}</i>{% endif %}</span>
+        <span class="an-col-label">{% if forloop.first or forloop.last or forloop.counter|divisibleby:7 %}{{ d.date|date:"d.m" }}{% endif %}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card stack-sm">
+    <h3>Javoblar to'liqligi</h3>
+    <div class="an-complete">
+      <div class="an-ring" style="--p: {{ complete.average }}"><b>{{ complete.average }}%</b><span>o'rtacha</span></div>
+      <div class="hbars an-buckets">
+        {% for bucket in complete.buckets %}
+        <div class="hbar"><span class="hbar-label">{{ bucket.label }}</span><span class="hbar-track"><span class="hbar-fill" style="width: {{ bucket.pct }}%"></span></span><span class="hbar-value">{{ bucket.count }}</span></div>
+        {% endfor %}
+      </div>
+    </div>
+    <p class="tiny muted">Ixtiyoriy savollarga ham javob bergan talabalar odatda faolroq bo'ladi: klub sardorini tanlashda shuni hisobga oling.</p>
+  </div>
+</section>
+
+{% if crosstab %}
+<section class="card card-lg stack">
+  <div class="an-head"><span class="an-head-icon">🧮</span><div><h2 class="survey-h2">Kesishma jadval</h2><p class="tiny muted">Ikki ko'rsatkichni solishtiring: masalan, qaysi fakultetda qaysi yo'nalish kuchli</p></div></div>
+  <form method="get" class="an-xy">
+    <input type="hidden" name="tab" value="analysis">
+    {% for key, value in filters.lists %}{% if key != "x" and key != "y" and key != "tab" and key != "page" %}{% for v in value %}<input type="hidden" name="{{ key }}" value="{{ v }}">{% endfor %}{% endif %}{% endfor %}
+    <label class="field"><span class="tiny bold muted">Ustunlar (savol)</span>
+      <select name="x" class="input" onchange="this.form.submit()">
+        {% for q in x_questions %}<option value="{{ q.pk }}" {% if q.pk == x.pk %}selected{% endif %}>{{ q.title|truncatechars:60 }}</option>{% endfor %}
+      </select></label>
+    <span class="an-xy-times" aria-hidden="true">×</span>
+    <label class="field"><span class="tiny bold muted">Qatorlar (kesim)</span>
+      <select name="y" class="input" onchange="this.form.submit()">
+        {% for key, label in dims %}<option value="{{ key }}" {% if key == y %}selected{% endif %}>{{ label|truncatechars:60 }}</option>{% endfor %}
+      </select></label>
+    <noscript><button class="btn btn-primary btn-sm">Ko'rsatish</button></noscript>
+  </form>
+  {% if crosstab.rows %}
+  <div class="table-wrap">
+    <table class="an-table">
+      <thead><tr><th></th>{% for c in crosstab.columns %}<th>{{ c }}</th>{% endfor %}</tr></thead>
+      <tbody>
+        {% for row in crosstab.rows %}
+        <tr>
+          <th scope="row"><span>{{ row.label }}</span><small>{{ row.total }} talaba</small></th>
+          {% for cell in row.cells %}
+          <td style="--heat: {{ cell.heat }}" class="{% if forloop.counter0 == row.best and cell.count %}is-best{% endif %}{% if not cell.count %} is-zero{% endif %}">
+            {% if cell.count %}<b>{{ cell.count }}</b><small>{{ cell.pct }}%</small>{% else %}<span>—</span>{% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot><tr><th>Jami</th>{% for t in crosstab.totals %}<td><b>{{ t }}</b></td>{% endfor %}</tr></tfoot>
+    </table>
+  </div>
+  <p class="tiny muted">Foiz: shu qatordagi talabalarning necha foizi bu variantni tanlagani. ★ — qatordagi eng kuchli variant. Rang qanchalik to'q bo'lsa, shuncha ko'p talaba.</p>
+  {% else %}
+  <p class="small muted">Bu savolga hali javob yo'q.</p>
+  {% endif %}
+</section>
+{% endif %}
+{% else %}
+<section class="card card-lg">
+  {% include "web/partials/empty.html" with emoji="🔎" title="Tahlil uchun javob yo'q" text="Javoblar kelishi bilan xulosalar, dinamika va kesishma jadval shu yerda paydo bo'ladi." %}
+</section>
+{% endif %}

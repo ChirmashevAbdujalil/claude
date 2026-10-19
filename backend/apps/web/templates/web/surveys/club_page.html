@@ -1,0 +1,56 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}{{ club.name }}{% endblock %}
+
+{% block content %}
+<a href="{% url 'web:surveys' %}" class="back-link">{% icon "arrow-left" "icon-sm" %} So'rovnomalar va klublar</a>
+
+<section class="club-hero">
+  <div class="club-hero-deco" aria-hidden="true"><i></i><i></i></div>
+  <span class="club-hero-emoji">{{ club.emoji }}</span>
+  <div class="club-hero-text">
+    <span class="club-hero-tag">{{ institution_short }} klubi</span>
+    <h1>{{ club.name }}</h1>
+    <p>{{ club.description|default:"Bir xil qiziqishdagi talabalar jamoasi: birga o'rganing, loyiha qiling va tanlovlarda qatnashing."|linebreaksbr }}</p>
+    <div class="club-hero-stats"><span><b>{{ stats.count }}</b> a'zo</span>{% for name, n in stats.faculties %}<span>{{ name }} · {{ n }}</span>{% endfor %}</div>
+  </div>
+</section>
+
+<div class="layout-main-aside">
+  <section class="card card-lg stack">
+    <h2 class="survey-h2">A'zolar</h2>
+    <div class="club-members">
+      {% for m in members %}
+      {% with r=m.response %}
+      <div class="club-member">
+        <span class="club-avatar" style="--hue: {% widthratio r.pk 1 47 %}">{{ r.display_name|slice:":1" }}</span>
+        <div class="grow" style="min-width:0">
+          <div class="bold">{{ r.display_name }}{% if r.user_id and r.user_id == club.leader_id %} <span class="chip chip-accent">👑 Sardor</span>{% endif %}{% if r.user_id == user.pk %} <span class="chip chip-primary">Siz</span>{% endif %}</div>
+          <div class="tiny muted">{{ r.faculty.short_name|default:"—" }}{% if r.course %} · {{ r.course }}-kurs{% endif %}</div>
+        </div>
+        {% if r.user.portfolio_slug and r.user.is_public %}<a href="{% url 'web:portfolio' r.user.portfolio_slug %}" class="btn btn-ghost btn-sm">Portfolio</a>{% endif %}
+      </div>
+      {% endwith %}
+      {% endfor %}
+    </div>
+  </section>
+
+  <aside class="stack">
+    {% if club.telegram_url %}
+    <a href="{{ club.telegram_url }}" target="_blank" rel="noopener" class="card club-telegram"><span class="club-role-icon">💬</span><div><b>Klub Telegram guruhi</b><div class="tiny">Qo'shilish uchun bosing ↗</div></div></a>
+    {% endif %}
+    <div class="card stack-sm">
+      <div class="club-role"><span class="club-role-icon">👑</span><div><div class="tiny muted bold">Sardor</div><b>{{ club.leader|default:"Hali tanlanmagan" }}</b></div></div>
+      <div class="club-role"><span class="club-role-icon">🧑‍🏫</span><div><div class="tiny muted bold">Mentor</div><b>{{ club.mentor|default:"Tez orada biriktiriladi" }}</b></div></div>
+    </div>
+    <div class="card stack-sm">
+      <h3>Klubda nima qilamiz?</h3>
+      <ul class="small club-todo">
+        <li>Birgalikda <a href="{% url 'web:projects' %}">loyiha</a> boshlang yoki mavjudiga qo'shiling</li>
+        <li><a href="{% url 'web:opportunities' %}">Imkoniyatlar</a>dan mos tanlov va grantlarni toping</li>
+        <li><a href="{% url 'web:challenges' %}">Challenge</a>larni birga yeching va XP to'plang</li>
+      </ul>
+    </div>
+  </aside>
+</div>
+{% endblock %}

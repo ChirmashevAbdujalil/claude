@@ -487,9 +487,9 @@ def summary(survey, responses) -> dict:
                     else:
                         counts[OTHER] += 1
                         others.append(item)
-            bars = [{"label": text, "count": counts[v]} for v, text in question.choices]
+            bars = [{"label": text, "count": counts[v], "value": v} for v, text in question.choices]
             if counts[OTHER]:
-                bars.append({"label": "Boshqa", "count": counts[OTHER]})
+                bars.append({"label": "Boshqa", "count": counts[OTHER], "value": OTHER})
             top = max([b["count"] for b in bars] + [1])
             for bar in bars:
                 bar["pct"] = round(bar["count"] * 100 / len(values)) if values else 0

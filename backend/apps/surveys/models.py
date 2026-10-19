@@ -224,3 +224,66 @@ class IssuedAccount(models.Model):
     def is_waiting(self) -> bool:
         """Talaba hali kirmagan: boshlang'ich parol berilishi kerak."""
         return bool(self.initial_password)
+
+
+class Club(models.Model):
+    """So'rovnomada bir xil javob bergan (masalan, bir yo'nalish yoki ko'nikmani tanlagan) talabalar klubi."""
+
+    tenant_path = "survey__institution"
+
+    survey = models.ForeignKey(Survey, on_delete=models.CASCADE, related_name="clubs", verbose_name="so'rovnoma")
+    question = models.ForeignKey(
+        Question, null=True, blank=True, on_delete=models.SET_NULL, related_name="clubs", verbose_name="savol"
+    )
+    option = models.CharField("javob varianti", max_length=300)
+    name = models.CharField("nomi", max_length=120)
+    emoji = models.CharField("belgi", max_length=8, default="🧩")
+    description = models.TextField("tavsif", blank=True)
+    leader = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+",
+        verbose_name="sardor",
+    )  # fmt: skip
+    mentor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+",
+        verbose_name="mentor",
+    )  # fmt: skip
+    telegram_url = models.URLField("Telegram guruh havolasi", blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    objects = TenantManager()
+
+    class Meta:
+        verbose_name = "klub"
+        verbose_name_plural = "klublar"
+        ordering = ["name"]
+        constraints = [
+            models.UniqueConstraint(fields=["survey", "question", "option"], name="club_unique_option_per_question")
+        ]
+
+    def __str__(self):
+        return self.name
+
+
+class ClubMember(models.Model):
+    tenant_path = "club__survey__institution"
+
+    club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="members", verbose_name="klub")
+    response = models.ForeignKey(
+        Response, on_delete=models.CASCADE, related_name="club_memberships", verbose_name="javob"
+    )
+    joined_at = models.DateTimeField(default=timezone.now)
+
+    objects = TenantManager()
+
+    class Meta:
+        verbose_name = "klub a'zosi"
+        verbose_name_plural = "klub a'zolari"
+        ordering = ["response__full_name"]
+        constraints = [models.UniqueConstraint(fields=["club", "response"], name="club_member_unique")]
+
+    def __str__(self):
+        return f"{self.club}: {self.response.display_name}"

@@ -205,6 +205,14 @@ orqali javob beradi. Asosiy vazifasi: butun institut bo'yicha iqtidorli talabala
   o'z fakultetini ko'radi, har bir yuklab olish harakatlar jurnaliga yoziladi.
 - **Xavfsizlik:** boshlang'ich parol faqat talaba birinchi marta kirguncha saqlanadi; birinchi kirishda talaba
   o'z parolini o'rnatadi va boshlang'ich parol ro'yxatdan o'chadi.
+- **Chuqur tahlil** (natijalar → «🔎 Tahlil»): avtomatik xulosalar, 21 kunlik javoblar dinamikasi, javoblar
+  to'liqligi va kesishma jadval (istalgan savol × fakultet, kurs yoki boshqa savol; issiqlik rangi va ★ eng kuchli
+  variant). Grafikdagi istalgan variantni bossangiz, butun sahifa, javoblar ro'yxati va Excel faqat shu javobni
+  berganlar bo'yicha qayta hisoblanadi; bir nechta shartni birlashtirish mumkin.
+- **Klublar** (natijalar → «👥 Klublar»): tanlangan savol (masalan, iqtidor yo'nalishi yoki ko'nikma) bo'yicha bir xil
+  javob bergan talabalar shu javob nomi bilan klubga yig'iladi. Sardor avtomatik taklif qilinadi, mentor va Telegram
+  guruh biriktiriladi, a'zolarga xabar yuboriladi, ro'yxat Excel'da yuklanadi, hammasi bir bosishda iqtidorlar
+  reyestriga qo'shiladi. A'zolar o'z klub sahifasini (`/klub/<id>/`) va «Mening klublarim»ni ko'radi.
 - **Rag'bat:** platformaga kirib javob bergan talabaga XP (bir marta). E'lon qilishda barcha talabalarga
   bildirishnoma yuborish mumkin.
 

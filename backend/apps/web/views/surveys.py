@@ -16,7 +16,7 @@ from django.views.decorators.http import require_POST
 
 from apps.accounts.models import Faculty
 from apps.arena.models import PointTransaction
-from apps.surveys import services
+from apps.surveys import analytics, clubs, services
 from apps.surveys.models import Question, Response, Survey
 from apps.surveys.services import SurveyError
 from apps.talent.tracks import ICONS, Track
@@ -59,12 +59,20 @@ def _filtered(request, survey):
         )
     if params.get("linked") == "1":
         responses = responses.filter(user__isnull=False)
-    return responses
+    return analytics.apply_conditions(responses, analytics.parse_conditions(survey, params.getlist("answer")))
+
+
+def _without(request, key, value):
+    """Joriy so'rovdan bitta filtr qiymatini olib tashlagan query string."""
+    query = request.GET.copy()
+    query.setlist(key, [v for v in query.getlist(key) if v != value])
+    query.pop("page", None)
+    return query.urlencode()
 
 
 def _filter_qs(request):
     query = request.GET.copy()
-    for key in ("tab", "page"):
+    for key in ("tab", "page", "cq", "x", "y"):
         query.pop(key, None)
     return query.urlencode()
 
@@ -79,6 +87,7 @@ def survey_list(request):
     context = {
         "open_surveys": services.open_for(user).order_by("closes_at", "-published_at"),
         "answered": answered[:10],
+        "my_clubs": clubs.clubs_of(user),
     }
     if user.is_management:
         surveys = services.management_list()
@@ -203,6 +212,10 @@ def survey_results(request, pk):
     survey = get_object_or_404(Survey.objects.select_related("created_by"), pk=pk)
     responses = _filtered(request, survey)
     tab = request.GET.get("tab", "summary")
+    conditions = analytics.parse_conditions(survey, request.GET.getlist("answer"))
+    for condition in conditions:
+        condition["remove"] = _without(request, "answer", condition["raw"])
+    summary = services.summary(survey, responses)
     context = {
         "survey": survey,
         "tab": tab,
@@ -212,9 +225,16 @@ def survey_results(request, pk):
         "courses": range(1, 7),
         "can_edit": services.can_edit(request.user, survey),
         "share": _share(request, survey),
-        "summary": services.summary(survey, responses),
+        "summary": summary,
         "has_track": survey.questions.filter(kind=Question.Kind.TRACK).exists(),
+        "conditions": conditions,
+        "active_answers": {c["raw"] for c in conditions},
+        "clubs_count": survey.clubs.count(),
     }
+    if tab == "analysis":
+        context |= _analysis(request, survey, responses, summary)
+    elif tab == "clubs":
+        context |= _clubs_tab(request, survey)
     if tab == "responses":
         page = paginate(request, responses, per_page=30)
         registered = services.in_registry(page.object_list)
@@ -222,6 +242,42 @@ def survey_results(request, pk):
             response.in_registry = response.user_id in registered
         context["page"] = page
     return render(request, "web/surveys/results.html", context)
+
+
+def _analysis(request, survey, responses, summary):
+    questions = analytics.choice_questions(survey)
+    by_id = {str(q.pk): q for q in questions}
+    default_x = next((q for q in questions if q.kind == Question.Kind.TRACK), questions[0] if questions else None)
+    x = by_id.get(request.GET.get("x", ""), default_x)
+    dims = [(key, label) for key, label in analytics.dimensions(survey) if x is None or key != f"q{x.pk}"]
+    y = request.GET.get("y") or (dims[0][0] if dims else "")
+    timeline = analytics.timeline(responses)
+    complete = analytics.completeness(survey, responses)
+    return {
+        "timeline": timeline,
+        "complete": complete,
+        "insights": analytics.insights(survey, responses, summary, timeline, complete),
+        "x_questions": questions,
+        "x": x,
+        "dims": dims,
+        "y": y,
+        "crosstab": analytics.crosstab(survey, responses, x, y) if dims else None,
+    }
+
+
+def _clubs_tab(request, survey):
+    questions = clubs.club_questions(survey)
+    chosen = next((q for q in questions if str(q.pk) == request.GET.get("cq", "")), None)
+    chosen = chosen or next(
+        (q for q in questions if q.kind == Question.Kind.TRACK), questions[0] if questions else None
+    )
+    return {
+        "club_rows": clubs.overview(survey),
+        "club_questions": questions,
+        "club_question": chosen,
+        "club_preview": clubs.preview(survey, chosen, survey.responses.all()) if chosen else [],
+        "club_min": clubs.MIN_MEMBERS,
+    }
 
 
 def _track_badge(track):

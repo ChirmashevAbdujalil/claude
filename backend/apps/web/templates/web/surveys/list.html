@@ -93,6 +93,17 @@
   </section>
   {% endif %}
 
+  {% if my_clubs %}
+  <section class="stack-sm">
+    <h2 class="survey-h2">Mening klublarim</h2>
+    <div class="club-grid">
+      {% for c in my_clubs %}
+      <a href="{% url 'web:club-page' c.pk %}" class="card card-link club-mini"><span class="club-emoji">{{ c.emoji }}</span><span><b>{{ c.name }}</b><span class="tiny muted">{% if c.mentor %}Mentor: {{ c.mentor }}{% else %}{{ c.survey.title|truncatechars:40 }}{% endif %}</span></span></a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
   {% if answered %}
   <section class="card stack-sm">
     <h3>Siz javob bergan so'rovnomalar</h3>

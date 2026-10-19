@@ -1,0 +1,104 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}{{ club.name }}{% endblock %}
+
+{% block content %}
+<a href="{% url 'web:survey-results' survey.pk %}?tab=clubs" class="back-link">{% icon "arrow-left" "icon-sm" %} «{{ survey.title|truncatechars:50 }}» klublari</a>
+
+<section class="club-hero">
+  <div class="club-hero-deco" aria-hidden="true"><i></i><i></i></div>
+  <span class="club-hero-emoji">{{ club.emoji }}</span>
+  <div class="club-hero-text">
+    <h1>{{ club.name }}</h1>
+    <p>{% if club.question %}«{{ club.question.title }}» savolida shu javobni berganlar{% else %}So'rovnoma natijasidan tuzilgan klub{% endif %}</p>
+    <div class="club-hero-stats">
+      <span><b>{{ stats.count }}</b> a'zo</span>
+      <span><b>{{ stats.accounts }}</b> platformada</span>
+      {% for name, n in stats.faculties %}<span>{{ name }} · {{ n }}</span>{% endfor %}
+    </div>
+  </div>
+</section>
+
+<div class="layout-main-aside">
+  <div class="stack">
+    <section class="card club-roles">
+      <div class="club-role"><span class="club-role-icon">👑</span><div><div class="tiny muted bold">Sardor</div><b>{{ club.leader|default:"Tanlanmagan" }}</b></div></div>
+      <div class="club-role"><span class="club-role-icon">🧑‍🏫</span><div><div class="tiny muted bold">Mentor</div><b>{{ club.mentor|default:"Biriktirilmagan" }}</b></div></div>
+      <div class="club-role"><span class="club-role-icon">💬</span><div><div class="tiny muted bold">Telegram guruh</div>{% if club.telegram_url %}<a href="{{ club.telegram_url }}" target="_blank" rel="noopener" class="bold">Ochish ↗</a>{% else %}<b class="muted">Qo'shilmagan</b>{% endif %}</div></div>
+    </section>
+
+    {% if club.description %}<section class="card"><p class="prose" style="margin:0">{{ club.description|linebreaksbr }}</p></section>{% endif %}
+
+    <section class="card card-lg stack">
+      <div class="row-between wrap">
+        <h2 class="survey-h2">A'zolar · {{ members|length }}</h2>
+        <a href="{% url 'web:club-export' survey.pk club.pk %}" class="btn btn-ghost btn-sm">{% icon "download" "icon-sm" %} Ro'yxat (Excel)</a>
+      </div>
+      {% if members %}
+      <div class="club-members">
+        {% for m in members %}
+        {% with r=m.response %}
+        <div class="club-member">
+          <span class="club-avatar" style="--hue: {% widthratio r.pk 1 47 %}">{{ r.display_name|slice:":1" }}</span>
+          <div class="grow" style="min-width:0">
+            <div class="bold"><a href="{% url 'web:survey-response' survey.pk r.pk %}">{{ r.display_name }}</a>{% if r.user_id and r.user_id == club.leader_id %} <span class="chip chip-accent">👑 Sardor</span>{% endif %}</div>
+            <div class="tiny muted">{{ r.faculty.short_name|default:"—" }}{% if r.course %} · {{ r.course }}-kurs{% endif %}{% if r.group %} · {{ r.group }}{% endif %}{% if r.phone %} · <a href="tel:{{ r.phone }}">{{ r.phone }}</a>{% endif %}</div>
+          </div>
+          <div class="club-member-tags">
+            {% if r.user_id %}<span class="chip mono">{{ r.user.username }}</span>{% else %}<span class="chip">akkauntsiz</span>{% endif %}
+            {% if m.in_registry %}<span class="chip chip-success">Reyestrda</span>{% endif %}
+          </div>
+          {% if can_edit %}
+          <form method="post" action="{% url 'web:club-action' survey.pk club.pk 'remove' %}" onsubmit="return confirm('{{ r.display_name|escapejs }} klubdan chiqarilsinmi?')">{% csrf_token %}
+            <input type="hidden" name="member" value="{{ m.pk }}">
+            <button class="btn btn-ghost btn-sm btn-icon" title="Klubdan chiqarish" aria-label="Klubdan chiqarish">{% icon "x" "icon-sm" %}</button>
+          </form>
+          {% endif %}
+        </div>
+        {% endwith %}
+        {% endfor %}
+      </div>
+      {% else %}
+      {% include "web/partials/empty.html" with emoji="👥" title="Klubda a'zo yo'q" text="«Yangi javoblardan qo'shish» tugmasi bilan so'rovnomaga keyin javob berganlarni qo'shing." %}
+      {% endif %}
+    </section>
+  </div>
+
+  <aside class="stack">
+    <div class="card stack-sm">
+      <h3>A'zolarga xabar</h3>
+      <form method="post" action="{% url 'web:club-action' survey.pk club.pk 'notify' %}" class="form">{% csrf_token %}
+        <input name="title" class="input" maxlength="200" placeholder="Masalan: Birinchi uchrashuv payshanba 15:00 da" required>
+        <textarea name="body" class="input" rows="3" maxlength="500" placeholder="Batafsil (ixtiyoriy): joyi, nima olib kelish kerak"></textarea>
+        <button class="btn btn-primary btn-block">{% icon "send" "icon-sm" %} {{ stats.accounts }} nafar a'zoga yuborish</button>
+      </form>
+      <p class="tiny muted">Xabar platformadagi akkauntli a'zolarga bildirishnoma bo'lib boradi.</p>
+    </div>
+
+    <div class="card stack-sm">
+      <h3>Amallar</h3>
+      {% if can_edit %}<form method="post" action="{% url 'web:club-action' survey.pk club.pk 'sync' %}">{% csrf_token %}<button class="btn btn-soft btn-sm btn-block">{% icon "plus" "icon-sm" %} Yangi javoblardan a'zo qo'shish</button></form>{% endif %}
+      <form method="post" action="{% url 'web:club-action' survey.pk club.pk 'register' %}">{% csrf_token %}<button class="btn btn-ghost btn-sm btn-block">{% icon "compass" "icon-sm" %} Hammasini iqtidorlar reyestriga</button></form>
+      <button type="button" class="btn btn-ghost btn-sm btn-block" data-copy="{{ public_url }}">{% icon "link" "icon-sm" %} <span data-label>Klub sahifasi havolasi</span></button>
+      {% if can_edit %}<form method="post" action="{% url 'web:club-action' survey.pk club.pk 'delete' %}" onsubmit="return confirm('Klub o\'chirilsinmi? Talabalar javoblari saqlanadi.')">{% csrf_token %}<button class="btn btn-danger btn-sm btn-block">{% icon "trash" "icon-sm" %} Klubni o'chirish</button></form>{% endif %}
+    </div>
+
+    {% if form %}
+    <div class="card stack-sm">
+      <h3>Sozlamalar</h3>
+      <form method="post" class="form">{% csrf_token %}
+        {% include "web/partials/form_fields.html" %}
+        <button class="btn btn-primary btn-block">{% icon "check" "icon-sm" %} Saqlash</button>
+      </form>
+    </div>
+    {% endif %}
+
+    {% if others %}
+    <div class="card stack-sm">
+      <h3>Boshqa klublar</h3>
+      <div class="list">{% for o in others %}<a href="{% url 'web:club-detail' survey.pk o.pk %}" class="list-item list-item-link"><span>{{ o.emoji }}</span><span class="grow">{{ o.name }}</span></a>{% endfor %}</div>
+    </div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}
