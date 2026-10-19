@@ -177,6 +177,29 @@ bir talabani iqtidoriga qarab to'g'ri yo'naltirish.
 python manage.py talent_reminders
 ```
 
+## So'rovnomalar (`apps/surveys/`)
+
+Google Forms kabi so'rovnoma tizimi: rahbariyat maxsus konstruktorda so'rovnoma tuzadi, talabalar havola yoki QR kod
+orqali javob beradi. Asosiy vazifasi: butun institut bo'yicha iqtidorli talabalarni ommaviy ro'yxatga olish.
+
+| Sahifa | Manzil | Kim uchun |
+|---|---|---|
+| **Ro'yxat va shablonlar**: «Iqtidorlarni ro'yxatga olish», «Tadbir bo'yicha fikr», bo'sh so'rovnoma | `/sorovnomalar/` | Rahbariyat; talaba ochiq so'rovnomalarni ko'radi |
+| **Konstruktor**: savol qo'shish, tartiblash, nusxalash, majburiy belgisi, sozlamalar, e'lon qilish | `/sorovnomalar/<id>/tahrir/` | Muallif, rektorat va admin |
+| **Ommaviy to'ldirish sahifasi** (login shart emas, telefonga moslashgan) | `/s/<kalit>/` | Har qanday talaba |
+| **Natijalar**: grafiklar, fakultet va kurs kesimi, javoblar jadvali, filtrlar | `/sorovnomalar/<id>/natijalar/` | Rahbariyat (dekan boshqalar tuzgan so'rovnomada o'z fakultetini ko'radi) |
+| **Excel (CSV) eksport**, **QR plakat** (A4, chop etish uchun) | `.../eksport.csv`, `.../plakat/` | Rahbariyat |
+
+- **12 xil savol turi:** qisqa va batafsil javob, bitta va bir nechta variant, ro'yxatdan tanlash, baholash shkalasi
+  (1–10), raqam, sana, elektron pochta, telefon, iqtidor yo'nalishi va bo'lim sarlavhasi. Variantlarda «Boshqa» bor.
+- **Iqtidorlar reyestriga bir bosishda:** javob bergan talabalarni belgilab reyestrga qo'shasiz, yo'nalishi
+  «Iqtidor yo'nalishi» savolidan olinadi (manba: «So'rovnoma»).
+- **Kim javob beradi:** havolasi bor hamma yoki faqat platformaga kirgan talabalar. Talaba ma'lumotlari (F.I.Sh.,
+  fakultet, kurs, guruh, telefon) so'raladi, kirgan talabada profildan to'ldiriladi.
+- **Takrorlanmaslik:** har kim bir marta javob beradi (akkaunt yoki brauzer bo'yicha); botlar uchun tuzoq maydon.
+- **Rag'bat:** platformaga kirib javob bergan talabaga XP (bir marta). E'lon qilishda barcha talabalarga
+  bildirishnoma yuborish mumkin.
+
 ## Harakatlar jurnali (audit log)
 
 Kim, qachon, qayerdan (IP) va nimani o'zgartirgani `apps/audit/` da avtomatik yoziladi. Rektorat uni
@@ -238,6 +261,7 @@ backend/
     ├── insights/      # rektorat va dekanat dashboardi
     ├── ai/            # AI Mentor, g'oya tekshiruvchi, karyera maslahatchisi, tekshiruv yordamchisi (Claude API)
     ├── notifications/ # bildirishnomalar va Telegram bot
+    ├── surveys/       # so'rovnomalar: konstruktor, ommaviy to'ldirish, natijalar, iqtidorlarni ro'yxatga olish
     └── web/           # veb-interfeys: template'lar, dizayn tizimi, view'lar
 ```
 

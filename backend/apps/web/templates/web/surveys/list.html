@@ -1,0 +1,107 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}So'rovnomalar{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><h1>So'rovnomalar 📝</h1>
+    <p>{% if user.is_management %}Google Forms kabi so'rovnoma tuzing, havola yoki QR kod orqali butun institutga tarqating va javoblarni shu yerda tahlil qiling.{% else %}Fikringizni bildiring: javoblaringiz institutga sizni yaxshiroq tanishga yordam beradi.{% endif %}</p></div>
+</div>
+
+<div class="stack-lg">
+  {% if open_surveys %}
+  <section class="stack-sm">
+    <h2 class="survey-h2">Sizni kutayotgan so'rovnomalar</h2>
+    <div class="survey-cards">
+      {% for s in open_surveys %}
+      <a href="{% url 'web:survey-fill' s.token %}" class="card card-link survey-card">
+        <div class="row-between" style="align-items:flex-start;gap:8px">
+          <h3>{{ s.title }}</h3>
+          {% if s.xp_reward %}<span class="chip chip-primary">+{{ s.xp_reward }} XP</span>{% endif %}
+        </div>
+        {% if s.description %}<p class="small muted">{{ s.description|truncatechars:140 }}</p>{% endif %}
+        <div class="row-between tiny muted">
+          <span>{% if s.closes_at %}{% icon "clock" "icon-sm" %} {{ s.closes_at|date:"d.m.Y H:i" }} gacha{% else %}Muddatsiz{% endif %}</span>
+          <span class="btn btn-primary btn-sm">Javob berish →</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% elif not user.is_management %}
+  <div class="card card-lg">
+    {% include "web/partials/empty.html" with emoji="📝" title="Hozircha ochiq so'rovnoma yo'q" text="Yangi so'rovnoma e'lon qilinsa, bildirishnoma keladi." %}
+  </div>
+  {% endif %}
+
+  {% if user.is_management %}
+  <section class="kpi-grid survey-kpis">
+    <div class="card stat"><div class="stat-value">{{ totals.surveys }}</div><div class="stat-label">so'rovnoma</div></div>
+    <div class="card stat"><div class="stat-value">{{ totals.open }}</div><div class="stat-label">hozir ochiq</div></div>
+    <div class="card stat"><div class="stat-value">{{ totals.responses }}</div><div class="stat-label">jami javob</div></div>
+    <div class="card stat"><div class="stat-value">{{ totals.today }}</div><div class="stat-label">bugun kelgan javob</div></div>
+  </section>
+
+  <section class="stack-sm">
+    <h2 class="survey-h2">Yangi so'rovnoma</h2>
+    <div class="survey-templates">
+      {% for key, t in templates.items %}
+      <form method="post" action="{% url 'web:survey-create' %}">{% csrf_token %}
+        <input type="hidden" name="template" value="{{ key }}">
+        <button class="card card-link survey-template {% if key == 'census' %}is-featured{% endif %}">
+          <span class="survey-template-emoji">{{ t.emoji }}</span>
+          <span class="bold">{{ t.label }}</span>
+          <span class="tiny muted">{{ t.hint }}</span>
+        </button>
+      </form>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="card card-lg stack">
+    <div class="row-between wrap">
+      <h2 class="survey-h2">Barcha so'rovnomalar</h2>
+      <nav class="tabs" aria-label="Holat bo'yicha">
+        <a href="?" class="tab {% if not status_filter %}active{% endif %}">Hammasi</a>
+        {% for value, label in statuses %}<a href="?status={{ value }}" class="tab {% if status_filter == value %}active{% endif %}">{{ label }}</a>{% endfor %}
+      </nav>
+    </div>
+    {% if page.object_list %}
+    <div class="survey-rows">
+      {% for s in page %}
+      <div class="survey-row">
+        <div class="grow" style="min-width:0">
+          <div class="row-sm wrap">
+            <a href="{% url 'web:survey-results' s.pk %}" class="bold">{{ s.title }}</a>
+            <span class="chip survey-status-{{ s.status }}">{{ s.get_status_display }}</span>
+            {% if s.talent_census %}<span class="chip chip-accent">🧭 Iqtidorlar</span>{% endif %}
+          </div>
+          <div class="tiny muted">{{ s.created_by|default:"—" }} · {{ s.created_at|date:"d.m.Y" }}{% if s.closes_at %} · muddat {{ s.closes_at|date:"d.m.Y H:i" }}{% endif %}</div>
+        </div>
+        <div class="survey-row-count"><b>{{ s.answers }}</b><span class="tiny muted">javob</span></div>
+        <div class="row-sm">
+          <a href="{% url 'web:survey-results' s.pk %}" class="btn btn-soft btn-sm">{% icon "chart" "icon-sm" %} Natijalar</a>
+          <a href="{% url 'web:survey-builder' s.pk %}" class="btn btn-ghost btn-sm" title="Tahrirlash">{% icon "edit" "icon-sm" %}</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% include "web/partials/pagination.html" %}
+    {% else %}
+    {% include "web/partials/empty.html" with emoji="📝" title="So'rovnoma hali yo'q" text="Yuqoridagi shablonlardan birini tanlang: «Iqtidorlarni ro'yxatga olish» shabloni butun institut bo'yicha iqtidorli talabalarni aniqlash uchun tayyor." %}
+    {% endif %}
+  </section>
+  {% endif %}
+
+  {% if answered %}
+  <section class="card stack-sm">
+    <h3>Siz javob bergan so'rovnomalar</h3>
+    <div class="list">
+      {% for r in answered %}
+      <div class="list-item"><span class="check-dot done">✓</span><span class="grow">{{ r.survey.title }}</span><span class="tiny muted">{{ r.submitted_at|date:"d.m.Y" }}</span></div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

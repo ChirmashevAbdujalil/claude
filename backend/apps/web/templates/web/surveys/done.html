@@ -1,0 +1,41 @@
+{% extends "web/base.html" %}
+{% load web_tags %}
+{% block title %}{{ survey.title }}{% endblock %}
+
+{% block body %}
+<header class="landing-nav">
+  <a href="{% if user.is_authenticated %}{% url 'web:dashboard' %}{% else %}{% url 'web:landing' %}{% endif %}" class="brand">{% brand_logo 40 %}<span>{{ brand_name }}<small>{{ institution_name }}</small></span></a>
+</header>
+
+<main class="survey-page">
+  <section class="card card-lg survey-done">
+    {% if state == "thanks" %}
+    <div class="survey-done-icon">✅</div>
+    <h1>Javobingiz qabul qilindi</h1>
+    <p class="muted">{{ survey.thank_you|default:"Rahmat! Fikringiz biz uchun muhim." }}</p>
+    {% if xp %}<div class="chip chip-primary survey-done-xp">{% icon "bolt" "icon-sm" %} +{{ xp }} XP hisobingizga qo'shildi</div>{% endif %}
+    {% elif state == "answered" %}
+    <div class="survey-done-icon">📬</div>
+    <h1>Siz allaqachon javob bergansiz</h1>
+    <p class="muted">«{{ survey.title }}» so'rovnomasiga javob faqat bir marta qabul qilinadi. Rahmat!</p>
+    {% else %}
+    <div class="survey-done-icon">🔒</div>
+    <h1>So'rovnoma yopilgan</h1>
+    <p class="muted">«{{ survey.title }}» hozir javob qabul qilmayapti{% if survey.closes_at %}: muddat {{ survey.closes_at|date:"d.m.Y H:i" }} da tugagan{% endif %}.</p>
+    {% endif %}
+
+    <div class="row-sm wrap" style="justify-content:center;margin-top:8px">
+      {% if user.is_authenticated %}
+      <a href="{% url 'web:surveys' %}" class="btn btn-ghost">Boshqa so'rovnomalar</a>
+      <a href="{% url 'web:dashboard' %}" class="btn btn-primary">Platformaga qaytish</a>
+      {% else %}
+      <a href="{% url 'web:landing' %}" class="btn btn-ghost">Platforma haqida</a>
+      {% if registration_open %}<a href="{% url 'web:register' %}" class="btn btn-primary">Ro'yxatdan o'tish</a>{% endif %}
+      {% endif %}
+    </div>
+    {% if not user.is_authenticated and registration_open and state == "thanks" %}
+    <p class="tiny muted">Ro'yxatdan o'ting: iqtidoringizga mos olimpiada, grant va tanlovlar haqida birinchi bo'lib xabar olasiz.</p>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

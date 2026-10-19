@@ -20,6 +20,7 @@ class PointTransaction(models.Model):
         BADGE = "badge", "Nishon bonusi"
         REDEMPTION = "redemption", "Mukofot xaridi"
         MANUAL = "manual", "Qo'lda berilgan"
+        SURVEY = "survey", "So'rovnomada qatnashish"
 
     # Kunlik limitga kirmaydigan sabablar: ular o'qituvchi tasdig'idan o'tadi yoki ball sarflaydi
     UNCAPPED_REASONS = {Reason.ACHIEVEMENT, Reason.REDEMPTION, Reason.MANUAL}

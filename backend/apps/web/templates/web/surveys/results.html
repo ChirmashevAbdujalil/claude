@@ -1,0 +1,172 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}{{ survey.title }} · natijalar{% endblock %}
+
+{% block content %}
+<a href="{% url 'web:surveys' %}" class="back-link">{% icon "arrow-left" "icon-sm" %} So'rovnomalar</a>
+<div class="page-header">
+  <div>
+    <div class="row-sm wrap"><h1>{{ survey.title }}</h1><span class="chip survey-status-{{ survey.status }}">{{ survey.get_status_display }}</span>
+      {% if survey.talent_census %}<span class="chip chip-accent">🧭 Iqtidorlarni ro'yxatga olish</span>{% endif %}</div>
+    <p>{{ survey.get_access_display }}{% if survey.closes_at %} · muddat {{ survey.closes_at|date:"d.m.Y H:i" }}{% endif %}{% if survey.created_by %} · muallif: {{ survey.created_by }}{% endif %}</p>
+  </div>
+  <div class="row-sm wrap">
+    {% if can_edit %}<a href="{% url 'web:survey-builder' survey.pk %}" class="btn btn-ghost btn-sm">{% icon "edit" "icon-sm" %} Tahrirlash</a>{% endif %}
+    <a href="{% url 'web:survey-export' survey.pk %}?{{ filter_qs }}" class="btn btn-soft btn-sm">{% icon "download" "icon-sm" %} Excel (CSV)</a>
+    {% if can_edit %}
+    <form method="post" action="{% url 'web:survey-status' survey.pk %}" class="row-sm">{% csrf_token %}
+      {% if survey.status == "open" %}<button class="btn btn-ghost btn-sm" name="action" value="close">Javoblarni to'xtatish</button>
+      {% else %}<button class="btn btn-primary btn-sm" name="action" value="publish">{% icon "send" "icon-sm" %} {% if survey.status == "closed" %}Qayta ochish{% else %}E'lon qilish{% endif %}</button>{% endif %}
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="stack-lg">
+  <section class="card survey-share-strip">
+    <div class="qr-box survey-qr-sm">{{ share.qr }}</div>
+    <div class="stack-sm grow" style="min-width:0">
+      <h3>Havola va QR kod</h3>
+      <div class="survey-link mono tiny">{{ share.url }}</div>
+      <div class="row-sm wrap">
+        <button type="button" class="btn btn-primary btn-sm" data-copy="{{ share.url }}">{% icon "link" "icon-sm" %} <span data-label>Havolani nusxalash</span></button>
+        <a href="{% url 'web:survey-poster' survey.pk %}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">{% icon "file" "icon-sm" %} QR plakatni chop etish</a>
+        <a href="{% url 'web:survey-fill' survey.token %}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">{% icon "external" "icon-sm" %} Ochish</a>
+      </div>
+      <p class="tiny muted">Telegram guruhlariga havolani yuboring yoki plakatni o'quv binolariga osing. Talaba platformaga kirmasdan ham javob bera oladi{% if survey.access == "students" %} (bu so'rovnomada kirish talab qilinadi){% endif %}.</p>
+    </div>
+  </section>
+
+  <section class="kpi-grid survey-kpis">
+    <div class="card stat"><div class="stat-value">{{ summary.total }}</div><div class="stat-label">javob{% if filters.faculty or filters.course or filters.q %} (filtr bo'yicha){% endif %}</div></div>
+    <div class="card stat"><div class="stat-value">{{ summary.today }}</div><div class="stat-label">bugun</div></div>
+    <div class="card stat"><div class="stat-value">{{ summary.linked }}</div><div class="stat-label">platformadagi talabalardan</div></div>
+    <div class="card stat"><div class="stat-value">{{ summary.faculties|length }}</div><div class="stat-label">fakultet qamrab olindi</div></div>
+  </section>
+
+  <form method="get" class="card talent-filters">
+    <input type="hidden" name="tab" value="{{ tab }}">
+    <input type="search" name="q" value="{{ filters.q }}" class="input" placeholder="Ism, guruh yoki telefon" aria-label="Qidirish">
+    <select name="faculty" class="input" aria-label="Fakultet">
+      <option value="">Barcha fakultetlar</option>
+      {% for f in faculties %}<option value="{{ f.pk }}" {% if filters.faculty == f.pk|stringformat:"d" %}selected{% endif %}>{{ f.short_name }}</option>{% endfor %}
+    </select>
+    <select name="course" class="input" aria-label="Kurs">
+      <option value="">Barcha kurslar</option>
+      {% for c in courses %}<option value="{{ c }}" {% if filters.course == c|stringformat:"d" %}selected{% endif %}>{{ c }}-kurs</option>{% endfor %}
+    </select>
+    <label class="check small"><input type="checkbox" name="linked" value="1" {% if filters.linked == "1" %}checked{% endif %}> Faqat platformadagilar</label>
+    <div class="row-sm"><button class="btn btn-primary btn-sm">Filtrlash</button>{% if filter_qs %}<a href="?tab={{ tab }}" class="btn btn-ghost btn-sm">Tozalash</a>{% endif %}</div>
+  </form>
+
+  <nav class="tabs" aria-label="Natijalar ko'rinishi">
+    <a href="?tab=summary&{{ filter_qs }}" class="tab {% if tab != 'responses' %}active{% endif %}">📊 Umumiy natija</a>
+    <a href="?tab=responses&{{ filter_qs }}" class="tab {% if tab == 'responses' %}active{% endif %}">👤 Javoblar ({{ summary.total }})</a>
+  </nav>
+
+  {% if tab == "responses" %}
+  <section class="card card-lg stack">
+    {% if page.object_list %}
+    <form method="post" action="{% url 'web:survey-register' survey.pk %}" class="stack">{% csrf_token %}
+      <div class="row-between wrap">
+        <label class="check small"><input type="checkbox" data-check-all> Hammasini belgilash</label>
+        <button class="btn btn-accent btn-sm">{% icon "compass" "icon-sm" %} Belgilanganlarni iqtidorlar reyestriga qo'shish</button>
+      </div>
+      <div class="table-wrap">
+        <table class="table survey-table">
+          <thead><tr><th></th><th>Talaba</th><th>Fakultet</th><th>Akkaunt</th><th>Reyestr</th><th>Vaqt</th><th></th></tr></thead>
+          <tbody>
+          {% for r in page %}
+          <tr>
+            <td><input type="checkbox" name="response" value="{{ r.pk }}" aria-label="{{ r.display_name }}" {% if not r.user_id or r.in_registry %}disabled{% endif %}></td>
+            <td><a href="{% url 'web:survey-response' survey.pk r.pk %}" class="bold">{{ r.display_name }}</a>{% if r.phone %}<div class="tiny muted">{{ r.phone }}</div>{% endif %}</td>
+            <td class="small">{{ r.faculty.short_name|default:"—" }}{% if r.course %} · {{ r.course }}-kurs{% endif %}{% if r.group %} · {{ r.group }}{% endif %}</td>
+            <td class="small">{% if r.user_id %}<span class="mono">{{ r.user.username }}</span>{% else %}<span class="muted">yo'q</span>{% endif %}</td>
+            <td>{% if r.in_registry %}<span class="chip chip-success">Reyestrda</span>{% elif r.user_id %}<span class="chip">Yo'q</span>{% else %}<span class="tiny muted">—</span>{% endif %}</td>
+            <td class="tiny muted nowrap">{{ r.submitted_at|date:"d.m.Y H:i" }}</td>
+            <td><a href="{% url 'web:survey-response' survey.pk r.pk %}" class="btn btn-ghost btn-sm">Ko'rish</a></td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </form>
+    <p class="tiny muted">Reyestrga faqat platformada akkaunti bor talabalar qo'shiladi{% if has_track %}; yo'nalishi «Iqtidor yo'nalishi» savolidagi javobdan olinadi{% endif %}.</p>
+    {% include "web/partials/pagination.html" %}
+    {% else %}
+    {% include "web/partials/empty.html" with emoji="📭" title="Javob hali yo'q" text="Havolani yoki QR kodni tarqating: javoblar shu yerda real vaqtda paydo bo'ladi." %}
+    {% endif %}
+  </section>
+  {% else %}
+  {% if summary.total %}
+  {% if summary.faculties or summary.courses %}
+  <section class="grid grid-2">
+    {% if summary.faculties %}
+    <div class="card stack-sm">
+      <h3>Fakultetlar kesimida</h3>
+      <div class="hbars hbars-wide">
+        {% for name, n in summary.faculties %}
+        <div class="hbar"><span class="hbar-label">{{ name }}</span><span class="hbar-track"><span class="hbar-fill" style="width:{% widthratio n summary.total 100 %}%"></span></span><span class="hbar-value">{{ n }}</span></div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    {% if summary.courses %}
+    <div class="card stack-sm">
+      <h3>Kurslar kesimida</h3>
+      <div class="hbars">
+        {% for name, n in summary.courses %}
+        <div class="hbar"><span class="hbar-label">{{ name }}</span><span class="hbar-track"><span class="hbar-fill" style="width:{% widthratio n summary.total 100 %}%"></span></span><span class="hbar-value">{{ n }}</span></div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </section>
+  {% endif %}
+
+  {% for b in summary.blocks %}
+  {% if b.section %}
+  <h2 class="survey-h2 survey-result-section">{{ b.question.title }}</h2>
+  {% else %}
+  <section class="card stack-sm survey-result">
+    <div class="row-between" style="align-items:flex-start;gap:12px">
+      <h3>{{ b.question.title }}</h3>
+      <span class="chip nowrap">{{ b.question.get_kind_display }}</span>
+    </div>
+    <p class="tiny muted">{{ b.answered }} ta javob{% if b.skipped %} · {{ b.skipped }} kishi o'tkazib yuborgan{% endif %}{% if b.average is not None %} · o'rtacha <b class="survey-avg">{{ b.average }}</b>{% if b.question.kind == "scale" %} / {{ b.question.scale_max }}{% endif %}{% endif %}{% if b.min is not None %} · eng kichik {{ b.min }} · eng katta {{ b.max }}{% endif %}</p>
+    {% if b.bars %}
+    <div class="hbars hbars-wide survey-bars">
+      {% for bar in b.bars %}
+      <div class="hbar" title="{{ bar.label }}: {{ bar.count }} ({{ bar.pct }}%)"><span class="hbar-label">{{ bar.label }}</span><span class="hbar-track"><span class="hbar-fill" style="width:{{ bar.width }}%"></span></span><span class="hbar-value">{{ bar.count }} · {{ bar.pct }}%</span></div>
+      {% endfor %}
+    </div>
+    {% if b.others %}
+    <details class="small"><summary class="muted">«Boshqa» javoblari ({{ b.others|length }})</summary>
+      <ul class="survey-texts">{% for t in b.others %}<li>{{ t }}</li>{% endfor %}</ul></details>
+    {% endif %}
+    {% elif b.texts %}
+    <ul class="survey-texts">{% for t in b.texts %}<li>{{ t|linebreaksbr }}</li>{% endfor %}</ul>
+    {% if b.answered > b.texts|length %}<p class="tiny muted">Oxirgi {{ b.texts|length }} ta javob ko'rsatildi. Hammasi «Javoblar» bo'limida va Excel faylida.</p>{% endif %}
+    {% else %}
+    <p class="small muted">Bu savolga hali javob yo'q.</p>
+    {% endif %}
+  </section>
+  {% endif %}
+  {% endfor %}
+  {% else %}
+  <section class="card card-lg">
+    {% include "web/partials/empty.html" with emoji="📭" title="Javob hali yo'q" text="So'rovnomani e'lon qiling va havola yoki QR kodni tarqating. Javoblar kelishi bilan grafiklar shu yerda paydo bo'ladi." %}
+  </section>
+  {% endif %}
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  var all = document.querySelector("[data-check-all]");
+  if (all) all.addEventListener("change", function () {
+    document.querySelectorAll("input[name=response]:not(:disabled)").forEach(function (box) { box.checked = all.checked; });
+  });
+</script>
+{% endblock %}

@@ -25,6 +25,7 @@ class TalentProfile(models.Model):
         RATING = "rating", "Reyting"
         DIAGNOSTIC = "diagnostic", "Diagnostika"
         MANUAL = "manual", "Rahbariyat qo'shgan"
+        SURVEY = "survey", "So'rovnoma"
 
     PIPELINE = [Status.IDENTIFIED, Status.MENTORED, Status.DEVELOPING, Status.ACHIEVED]
 

@@ -16,6 +16,7 @@ from .views import (
     public,
     saas,
     staff,
+    surveys,
     talent,
 )
 
@@ -115,4 +116,23 @@ urlpatterns = [
     path("shogirdlarim/", talent.mentees, name="talent-mentees"),
     path("mening-yolim/", talent.my_path, name="my-path"),
     path("mening-yolim/test/", talent.diagnostic, name="talent-diagnostic"),
+    # So'rovnomalar
+    path("sorovnomalar/", surveys.survey_list, name="surveys"),
+    path("sorovnomalar/yangi/", surveys.survey_create, name="survey-create"),
+    path("sorovnomalar/<int:pk>/tahrir/", surveys.survey_builder, name="survey-builder"),
+    path("sorovnomalar/<int:pk>/holat/", surveys.survey_status, name="survey-status"),
+    path("sorovnomalar/<int:pk>/nusxa/", surveys.survey_duplicate, name="survey-duplicate"),
+    path("sorovnomalar/<int:pk>/ochirish/", surveys.survey_delete, name="survey-delete"),
+    path("sorovnomalar/<int:pk>/natijalar/", surveys.survey_results, name="survey-results"),
+    path("sorovnomalar/<int:pk>/eksport.csv", surveys.survey_export, name="survey-export"),
+    path("sorovnomalar/<int:pk>/reyestr/", surveys.survey_register, name="survey-register"),
+    path("sorovnomalar/<int:pk>/plakat/", surveys.survey_poster, name="survey-poster"),
+    path("sorovnomalar/<int:pk>/javoblar/<int:rid>/", surveys.survey_response, name="survey-response"),
+    path(
+        "sorovnomalar/<int:pk>/javoblar/<int:rid>/ochirish/",
+        surveys.survey_response_delete,
+        name="survey-response-delete",
+    ),
+    path("s/<slug:token>/", surveys.survey_fill, name="survey-fill"),
+    path("s/<slug:token>/rahmat/", surveys.survey_thanks, name="survey-thanks"),
 ]

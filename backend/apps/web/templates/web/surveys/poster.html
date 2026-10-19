@@ -1,0 +1,53 @@
+{% load web_tags %}<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ survey.title }} · QR plakat</title>
+  <style>
+    @page { size: A4; margin: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Manrope", system-ui, sans-serif; color: #0b1d24; background: #e9eef0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .sheet { width: 210mm; min-height: 297mm; margin: 0 auto; background: #fff; display: flex; flex-direction: column; }
+    .top { background: linear-gradient(135deg, #062d3b 0%, #0e5a73 55%, #168a9c 100%); color: #fff; padding: 18mm 16mm 14mm; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 13pt; opacity: .95; }
+    .brand small { display: block; font-weight: 600; font-size: 9pt; opacity: .75; }
+    .tag { display: inline-block; margin-top: 12mm; background: #f59e0b; color: #1f1300; font-weight: 800; font-size: 11pt; letter-spacing: .12em; text-transform: uppercase; padding: 2mm 4mm; border-radius: 2mm; }
+    h1 { font-size: 30pt; line-height: 1.1; margin-top: 6mm; letter-spacing: -.01em; }
+    .desc { font-size: 12.5pt; line-height: 1.5; margin-top: 5mm; color: #d6e8ec; max-width: 165mm; }
+    .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12mm 16mm; text-align: center; }
+    .qr { padding: 6mm; border: 1.2mm solid #062d3b; border-radius: 6mm; }
+    .qr svg { width: 105mm !important; height: 105mm !important; display: block; }
+    .scan { font-size: 20pt; font-weight: 800; margin-top: 9mm; }
+    .steps { display: flex; gap: 6mm; margin-top: 7mm; font-size: 11pt; color: #2f4650; }
+    .steps span b { display: inline-grid; place-items: center; width: 7mm; height: 7mm; border-radius: 50%; background: #e2f0f4; color: #0a4256; margin-right: 2mm; font-size: 10pt; }
+    .link { margin-top: 8mm; font-family: ui-monospace, monospace; font-size: 10.5pt; color: #0e5a73; word-break: break-all; }
+    .foot { display: flex; justify-content: space-between; align-items: center; padding: 7mm 16mm; border-top: 1px solid #dbe4e7; font-size: 10pt; color: #5f747c; }
+    .foot b { color: #0b1d24; }
+    .xp { color: #92400e; background: #fff6e0; padding: 1.5mm 3mm; border-radius: 2mm; font-weight: 800; }
+    .print { position: fixed; right: 16px; bottom: 16px; background: #062d3b; color: #fff; border: 0; border-radius: 12px; padding: 12px 18px; font: 700 14px system-ui; cursor: pointer; }
+    @media print { body { background: #fff; } .print { display: none; } .sheet { margin: 0; } }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <div class="top">
+      <div class="brand">{% brand_logo 36 %}<span>{{ brand_name }}<small>{{ institution_name }}</small></span></div>
+      <span class="tag">{% if survey.talent_census %}Iqtidorlarni ro'yxatga olish{% else %}So'rovnoma{% endif %}</span>
+      <h1>{{ survey.title }}</h1>
+      {% if survey.description %}<p class="desc">{{ survey.description|truncatechars:260 }}</p>{% endif %}
+    </div>
+    <div class="main">
+      <div class="qr">{{ share.qr }}</div>
+      <p class="scan">Telefoningiz kamerasini QR kodga tuting</p>
+      <div class="steps"><span><b>1</b>Skanerlang</span><span><b>2</b>Savollarga javob bering</span><span><b>3</b>Yuboring</span></div>
+      <p class="link">{{ share.url }}</p>
+    </div>
+    <div class="foot">
+      <span>{% if survey.closes_at %}Muddat: <b>{{ survey.closes_at|date:"d.m.Y H:i" }}</b> gacha{% else %}Bir necha daqiqa vaqt oladi{% endif %}</span>
+      {% if survey.xp_reward %}<span class="xp">Platformaga kirib javob bersangiz: +{{ survey.xp_reward }} XP</span>{% endif %}
+    </div>
+  </div>
+  <button class="print" onclick="window.print()">🖨 Chop etish</button>
+</body>
+</html>

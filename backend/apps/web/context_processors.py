@@ -2,6 +2,7 @@ from apps.arena.levels import level_for_xp
 from apps.discovery.models import Submission
 from apps.notifications.services import unread_count
 from apps.profiles.models import Achievement
+from apps.surveys import services as survey_services
 from apps.tenants import services as tenant_services
 
 DEFAULT_COLORS = ("#062d3b", "#168a9c")
@@ -43,6 +44,8 @@ def navigation(request):
         "my_level": level_for_xp(user.xp),
         "unread_notifications": unread_count(user),
     }
+    if user.role == user.Role.STUDENT:
+        context["open_surveys_count"] = survey_services.open_for(user).count()
     if user.is_reviewer:
         context["review_count"] = (
             Submission.objects.filter(status=Submission.Status.PENDING).exclude(user=user).count()

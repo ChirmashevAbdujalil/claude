@@ -25,6 +25,7 @@ ADMIN_MODELS = {
     "profiles": ["achievement"],
     "audit": ["auditlog"],
     "talent": ["talentprofile", "developmentgoal", "diagnosticresult"],
+    "surveys": ["survey", "question", "response"],
 }
 RESERVED_SLUGS = {"www", "admin", "api", "platform", "saas", "static", "media", "mail"}
 

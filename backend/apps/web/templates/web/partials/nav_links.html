@@ -7,6 +7,8 @@
 {% if "league" in features %}<a href="{% url 'web:league' %}" class="nav-link {% active 'league' %}">{% icon "award" %} OTMlararo liga</a>{% endif %}
 <a href="{% url 'web:ai' %}" class="nav-link {% active 'ai' %}">{% icon "sparkles" %} AI Mentor</a>
 {% if user.role == "student" %}<a href="{% url 'web:my-path' %}" class="nav-link {% active 'my-path' 'talent-diagnostic' %}">{% icon "compass" %} Mening yo'lim</a>{% endif %}
+<a href="{% url 'web:surveys' %}" class="nav-link {% active 'surveys' 'survey' %}">{% icon "clipboard" %} So'rovnomalar
+  {% if open_surveys_count %}<span class="chip chip-accent count">{{ open_surveys_count }}</span>{% endif %}</a>
 <a href="{% url 'web:notifications' %}" class="nav-link {% active 'notifications' 'notification' %}">{% icon "bell" %} Bildirishnomalar
   {% if unread_notifications %}<span class="chip chip-danger count">{{ unread_notifications }}</span>{% endif %}</a>
 

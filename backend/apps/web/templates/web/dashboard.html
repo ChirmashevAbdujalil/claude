@@ -28,6 +28,18 @@
   {% endwith %}
   {% endif %}
 
+  {% for s in surveys %}
+  <a href="{% url 'web:survey-fill' s.token %}" class="card card-link next-step survey-nudge">
+    <span class="emoji">📝</span>
+    <div class="grow">
+      <div class="eyebrow" style="color:var(--accent-text)">Yangi so'rovnoma</div>
+      <h3 style="margin-top:2px">{{ s.title }}</h3>
+      {% if s.closes_at %}<p class="small muted" style="margin-top:2px">{{ s.closes_at|date:"d.m.Y H:i" }} gacha javob bering</p>{% endif %}
+    </div>
+    <span class="btn btn-accent btn-sm hide-mobile">Javob berish{% if s.xp_reward %} · +{{ s.xp_reward }} XP{% endif %}</span>
+  </a>
+  {% endfor %}
+
   <div class="layout-main-aside">
     <div class="stack">
       <!-- Daraja kartasi -->

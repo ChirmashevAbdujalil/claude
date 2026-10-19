@@ -10,6 +10,8 @@ from apps.discovery.models import Challenge, TalentFlag
 from apps.opportunities.models import Opportunity
 from apps.profiles.models import Achievement, Resume, Skill, UserSkill
 from apps.projects.models import Project
+from apps.surveys import services as survey_services
+from apps.surveys.models import Survey
 from apps.talent.models import DevelopmentGoal, TalentProfile
 from apps.talent.tracks import Track
 from apps.tenants.models import Institution, InstitutionRequest
@@ -466,3 +468,55 @@ class StudentGoalForm(forms.ModelForm):
 
     def clean_progress(self):
         return max(0, min(100, self.cleaned_data["progress"] or 0))
+
+
+# ---------------------------------------------------------------- so'rovnomalar
+
+
+class SurveyForm(forms.ModelForm):
+    class Meta:
+        model = Survey
+        fields = ["title", "description", "access", "collect_identity", "one_response", "talent_census", "xp_reward",
+                  "closes_at", "thank_you"]  # fmt: skip
+        widgets = {
+            "description": forms.Textarea(
+                attrs={"rows": 3, "placeholder": "Talabalarga so'rovnoma maqsadini tushuntiring"}
+            ),
+            "closes_at": DATETIME_WIDGET,
+            "thank_you": forms.TextInput(attrs={"placeholder": "Rahmat! Javobingiz qabul qilindi."}),
+        }
+
+    def clean_xp_reward(self):
+        xp = self.cleaned_data["xp_reward"]
+        if xp > survey_services.MAX_XP:
+            raise forms.ValidationError(f"{survey_services.MAX_XP} XP dan oshmasin")
+        return xp
+
+
+class SurveyIdentityForm(forms.Form):
+    """So'rovnomada talaba haqidagi umumiy ma'lumotlar (platformaga kirgan bo'lsa, o'zi to'ldiriladi)."""
+
+    full_name = forms.CharField(label="Familiya, ism, sharif", max_length=150)
+    faculty = forms.ModelChoiceField(label="Fakultet", queryset=Faculty.objects.none(), empty_label="Tanlang")
+    course = forms.TypedChoiceField(
+        label="Kurs", coerce=int, choices=[("", "Tanlang")] + [(n, f"{n}-kurs") for n in range(1, 7)]
+    )
+    group = forms.CharField(label="Guruh", max_length=40, required=False)
+    phone = forms.CharField(
+        label="Telefon raqam",
+        max_length=30,
+        required=False,
+        widget=forms.TextInput(attrs={"inputmode": "tel", "placeholder": "+998 90 123 45 67"}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, prefix="who", **kwargs)
+        self.fields["faculty"].queryset = Faculty.objects.order_by("name")
+        if not self.fields["faculty"].queryset.exists():
+            del self.fields["faculty"]
+
+    def clean_phone(self):
+        phone = self.cleaned_data["phone"].strip()
+        if phone and not survey_services.PHONE_RE.match(phone):
+            raise forms.ValidationError("Telefon raqamini to'g'ri kiriting")
+        return phone

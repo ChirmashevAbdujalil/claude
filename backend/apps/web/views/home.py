@@ -11,6 +11,7 @@ from apps.discovery.selectors import visible_challenges
 from apps.opportunities.models import Opportunity
 from apps.profiles.models import Achievement
 from apps.projects.models import ProjectMember
+from apps.surveys import services as survey_services
 
 from ..guidance import next_steps, profile_checklist
 
@@ -45,6 +46,9 @@ def dashboard(request):
         "badges": user.badges.select_related("badge")[:6],
         "memberships": ProjectMember.objects.filter(user=user, status="active").select_related("project")[:3],
         "opportunities": Opportunity.objects.filter(is_active=True).order_by("-created_at")[:3],
+        "surveys": survey_services.open_for(user).order_by("closes_at", "-published_at")[:2]
+        if user.role == user.Role.STUDENT
+        else [],
         "pending_reviews": (
             Submission.objects.filter(status=Submission.Status.PENDING).count()
             + Achievement.objects.filter(status=Achievement.Status.PENDING).count()

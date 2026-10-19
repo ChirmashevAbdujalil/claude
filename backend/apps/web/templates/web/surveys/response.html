@@ -1,0 +1,48 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}{{ response.display_name }} · {{ survey.title }}{% endblock %}
+
+{% block content %}
+<a href="{% url 'web:survey-results' survey.pk %}?tab=responses" class="back-link">{% icon "arrow-left" "icon-sm" %} Javoblar</a>
+<div class="page-header">
+  <div><h1>{{ response.display_name }}</h1>
+    <p>«{{ survey.title }}» · {{ response.submitted_at|date:"d.m.Y H:i" }}</p></div>
+  <div class="row-sm wrap">
+    {% if response.user_id and response.user.role == "student" %}
+      {% if in_registry %}<a href="{% url 'web:talent-profile' response.user.talent_profile.pk %}" class="btn btn-soft btn-sm">{% icon "compass" "icon-sm" %} Reyestrdagi profili</a>
+      {% else %}<form method="post" action="{% url 'web:survey-register' survey.pk %}">{% csrf_token %}<input type="hidden" name="response" value="{{ response.pk }}">
+        <button class="btn btn-accent btn-sm">{% icon "plus" "icon-sm" %} Iqtidorlar reyestriga qo'shish</button></form>{% endif %}
+    {% endif %}
+    {% if can_edit %}<form method="post" action="{% url 'web:survey-response-delete' survey.pk response.pk %}" onsubmit="return confirm('Javob o\'chirilsinmi?')">{% csrf_token %}<button class="btn btn-ghost btn-sm text-danger">{% icon "trash" "icon-sm" %} O'chirish</button></form>{% endif %}
+  </div>
+</div>
+
+<div class="layout-main-aside">
+  <div class="stack">
+    {% for question, answer in rows %}
+    {% if answer is None %}
+    <h2 class="survey-h2 survey-result-section">{{ question.title }}</h2>
+    {% else %}
+    <div class="card survey-answer">
+      <div class="tiny muted bold">{{ question.title }}</div>
+      {% if answer %}<div class="survey-answer-text">{{ answer|linebreaksbr }}</div>{% else %}<div class="muted small">Javob berilmagan</div>{% endif %}
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+  <aside class="stack">
+    <div class="card stack-sm">
+      <h3>Talaba</h3>
+      <div class="list">
+        <div class="list-item"><span class="muted small grow">F.I.Sh.</span><b class="small">{{ response.full_name|default:"—" }}</b></div>
+        <div class="list-item"><span class="muted small grow">Fakultet</span><b class="small">{{ response.faculty.short_name|default:"—" }}</b></div>
+        <div class="list-item"><span class="muted small grow">Kurs</span><b class="small">{% if response.course %}{{ response.course }}-kurs{% else %}—{% endif %}</b></div>
+        <div class="list-item"><span class="muted small grow">Guruh</span><b class="small">{{ response.group|default:"—" }}</b></div>
+        <div class="list-item"><span class="muted small grow">Telefon</span><b class="small">{% if response.phone %}<a href="tel:{{ response.phone }}">{{ response.phone }}</a>{% else %}—{% endif %}</b></div>
+        <div class="list-item"><span class="muted small grow">Akkaunt</span><b class="small">{% if response.user_id %}{{ response.user.username }}{% else %}platformada yo'q{% endif %}</b></div>
+      </div>
+      {% if response.user_id and response.user.portfolio_slug and response.user.is_public %}<a href="{% url 'web:portfolio' response.user.portfolio_slug %}" class="btn btn-ghost btn-sm">{% icon "user" "icon-sm" %} Portfolio</a>{% endif %}
+    </div>
+  </aside>
+</div>
+{% endblock %}

@@ -22,6 +22,8 @@ from apps.opportunities.models import Opportunity, Redemption, Reward, Sponsor
 from apps.profiles.models import Achievement, Skill, UserSkill
 from apps.projects import services as project_services
 from apps.projects.models import Project, ProjectMember
+from apps.surveys import services as survey_services
+from apps.surveys.models import Survey
 from apps.talent import diagnostics as talent_diagnostics
 from apps.talent import services as talent_services
 from apps.talent.models import DevelopmentGoal, TalentProfile
@@ -336,6 +338,7 @@ class Command(BaseCommand):
         self._demo_activity(teacher, students)
         self._demo_sponsors(students)
         self._demo_talent(teacher, rector, students)
+        self._demo_surveys(rector, students, faculties)
         self.stdout.write(self.style.SUCCESS("Demo ma'lumotlar yaratildi (parol: demo12345)"))
 
     def _demo_talent(self, teacher, rector, students):
@@ -393,6 +396,53 @@ class Command(BaseCommand):
                                                     by=rector)  # fmt: skip
         talent_services.assign_mentor(profile, teacher, by=rector)
         Opportunity.objects.filter(title__endswith="(demo)", tracks=[]).update(tracks=[Track.IT, Track.INVENTION])
+
+    def _demo_surveys(self, rector, students, faculties):
+        """Iqtidorlarni ro'yxatga olish so'rovnomasi: platformadagi va anonim javoblar bilan."""
+        title = "Iqtidorli talabalarni ro'yxatga olish (demo)"
+        if Survey.objects.filter(title=title).exists():
+            return
+        survey = survey_services.create_survey(rector, "census")
+        survey.title = title
+        survey.closes_at = timezone.now() + timedelta(days=21)
+        survey.save()
+        survey_services.publish(survey)
+        by_title = {q.title: q for q in survey.questions.all()}
+        track_q = next(q for q in by_title.values() if q.kind == "track")
+        level_q = by_title["Eng yuqori natijangiz qaysi darajada?"]
+        did_q = by_title["Qaysi faoliyatlarda qatnashgansiz?"]
+        scale_q = by_title["O'z salohiyatingizni qanday baholaysiz?"]
+        mentor_q = by_title["Mentor (ustoz) bilan ishlashni xohlaysizmi?"]
+        story_q = by_title["Eng katta yutug'ingiz yoki loyihangiz haqida yozing"]
+        demo = [
+            (Track.IT, "Respublika", ["Hakaton yoki IT tanlov", "Fan olimpiadasi"], 5, "Ha, albatta",
+             "Viloyat hakatonida «Aqlli navbat» ilovasi bilan 2-o'rin oldim"),
+            (Track.INVENTION, "Viloyat", ["Ixtiro yoki patent"], 4, "Ha, albatta",
+             "Quyosh panelli sug'orish qurilmasi prototipini yasadim"),
+            (Track.RESEARCH, "OTM ichida", ["Ilmiy maqola yoki tezis"], 4, "Ha, imkon bo'lsa",
+             "Kafedra konferensiyasida tezis bilan chiqdim"),
+            (Track.STARTUP, "Hali qatnashmaganman", ["Startap tanlovi"], 3, "Ha, albatta",
+             "Talabalar uchun ijara xonalari platformasi g'oyasi bor"),
+            (Track.OLYMPIAD, "Respublika", ["Fan olimpiadasi"], 5, "Ha, imkon bo'lsa",
+             "Matematika fan olimpiadasida respublika bosqichi 3-o'rin"),
+            (Track.CREATIVE, "OTM ichida", ["Ijodiy tanlov"], 3, "Hozircha yo'q", ""),
+        ]  # fmt: skip
+        anonymous = ["Sardorbek Qodirov", "Nilufar Ergasheva"]
+        people = [(s, s.get_full_name() or s.username) for s in students[:4]] + [(None, n) for n in anonymous]
+        rows = zip(people[: len(demo)], demo[: len(people)], strict=True)
+        for index, ((student, name), (track, level, did, score, mentor, story)) in enumerate(rows):
+            answers = {str(track_q.pk): track, str(level_q.pk): level, str(did_q.pk): did,
+                       str(scale_q.pk): score, str(mentor_q.pk): mentor}  # fmt: skip
+            if story:
+                answers[str(story_q.pk)] = story
+            survey_services.submit(
+                survey,
+                answers=answers,
+                identity={"full_name": name, "faculty": faculties[index % len(faculties)], "course": 1 + index % 4,
+                          "group": f"{210 + index}-21", "phone": f"+998 90 12{index} 45 67"},
+                user=student,
+                browser_key=f"demo-{index}" if student is None else "",
+            )  # fmt: skip
 
     def _demo_sponsors(self, students):
         """Demo homiylar: nomlari to'qima, «(demo)» belgisi bilan. Haqiqiy homiylar admin paneldan qo'shiladi."""

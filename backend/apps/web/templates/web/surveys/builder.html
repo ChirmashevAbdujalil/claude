@@ -1,0 +1,93 @@
+{% extends "web/layout.html" %}
+{% load static web_tags %}
+{% block title %}{{ survey.title }} · konstruktor{% endblock %}
+
+{% block content %}
+<a href="{% url 'web:surveys' %}" class="back-link">{% icon "arrow-left" "icon-sm" %} So'rovnomalar</a>
+<div class="page-header">
+  <div>
+    <div class="row-sm wrap"><h1>{{ survey.title }}</h1><span class="chip survey-status-{{ survey.status }}">{{ survey.get_status_display }}</span></div>
+    <p>Savollarni qo'shing, tartibini o'zgartiring va saqlang. {% if responses %}Hozircha {{ responses }} ta javob bor: savolni o'chirsangiz, unga berilgan javoblar natijalarda ko'rinmaydi.{% endif %}</p>
+  </div>
+  <div class="row-sm wrap">
+    <a href="{% url 'web:survey-fill' survey.token %}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">{% icon "external" "icon-sm" %} Ko'rish</a>
+    <a href="{% url 'web:survey-results' survey.pk %}" class="btn btn-soft btn-sm">{% icon "chart" "icon-sm" %} Natijalar</a>
+  </div>
+</div>
+
+<form method="post" id="survey-form" class="layout-main-aside" data-survey-form>{% csrf_token %}
+  <div class="stack">
+    <section class="card card-lg survey-head-card stack-sm">
+      <div class="field"><label for="{{ form.title.id_for_label }}">Nomi</label>{{ form.title }}{% for e in form.title.errors %}<span class="error">{{ e }}</span>{% endfor %}</div>
+      <div class="field"><label for="{{ form.description.id_for_label }}">Tavsif <span class="muted" style="font-weight:500">(ixtiyoriy)</span></label>{{ form.description }}</div>
+    </section>
+
+    <input type="hidden" name="schema" id="survey-schema">
+    {{ schema|json_script:"survey-schema-data" }}
+    {{ kinds|json_script:"survey-kinds-data" }}
+    <div id="survey-builder" class="sb stack" aria-live="polite"></div>
+    <noscript><div class="card form-errors">Konstruktor ishlashi uchun brauzerda JavaScript yoqilgan bo'lishi kerak.</div></noscript>
+
+    <div class="card sb-add">
+      <button type="button" class="btn btn-primary" data-add="short">{% icon "plus" "icon-sm" %} Savol qo'shish</button>
+      <div class="sb-add-kinds">
+        <button type="button" class="chip chip-outline" data-add="single">◉ Bitta variant</button>
+        <button type="button" class="chip chip-outline" data-add="multiple">☑ Bir nechta</button>
+        <button type="button" class="chip chip-outline" data-add="long">¶ Batafsil javob</button>
+        <button type="button" class="chip chip-outline" data-add="scale">★ Shkala</button>
+        <button type="button" class="chip chip-outline" data-add="track">🧭 Iqtidor yo'nalishi</button>
+        <button type="button" class="chip chip-outline" data-add="section">§ Bo'lim</button>
+      </div>
+    </div>
+
+    <div class="sb-savebar card">
+      <span class="small muted" data-sb-count></span>
+      <div class="row-sm wrap">
+        <button class="btn btn-primary" name="then" value="save">{% icon "check" "icon-sm" %} Saqlash</button>
+      </div>
+    </div>
+  </div>
+
+  <aside class="stack">
+    <div class="card stack-sm">
+      <h3>E'lon qilish</h3>
+      {% if survey.status == "open" %}
+      <p class="small muted">So'rovnoma javob qabul qilmoqda. Havola va QR kodni tarqating.</p>
+      <button class="btn btn-ghost btn-block" form="survey-status-form" name="action" value="close">Javob qabul qilishni to'xtatish</button>
+      {% else %}
+      <p class="small muted">{% if survey.status == "closed" %}So'rovnoma yopilgan. Qayta ochsangiz, yana javob qabul qilinadi.{% else %}Hozircha qoralama: uni faqat siz ko'rasiz.{% endif %}</p>
+      <label class="check small"><input type="checkbox" name="notify" value="1" {% if survey.status == "draft" %}checked{% endif %}> Barcha talabalarga bildirishnoma yuborish</label>
+      <button class="btn btn-gradient btn-block" name="then" value="publish">{% icon "send" "icon-sm" %} {% if survey.status == "closed" %}Qayta ochish{% else %}Saqlash va e'lon qilish{% endif %}</button>
+      {% endif %}
+    </div>
+
+    <div class="card stack-sm">
+      <h3>Sozlamalar</h3>
+      {% for field in form %}{% if field.name != "title" and field.name != "description" %}{% include "web/partials/field.html" %}{% endif %}{% endfor %}
+    </div>
+
+    <div class="card stack-sm survey-share">
+      <h3>Tarqatish</h3>
+      <div class="qr-box">{{ share.qr }}</div>
+      <div class="survey-link mono tiny">{{ share.url }}</div>
+      <div class="row-sm wrap">
+        <button type="button" class="btn btn-primary btn-sm" data-copy="{{ share.url }}">{% icon "link" "icon-sm" %} <span data-label>Havolani nusxalash</span></button>
+        <a href="{% url 'web:survey-poster' survey.pk %}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">{% icon "file" "icon-sm" %} QR plakat</a>
+      </div>
+      <p class="tiny muted">Plakatni chop etib, yotoqxona, kutubxona va o'quv binolariga osing: talaba telefonini tutib javob beradi.</p>
+    </div>
+
+    <div class="card stack-sm">
+      <h3>Boshqa amallar</h3>
+      <button class="btn btn-ghost btn-sm btn-block" form="survey-copy-form">{% icon "copy" "icon-sm" %} Nusxa olish</button>
+      <button class="btn btn-danger btn-sm btn-block" form="survey-delete-form">{% icon "trash" "icon-sm" %} O'chirish</button>
+    </div>
+  </aside>
+</form>
+
+<form method="post" action="{% url 'web:survey-status' survey.pk %}" id="survey-status-form">{% csrf_token %}<input type="hidden" name="next" value="{% url 'web:survey-builder' survey.pk %}"></form>
+<form method="post" action="{% url 'web:survey-duplicate' survey.pk %}" id="survey-copy-form">{% csrf_token %}</form>
+<form method="post" action="{% url 'web:survey-delete' survey.pk %}" id="survey-delete-form" onsubmit="return confirm('So\'rovnoma va unga berilgan barcha javoblar o\'chiriladi. Davom etasizmi?')">{% csrf_token %}</form>
+{% endblock %}
+
+{% block scripts %}<script src="{% static 'web/js/survey-builder.js' %}" defer></script>{% endblock %}
