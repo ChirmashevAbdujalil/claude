@@ -15,6 +15,7 @@ from apps.opportunities.models import Sponsor
 from apps.profiles.models import Achievement, UserSkill
 from apps.profiles.services import skill_map
 from apps.projects.models import Project
+from apps.surveys.models import IssuedAccount
 from apps.talent import services as talent_services
 from apps.talent.models import TalentProfile
 
@@ -55,6 +56,9 @@ def login_view(request):
             form.add_error(None, "Login yoki parol noto'g'ri")
         else:
             login(request, user)
+            if IssuedAccount.objects.filter(user=user, must_change_password=True).exists():
+                messages.info(request, "Xush kelibsiz! Avval o'zingizning yangi parolingizni o'rnating")
+                return redirect("web:password-change")
             messages.success(request, f"Xush kelibsiz, {user.first_name or user.username}!")
             return redirect(_safe_next(request))
     return render(request, "web/auth/login.html", {"form": form, "next": request.GET.get("next", "")})

@@ -23,6 +23,13 @@
     <h1>Javobingiz qabul qilindi!</h1>
     <p>{{ survey.thank_you|default:"Rahmat! Fikringiz biz uchun muhim." }}</p>
     {% if xp %}<span class="sv-done-xp">⚡ +{{ xp }} XP hisobingizga qo'shildi</span>{% endif %}
+    {% if new_account %}
+    <div class="sv-account">
+      <span class="sv-account-icon">🎓</span>
+      <div><b>Siz uchun platformada akkaunt ochildi!</b>
+        <span>Login va parolingizni guruh sardoringiz yoki dekanat orqali olasiz. Birinchi kirishda o'z parolingizni o'rnatasiz.{% if survey.xp_reward %} Hisobingizda allaqachon +{{ survey.xp_reward }} XP bor.{% endif %}</span></div>
+    </div>
+    {% endif %}
     {% elif state == "answered" %}
     <div class="sv-done-badge">📬</div>
     <h1>Siz allaqachon javob bergansiz</h1>

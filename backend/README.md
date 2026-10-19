@@ -197,6 +197,14 @@ orqali javob beradi. Asosiy vazifasi: butun institut bo'yicha iqtidorli talabala
 - **Kim javob beradi:** havolasi bor har qanday talaba, ro'yxatdan o'tmasdan va profilsiz. Talaba ma'lumotlari
   (F.I.Sh., fakultet, kurs, guruh, telefon) formada so'raladi; platformaga kirgan talabada profildan to'ldiriladi.
 - **Takrorlanmaslik:** har kim bir marta javob beradi (akkaunt yoki brauzer bo'yicha); botlar uchun tuzoq maydon.
+- **Avtomatik akkaunt:** platformada akkaunti yo'q talaba so'rovnomani yuborishi bilan unga talaba akkaunti
+  ochiladi: login ism-familiyadan (kirill ham lotinga o'giriladi), parol tasodifiy (masalan `kmr7-4tqx`). Shu talaba
+  boshqa so'rovnomani to'ldirsa, telefon yoki ism-fakultet-kurs bo'yicha o'sha akkauntga bog'lanadi.
+- **Login va parollar** (`/akkauntlar/`): jadval, filtrlar, nusxalash, «Yangi parol»; Word'da ikki xil fayl:
+  fakultetlar bo'yicha jadval («Oldim (imzo)» ustuni bilan) va qirqib beriladigan kartochkalar. Dekan faqat
+  o'z fakultetini ko'radi, har bir yuklab olish harakatlar jurnaliga yoziladi.
+- **Xavfsizlik:** boshlang'ich parol faqat talaba birinchi marta kirguncha saqlanadi; birinchi kirishda talaba
+  o'z parolini o'rnatadi va boshlang'ich parol ro'yxatdan o'chadi.
 - **Rag'bat:** platformaga kirib javob bergan talabaga XP (bir marta). E'lon qilishda barcha talabalarga
   bildirishnoma yuborish mumkin.
 

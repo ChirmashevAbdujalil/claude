@@ -36,6 +36,9 @@
     </header>
 
     <main class="main" id="main">
+      {% if must_change_password %}
+      <a href="{% url 'web:password-change' %}" class="card pw-banner">🔐 <span><b>Xavfsizlik uchun parolingizni almashtiring.</b> Sizga berilgan boshlang'ich parol o'rniga o'zingiz biladigan parolni o'rnating.</span><span class="btn btn-primary btn-sm">Almashtirish</span></a>
+      {% endif %}
       {% block content %}{% endblock %}
     </main>
   </div>

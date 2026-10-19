@@ -370,7 +370,7 @@ def survey_fill(request, token):
             identity = SurveyIdentityForm(request.POST)
         if not errors and (identity is None or identity.is_valid()):
             try:
-                services.submit(
+                saved = services.submit(
                     survey,
                     answers=answers,
                     identity=identity.cleaned_data if identity is not None else None,
@@ -380,6 +380,8 @@ def survey_fill(request, token):
             except SurveyError as exc:
                 messages.error(request, str(exc))
             else:
+                if not user.is_authenticated and saved.user_id:
+                    request.session[f"sv-account:{survey.token}"] = True
                 return redirect("web:survey-thanks", token=survey.token)
         else:
             messages.error(request, "Ba'zi javoblarda xato bor: belgilangan savollarni tekshiring")
@@ -417,5 +419,11 @@ def survey_thanks(request, token):
         else None
     )
     xp = reward or 0
-    context = {"survey": survey, "state": "thanks", "xp": xp, "share_url": _fill_url(request, survey)}
+    context = {
+        "survey": survey,
+        "state": "thanks",
+        "xp": xp,
+        "share_url": _fill_url(request, survey),
+        "new_account": request.session.pop(f"sv-account:{survey.token}", False),
+    }
     return render(request, "web/surveys/done.html", context)

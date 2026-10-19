@@ -8,6 +8,7 @@ from .views import (
     challenges,
     coins,
     community,
+    credentials,
     home,
     onboarding,
     opportunities,
@@ -134,5 +135,11 @@ urlpatterns = [
         name="survey-response-delete",
     ),
     path("s/<slug:token>/", surveys.survey_fill, name="survey-fill"),
+    # Login va parollar
+    path("akkauntlar/", credentials.credentials, name="credentials"),
+    path("akkauntlar/word/", credentials.credentials_word, name="credentials-word"),
+    path("akkauntlar/<int:pk>/yangi-parol/", credentials.credentials_reset, name="credentials-reset"),
+    path("akkauntlar/sorovnoma/<int:pk>/ochish/", credentials.credentials_provision, name="credentials-provision"),
+    path("profile/parol/", credentials.password_change, name="password-change"),
     path("s/<slug:token>/rahmat/", surveys.survey_thanks, name="survey-thanks"),
 ]

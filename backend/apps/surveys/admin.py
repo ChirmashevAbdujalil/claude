@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from apps.tenants.admin import TenantAdminMixin
 
-from .models import Question, Response, Survey
+from .models import IssuedAccount, Question, Response, Survey
 
 
 class QuestionInline(admin.StackedInline):
@@ -38,3 +38,11 @@ class ResponseAdmin(admin.ModelAdmin):
     list_filter = ["survey", "faculty"]
     search_fields = ["full_name", "user__username", "phone"]
     readonly_fields = ["survey", "user", "answers", "submitted_at"]
+
+
+@admin.register(IssuedAccount)
+class IssuedAccountAdmin(admin.ModelAdmin):
+    list_display = ["user", "survey", "group", "phone", "created_at", "first_login_at", "must_change_password"]
+    list_filter = ["must_change_password", "survey"]
+    search_fields = ["user__username", "user__first_name", "user__last_name", "phone", "group"]
+    readonly_fields = ["user", "survey", "initial_password", "created_at", "first_login_at"]

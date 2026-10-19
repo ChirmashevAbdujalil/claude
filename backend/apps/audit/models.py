@@ -25,6 +25,7 @@ class AuditLog(models.Model):
         LOGIN = "login", "Tizimga kirdi"
         LOGOUT = "logout", "Tizimdan chiqdi"
         LOGIN_FAILED = "login_failed", "Kirish urinishi muvaffaqiyatsiz"
+        EXPORT = "export", "Ma'lumotni yuklab oldi"
 
     institution = models.ForeignKey(
         "tenants.Institution",

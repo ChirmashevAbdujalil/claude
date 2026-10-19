@@ -373,6 +373,11 @@ def submit(survey, *, answers, identity=None, user=None, browser_key="") -> Resp
         answers=answers,
         browser_key="" if user else browser_key[:32],
     )
+    if user is None and survey.create_accounts and survey.collect_identity:
+        from .accounts import provision
+
+        account, _ = provision(response)
+        user = account.user if account is not None else None
     if user is not None and user.role == User.Role.STUDENT and survey.xp_reward:
         arena.award(user, PointTransaction.Reason.SURVEY, min(survey.xp_reward, MAX_XP), ref=f"survey:{survey.pk}",
                     note=survey.title[:100])  # fmt: skip

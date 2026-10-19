@@ -218,7 +218,8 @@ def test_anonymous_student_fills_public_survey_once(web, survey, faculty):
     response = client.post(url, post_data(survey, faculty))
     assert response.status_code == 302 and response.url == reverse("web:survey-thanks", args=[survey.token])
     saved = Response.objects.get(survey=survey)
-    assert saved.user is None and saved.full_name == "Aziza Karimova" and saved.faculty == faculty
+    assert saved.full_name == "Aziza Karimova" and saved.faculty == faculty
+    assert saved.user.issued_account.initial_password  # akkaunt avtomatik ochildi
     assert saved.course == 2 and saved.answers[str(q(survey, Kind.TRACK).pk)] == Track.IT
     assert "qabul qilindi" in client.get(response.url).content.decode()
 
@@ -270,7 +271,7 @@ def test_anyone_can_answer_without_account(web, survey, faculty):
     assert page.status_code == 200 and "Yuborish" in page.content.decode()
     web().post(url, post_data(survey, faculty))
     saved = Response.objects.get(survey=survey)
-    assert saved.user is None and saved.full_name == "Aziza Karimova"
+    assert saved.full_name == "Aziza Karimova" and saved.user.role == User.Role.STUDENT
 
 
 def test_draft_is_hidden_but_management_can_preview(web, rector, student, faculty):
@@ -399,6 +400,8 @@ def test_summary_counts_answers(rector, survey, faculty):
 
 
 def test_results_pages_and_csv_export(web, rector, survey, faculty):
+    survey.create_accounts = False
+    survey.save()
     services.submit(
         survey,
         answers={str(q(survey, Kind.TRACK).pk): Track.STARTUP},
@@ -424,6 +427,8 @@ def test_results_pages_and_csv_export(web, rector, survey, faculty):
 
 
 def test_register_respondents_in_talent_registry(web, rector, survey, student, faculty):
+    survey.create_accounts = False
+    survey.save()
     linked = services.submit(survey, answers={str(q(survey, Kind.TRACK).pk): Track.INVENTION}, user=student)
     anonymous = services.submit(survey, answers={}, identity={"full_name": "Anonim talaba", "faculty": faculty})
     response = web(rector).post(
@@ -460,7 +465,8 @@ def test_demo_seed_creates_census_with_responses():
     call_command("seed", "--demo", verbosity=0)
     survey = Survey.objects.get(title__endswith="(demo)")
     assert survey.status == Survey.Status.OPEN and survey.responses.count() == 6
-    assert survey.responses.filter(user__isnull=True).count() == 2
+    assert not survey.responses.filter(user__isnull=True).exists()
+    assert survey.issued_accounts.count() == 2  # anonim javob berganlarga akkaunt ochildi
 
 
 def test_answer_items_and_navigation(rector, survey, student, faculty):

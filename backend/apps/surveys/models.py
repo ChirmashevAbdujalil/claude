@@ -45,6 +45,12 @@ class Survey(models.Model):
         default=False,
         help_text="Javob bergan talabalarni natijalar sahifasidan bir bosishda iqtidorlar reyestriga qo'shish mumkin",
     )
+    create_accounts = models.BooleanField(
+        "javob berganlarga akkaunt ochish",
+        default=True,
+        help_text="Platformada akkaunti yo'q talabaga login va parol avtomatik yaratiladi. "
+        "Ular «Login va parollar» sahifasida chiqadi",
+    )
     xp_reward = models.PositiveSmallIntegerField(
         "javob uchun XP", default=0, help_text="Platformaga kirib javob bergan talabaga bir marta beriladi"
     )
@@ -174,3 +180,47 @@ class Response(models.Model):
         if self.user_id:
             return str(self.user)
         return "Anonim"
+
+
+class IssuedAccount(models.Model):
+    """So'rovnoma javobidan avtomatik ochilgan talaba akkaunti va uning boshlang'ich paroli.
+
+    Boshlang'ich parol rahbariyat talabaga berishi uchun faqat talaba birinchi marta kirguncha saqlanadi:
+    birinchi kirishda o'chiriladi va talaba o'z parolini o'rnatadi.
+    """
+
+    tenant_path = "user__institution"
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="issued_account", verbose_name="talaba"
+    )
+    survey = models.ForeignKey(
+        Survey,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="issued_accounts",
+        verbose_name="so'rovnoma",
+    )
+    initial_password = models.CharField("boshlang'ich parol", max_length=40, blank=True)
+    must_change_password = models.BooleanField("parolni almashtirishi kerak", default=True)
+    group = models.CharField("guruh", max_length=40, blank=True)
+    phone = models.CharField("telefon", max_length=30, blank=True)
+    phone_key = models.CharField(max_length=15, blank=True, db_index=True, editable=False)
+    created_at = models.DateTimeField("ochilgan", default=timezone.now, db_index=True)
+    first_login_at = models.DateTimeField("birinchi kirgan", null=True, blank=True)
+
+    objects = TenantManager()
+
+    class Meta:
+        verbose_name = "ochilgan akkaunt"
+        verbose_name_plural = "so'rovnomadan ochilgan akkauntlar"
+        ordering = ["-created_at", "-id"]
+
+    def __str__(self):
+        return str(self.user)
+
+    @property
+    def is_waiting(self) -> bool:
+        """Talaba hali kirmagan: boshlang'ich parol berilishi kerak."""
+        return bool(self.initial_password)

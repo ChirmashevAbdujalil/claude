@@ -476,8 +476,17 @@ class StudentGoalForm(forms.ModelForm):
 class SurveyForm(forms.ModelForm):
     class Meta:
         model = Survey
-        fields = ["title", "description", "collect_identity", "one_response", "talent_census", "xp_reward",
-                  "closes_at", "thank_you"]  # fmt: skip
+        fields = [
+            "title",
+            "description",
+            "collect_identity",
+            "create_accounts",
+            "one_response",
+            "talent_census",
+            "xp_reward",
+            "closes_at",
+            "thank_you",
+        ]
         widgets = {
             "description": forms.Textarea(
                 attrs={"rows": 3, "placeholder": "Talabalarga so'rovnoma maqsadini tushuntiring"}
