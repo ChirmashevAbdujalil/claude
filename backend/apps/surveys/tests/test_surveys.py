@@ -267,7 +267,7 @@ def test_anyone_can_answer_without_account(web, survey, faculty):
     """Ro'yxatdan o'tmagan, profilsiz talaba ham javob yuboradi: login sahifasiga yo'naltirilmaydi."""
     url = reverse("web:survey-fill", args=[survey.token])
     page = web().get(url)
-    assert page.status_code == 200 and "Javobni yuborish" in page.content.decode()
+    assert page.status_code == 200 and "Yuborish" in page.content.decode()
     web().post(url, post_data(survey, faculty))
     saved = Response.objects.get(survey=survey)
     assert saved.user is None and saved.full_name == "Aziza Karimova"

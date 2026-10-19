@@ -355,13 +355,15 @@ def survey_fill(request, token):
         else:
             messages.error(request, "Ba'zi javoblarda xato bor: belgilangan savollarni tekshiring")
 
+    answerable = sum(1 for q in questions if q.is_answerable)
     context = {
         "survey": survey,
         "fields": _fields(questions, request.POST if request.method == "POST" else None, errors),
         "identity": identity,
         "preview": preview,
         "required_count": sum(1 for q in questions if q.required),
-        "answerable": sum(1 for q in questions if q.is_answerable),
+        "answerable": answerable,
+        "minutes": max(1, round(answerable * 0.4)),
         "other": services.OTHER,
     }
     response = render(request, "web/surveys/fill.html", context)

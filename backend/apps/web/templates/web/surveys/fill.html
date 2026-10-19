@@ -1,44 +1,61 @@
 {% extends "web/base.html" %}
-{% load web_tags %}
+{% load static web_tags %}
 {% block title %}{{ survey.title }}{% endblock %}
 {% block description %}{{ survey.description|default:survey.title|truncatechars:150 }}{% endblock %}
+{% block body_class %}sv-body{% endblock %}
 
 {% block body %}
-<header class="landing-nav">
-  <a href="{% if user.is_authenticated %}{% url 'web:dashboard' %}{% else %}{% url 'web:landing' %}{% endif %}" class="brand">{% brand_logo 40 %}<span>{{ brand_name }}<small>{{ institution_name }}</small></span></a>
-  {% if user.is_authenticated %}<a href="{% url 'web:surveys' %}" class="btn btn-ghost btn-sm">So'rovnomalar</a>
-  {% else %}<a href="{% url 'web:login' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-ghost btn-sm">Kirish</a>{% endif %}
+<div class="sv-progress" aria-hidden="true"><span data-progress-bar></span></div>
+
+<header class="sv-top">
+  <a href="{% if user.is_authenticated %}{% url 'web:dashboard' %}{% else %}{% url 'web:landing' %}{% endif %}" class="brand">{% brand_logo 38 %}<span>{{ brand_name }}<small>{{ institution_name }}</small></span></a>
+  <div class="row-sm">
+    <button type="button" class="bell theme-toggle" data-theme-toggle aria-label="Yorug' yoki qorong'i rejim" title="Rejimni almashtirish">
+      <span class="when-light">{% icon "moon" %}</span><span class="when-dark">{% icon "sun" %}</span>
+    </button>
+  </div>
 </header>
 
-<main class="survey-page">
-  {% include "web/partials/messages.html" %}
+<main class="sv-wrap">
   {% if preview %}
-  <div class="card survey-preview-note">👁 Ko'rish rejimi: so'rovnoma hali e'lon qilinmagan, javob yuborilmaydi. <a href="{% url 'web:survey-builder' survey.pk %}" class="bold">Konstruktorga qaytish</a></div>
+  <div class="sv-note sv-note-warn">👁 <span><b>Ko'rish rejimi.</b> So'rovnoma hali e'lon qilinmagan, javob yuborilmaydi. <a href="{% url 'web:survey-builder' survey.pk %}">Konstruktorga qaytish</a></span></div>
   {% endif %}
 
-  <section class="card card-lg survey-intro">
+  <section class="sv-hero">
+    <div class="sv-hero-deco" aria-hidden="true"><i></i><i></i><i></i></div>
+    <span class="sv-tag">{% if survey.talent_census %}🧭 Iqtidorlarni ro'yxatga olish{% else %}📝 So'rovnoma{% endif %}</span>
     <h1>{{ survey.title }}</h1>
-    {% if survey.description %}<p class="survey-desc">{{ survey.description|linebreaksbr }}</p>{% endif %}
-    <div class="row-sm wrap tiny muted">
-      <span>📝 {{ answerable }} ta savol</span>
-      {% if required_count %}<span><span class="survey-req">*</span> majburiy savollar</span>{% endif %}
-      {% if survey.closes_at %}<span>⏳ {{ survey.closes_at|date:"d.m.Y H:i" }} gacha</span>{% endif %}
-      {% if survey.xp_reward %}<span class="chip chip-primary">+{{ survey.xp_reward }} XP</span>{% endif %}
+    {% if survey.description %}<p class="sv-hero-desc">{{ survey.description|linebreaksbr }}</p>{% endif %}
+    <div class="sv-pills">
+      <span class="sv-pill">📝 {{ answerable }} ta savol</span>
+      <span class="sv-pill">⏱ ~{{ minutes }} daqiqa</span>
+      {% if survey.closes_at %}<span class="sv-pill">⏳ {{ survey.closes_at|date:"d.m.Y H:i" }} gacha</span>{% endif %}
+      {% if survey.xp_reward %}<span class="sv-pill sv-pill-gold">⚡ +{{ survey.xp_reward }} XP</span>{% endif %}
     </div>
-    {% if not user.is_authenticated and survey.xp_reward %}
-    <p class="small survey-login-hint">Platformada akkauntingiz bo'lsa, <a href="{% url 'web:login' %}?next={{ request.get_full_path|urlencode }}" class="bold">kiring</a>: javobingiz profilingizga bog'lanadi va +{{ survey.xp_reward }} XP olasiz.</p>
-    {% endif %}
   </section>
 
-  <form method="post" class="stack survey-form" novalidate>{% csrf_token %}
+  <div class="sv-note">
+    <span class="sv-note-icon">✓</span>
+    <span>{% if user.is_authenticated %}Siz <b>{{ user|display_name }}</b> sifatida javob beryapsiz: javobingiz profilingizga bog'lanadi.{% else %}<b>Ro'yxatdan o'tish shart emas.</b> Savollarga javob bering va «Yuborish» tugmasini bosing.{% if survey.xp_reward %} Platformada akkauntingiz bo'lsa, <a href="{% url 'web:login' %}?next={{ request.get_full_path|urlencode }}">kiring</a> va +{{ survey.xp_reward }} XP oling.{% endif %}{% endif %}</span>
+  </div>
+
+  <form method="post" class="sv-form" novalidate data-survey-fill data-draft-key="sv-draft:{{ survey.token }}" data-restore="{% if request.method == 'GET' and not preview %}1{% endif %}">{% csrf_token %}
     <div class="survey-trap" aria-hidden="true"><label>Sayt <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
 
     {% if identity %}
-    <section class="card survey-q stack-sm">
-      <h2 class="survey-section-title">Siz haqingizda</h2>
-      {% if user.is_authenticated %}<p class="tiny muted">Profilingizdan to'ldirildi: kerak bo'lsa, tuzating.</p>{% endif %}
-      <div class="survey-identity">
-        {% for field in identity %}{% include "web/partials/field.html" %}{% endfor %}
+    <section class="sv-card sv-identity">
+      <div class="sv-card-head">
+        <span class="sv-icon">👤</span>
+        <div><h2>Siz haqingizda</h2><p>{% if user.is_authenticated %}Profilingizdan to'ldirildi: kerak bo'lsa, tuzating.{% else %}Javobingiz kimga tegishli ekanini bilishimiz uchun.{% endif %}</p></div>
+      </div>
+      <div class="sv-identity-grid">
+        {% for field in identity %}
+        <div class="field {% if field.errors %}has-error{% endif %} {% if field.name == 'full_name' %}sv-span-2{% endif %}">
+          <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="sv-req">*</span>{% else %} <span class="muted" style="font-weight:500">(ixtiyoriy)</span>{% endif %}</label>
+          {{ field }}
+          {% for error in field.errors %}<span class="error">{{ error }}</span>{% endfor %}
+        </div>
+        {% endfor %}
       </div>
     </section>
     {% endif %}
@@ -46,87 +63,80 @@
     {% for f in fields %}
     {% with q=f.q %}
     {% if q.kind == "section" %}
-    <section class="survey-section">
-      <h2 class="survey-section-title">{{ q.title }}</h2>
-      {% if q.help_text %}<p class="small muted">{{ q.help_text }}</p>{% endif %}
-    </section>
+    <div class="sv-section">
+      <h2>{{ q.title }}</h2>
+      {% if q.help_text %}<p>{{ q.help_text }}</p>{% endif %}
+    </div>
     {% else %}
-    <fieldset class="card survey-q {% if f.error %}has-error{% endif %}" id="savol-{{ q.pk }}">
-      <legend class="survey-q-title">{{ q.title }}{% if q.required %} <span class="survey-req" aria-label="majburiy">*</span>{% endif %}</legend>
-      {% if q.help_text %}<p class="small muted survey-q-help">{{ q.help_text }}</p>{% endif %}
+    <fieldset class="sv-card sv-q {% if f.error %}has-error{% endif %}" id="savol-{{ q.pk }}" data-q {% if q.required %}data-required{% endif %}>
+      <div class="sv-q-head">
+        <span class="sv-qno" data-qno></span>
+        <legend>{{ q.title }}{% if q.required %} <span class="sv-req" title="Majburiy">*</span>{% endif %}</legend>
+      </div>
+      {% if q.help_text %}<p class="sv-q-help">{{ q.help_text }}</p>{% endif %}
 
       {% if q.kind == "short" or q.kind == "email" or q.kind == "phone" or q.kind == "number" or q.kind == "date" %}
-      <input class="input" name="{{ f.name }}" value="{{ f.value }}" aria-label="{{ q.title }}"
-        {% if q.kind == "email" %}type="email" autocomplete="email" placeholder="ism@pochta.uz"
-        {% elif q.kind == "phone" %}type="tel" inputmode="tel" placeholder="+998 90 123 45 67"
-        {% elif q.kind == "number" %}type="text" inputmode="decimal" placeholder="Raqam"
+      <input class="input sv-input" name="{{ f.name }}" value="{{ f.value }}" aria-label="{{ q.title }}"
+        {% if q.kind == "email" %}type="email" autocomplete="email" inputmode="email" placeholder="ism@pochta.uz"
+        {% elif q.kind == "phone" %}type="tel" inputmode="tel" autocomplete="tel" placeholder="+998 90 123 45 67"
+        {% elif q.kind == "number" %}type="text" inputmode="decimal" placeholder="Raqam kiriting"
         {% elif q.kind == "date" %}type="date"
-        {% else %}type="text" maxlength="500" placeholder="Javobingiz"{% endif %}>
+        {% else %}type="text" maxlength="500" placeholder="Javobingizni yozing"{% endif %}>
       {% elif q.kind == "long" %}
-      <textarea class="input" name="{{ f.name }}" rows="4" maxlength="5000" placeholder="Javobingiz" aria-label="{{ q.title }}">{{ f.value }}</textarea>
+      <textarea class="input sv-input" name="{{ f.name }}" rows="4" maxlength="5000" placeholder="Javobingizni yozing" aria-label="{{ q.title }}" data-autogrow>{{ f.value }}</textarea>
       {% elif q.kind == "dropdown" %}
-      <select class="input" name="{{ f.name }}" aria-label="{{ q.title }}">
+      <select class="input sv-input" name="{{ f.name }}" aria-label="{{ q.title }}">
         <option value="">Tanlang</option>
         {% for value, text in f.choices %}<option value="{{ value }}" {% if f.value == value %}selected{% endif %}>{{ text }}</option>{% endfor %}
       </select>
       {% elif q.kind == "scale" %}
-      <div class="survey-scale">
-        {% if q.scale_min_label %}<span class="tiny muted survey-scale-label">{{ q.scale_min_label }}</span>{% endif %}
-        <div class="survey-scale-row">
+      <div class="sv-scale" style="--n: {{ q.scale_max }}">
+        <div class="sv-scale-row" role="radiogroup" aria-label="{{ q.title }}">
           {% for value, text in f.choices %}
-          <label class="survey-scale-item"><input type="radio" name="{{ f.name }}" value="{{ value }}" {% if f.value == value %}checked{% endif %}><span>{{ text }}</span></label>
+          <label class="sv-scale-item"><input type="radio" name="{{ f.name }}" value="{{ value }}" {% if f.value == value %}checked{% endif %}><span>{{ text }}</span></label>
           {% endfor %}
         </div>
-        {% if q.scale_max_label %}<span class="tiny muted survey-scale-label">{{ q.scale_max_label }}</span>{% endif %}
+        {% if q.scale_min_label or q.scale_max_label %}
+        <div class="sv-scale-labels"><span>{{ q.scale_min_label }}</span><span>{{ q.scale_max_label }}</span></div>
+        {% endif %}
       </div>
       {% else %}
-      <div class="survey-options">
+      <div class="sv-options {% if q.kind == 'track' or f.choices|length > 4 %}sv-options-grid{% endif %}">
         {% for value, text in f.choices %}
-        <label class="diagnostic-option">
-          {% if q.kind == "multiple" %}<input type="checkbox" name="{{ f.name }}" value="{{ value }}" {% if value in f.values %}checked{% endif %}>
-          {% else %}<input type="radio" name="{{ f.name }}" value="{{ value }}" {% if f.value == value %}checked{% endif %}>{% endif %}
-          <span>{{ text }}</span>
+        <label class="sv-opt">
+          <input type="{% if q.kind == 'multiple' %}checkbox{% else %}radio{% endif %}" name="{{ f.name }}" value="{{ value }}" {% if q.kind == 'multiple' %}{% if value in f.values %}checked{% endif %}{% elif f.value == value %}checked{% endif %}>
+          <span class="sv-mark {% if q.kind == 'multiple' %}is-box{% endif %}" aria-hidden="true"></span>
+          <span class="sv-opt-text">{{ text }}</span>
         </label>
         {% endfor %}
         {% if q.allow_other %}
-        <label class="diagnostic-option survey-other">
+        <label class="sv-opt sv-opt-other">
           <input type="{% if q.kind == 'multiple' %}checkbox{% else %}radio{% endif %}" name="{{ f.name }}" value="{{ other }}" {% if f.other_checked %}checked{% endif %} data-other-toggle>
-          <span>Boshqa:</span>
-          <input type="text" class="input" name="{{ f.name }}_other" value="{{ f.other }}" maxlength="300" placeholder="o'zingiz yozing" aria-label="Boshqa variant" data-other-text>
+          <span class="sv-mark {% if q.kind == 'multiple' %}is-box{% endif %}" aria-hidden="true"></span>
+          <span class="sv-opt-text">Boshqa:</span>
+          <input type="text" class="sv-other-input" name="{{ f.name }}_other" value="{{ f.other }}" maxlength="300" placeholder="o'zingiz yozing" aria-label="Boshqa variant" data-other-text>
         </label>
         {% endif %}
       </div>
       {% endif %}
-      {% if f.error %}<p class="error small">{{ f.error }}</p>{% endif %}
+      <p class="sv-error" data-error>{{ f.error }}</p>
     </fieldset>
     {% endif %}
     {% endwith %}
     {% endfor %}
 
-    <div class="survey-submit">
-      {% if preview %}<button type="button" class="btn btn-primary btn-lg" disabled>Yuborish (ko'rish rejimi)</button>
-      {% else %}<button class="btn btn-gradient btn-lg">{% icon "send" "icon-sm" %} Javobni yuborish</button>{% endif %}
-      <span class="tiny muted">Javoblar faqat {{ institution_short }} rahbariyatiga ko'rinadi.</span>
+    <div class="sv-submit">
+      <div class="sv-submit-info">
+        <span class="sv-submit-count" data-progress-text>{{ answerable }} ta savol</span>
+        <span class="tiny muted">Javoblar faqat {{ institution_short }} rahbariyatiga ko'rinadi</span>
+      </div>
+      {% if preview %}<button type="button" class="btn btn-primary btn-lg" disabled>Ko'rish rejimi</button>
+      {% else %}<button class="btn btn-gradient btn-lg sv-send" data-send>{% icon "send" "icon-sm" %} Yuborish</button>{% endif %}
     </div>
   </form>
+
+  <p class="sv-foot">{% brand_logo 28 %}<span>© {{ institution_name }} · {{ brand_name }}</span></p>
 </main>
-
-<footer class="landing-footer stack-sm" style="align-items:center">
-  {% brand_logo 48 %}
-  <div class="tiny">© {{ institution_name }} · {{ brand_name }}</div>
-</footer>
 {% endblock %}
 
-{% block scripts %}
-<script>
-  // «Boshqa» matni yozilsa, mos variant avtomatik belgilanadi
-  document.querySelectorAll("[data-other-text]").forEach(function (input) {
-    input.addEventListener("input", function () {
-      var toggle = input.parentElement.querySelector("[data-other-toggle]");
-      if (toggle && input.value.trim()) toggle.checked = true;
-    });
-  });
-  var firstError = document.querySelector(".survey-q.has-error, .field.has-error");
-  if (firstError) firstError.scrollIntoView({ block: "center" });
-</script>
-{% endblock %}
+{% block scripts %}<script src="{% static 'web/js/survey-fill.js' %}" defer></script>{% endblock %}
