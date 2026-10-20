@@ -867,6 +867,7 @@ html, body { overflow-x: clip; }
 .sv-card-head h2 { font-size: 1.1rem; }
 .sv-card-head p { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
 .sv-icon { flex: none; width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 20px; background: var(--primary-soft); }
+.sv-via-tutor { display: flex; gap: 10px; align-items: flex-start; margin: -4px 0 16px; padding: 10px 14px; border-radius: 12px; background: var(--primary-soft); color: var(--primary-text); font-size: 13.5px; line-height: 1.45; }
 .sv-identity-grid { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .sv-identity-grid .sv-span-2 { grid-column: 1 / -1; }
 .sv-req { color: var(--danger); font-weight: 800; }
@@ -1323,4 +1324,29 @@ a.reg-row:hover { color: inherit; background: var(--surface-2); }
   .tut-name { grid-column: 2 / -1; }
   .tut-row > :nth-child(3) { grid-column: 2; }
   .tut-row .reg-num::before { content: attr(data-label); font-size: 10.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+}
+
+/* Tyutorlar havolalari (tl-) */
+.tl-group { display: grid; gap: 12px; }
+.tl-group-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+.tl-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); }
+.tl-card { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 14px; padding: 14px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
+.tl-card.is-silent { border-color: color-mix(in srgb, var(--danger) 35%, var(--border)); }
+.tl-qr { width: 92px; height: 92px; padding: 4px; border-radius: 10px; background: #fff; border: 1px solid var(--border); }
+.tl-qr svg { width: 100% !important; height: 100% !important; display: block; }
+.tl-body { display: grid; gap: 6px; min-width: 0; align-content: start; }
+.tl-name { font-weight: 800; font-size: 15px; line-height: 1.25; }
+.tl-count { font-size: 12.5px; color: var(--muted); }
+.tl-count b { color: var(--text); font-size: 14px; }
+.tl-card.is-silent .tl-count b { color: var(--danger); }
+.tl-url { font-size: 11.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tl-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.tl-actions .btn { padding-inline: 10px; }
+.tl-howto { display: grid; gap: 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.tl-howto > div { display: flex; gap: 10px; align-items: flex-start; padding: 12px; border-radius: 12px; background: var(--surface-2); font-size: 13px; line-height: 1.45; }
+.tl-howto b.n { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--primary-soft); color: var(--primary-text); }
+@media (max-width: 720px) {
+  .tl-howto { grid-template-columns: 1fr; }
+  .tl-card { grid-template-columns: 76px minmax(0, 1fr); gap: 12px; }
+  .tl-qr { width: 76px; height: 76px; }
 }

@@ -23,7 +23,7 @@ from apps.talent import services as talent_services
 from apps.talent.models import TalentProfile
 from apps.talent.tracks import Track
 
-from .models import Question, Response, Survey
+from .models import IssuedAccount, Question, Response, Survey
 
 User = get_user_model()
 Kind = Question.Kind
@@ -399,6 +399,12 @@ def submit(survey, *, answers, identity=None, user=None, browser_key="") -> Resp
 
         account, _ = provision(response)
         user = account.user if account is not None else None
+    elif user is not None and response.tutor_id:
+        from .accounts import remember_tutor
+
+        account = IssuedAccount.objects.filter(user=user).first()
+        if account is not None:
+            remember_tutor(account, response.tutor_id)
     if user is not None and user.role == User.Role.STUDENT and survey.xp_reward:
         arena.award(user, PointTransaction.Reason.SURVEY, min(survey.xp_reward, MAX_XP), ref=f"survey:{survey.pk}",
                     note=survey.title[:100])  # fmt: skip

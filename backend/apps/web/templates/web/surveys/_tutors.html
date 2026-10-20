@@ -37,5 +37,5 @@
     </details>
     {% endfor %}
   </div>
-  <p class="tiny muted">Javobi yo'q tyutorlarga eslating: ular o'z guruhlaridagi talabalarga havola yoki QR plakatni yuborishsin.{% if user.is_institution_admin %} Ro'yxatni <a href="{% url 'web:tutors' %}">tyutorlar sahifasida</a> o'zgartirasiz.{% endif %}</p>
+  <p class="tiny muted">Javobi yo'q tyutorlarga eslating: <a href="{% url 'web:survey-tutor-links' survey.pk %}">har bir tyutorning shaxsiy havolasi va QR plakati</a> tayyor, ular uni o'z guruhlariga yuborishsin.{% if user.is_institution_admin %} Ro'yxatni <a href="{% url 'web:tutors' %}">tyutorlar sahifasida</a> o'zgartirasiz.{% endif %}</p>
 </section>

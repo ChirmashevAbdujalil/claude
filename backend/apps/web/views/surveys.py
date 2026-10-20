@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -40,9 +40,19 @@ def _fill_url(request, survey):
     return request.build_absolute_uri(reverse("web:survey-fill", args=[survey.token]))
 
 
-def _share(request, survey):
+def _share(request, survey, tutor=None):
     url = _fill_url(request, survey)
+    if tutor is not None:
+        url += f"?t={tutor.pk}"
     return {"url": url, "qr": qr_svg(url, label=f"«{survey.title}» so'rovnomasining QR kodi")}
+
+
+def _link_tutor(request):
+    """Tyutorning shaxsiy havolasidagi (?t=<id>) faol tyutor."""
+    value = request.GET.get("t", "")
+    if not value.isdigit():
+        return None
+    return Tutor.objects.filter(pk=value, is_active=True).select_related("faculty").first()
 
 
 def _filtered(request, survey):
@@ -404,7 +414,39 @@ def survey_register(request, pk):
 @management_required
 def survey_poster(request, pk):
     survey = get_object_or_404(Survey, pk=pk)
-    return render(request, "web/surveys/poster.html", {"survey": survey, "share": _share(request, survey)})
+    tutor = _link_tutor(request)
+    context = {"survey": survey, "tutor": tutor, "share": _share(request, survey, tutor)}
+    return render(request, "web/surveys/poster.html", context)
+
+
+@management_required
+def survey_tutor_links(request, pk):
+    """Har bir tyutor uchun shaxsiy havola va QR: talaba ochganda fakultet va tyutor oldindan tanlangan bo'ladi."""
+    survey = get_object_or_404(Survey, pk=pk)
+    tutors = _tutors_for(request.user)
+    counts = dict(
+        services.responses_for(request.user, survey)
+        .filter(tutor__isnull=False)
+        .values("tutor")
+        .annotate(n=Count("id"))
+        .values_list("tutor", "n")
+    )
+    groups = []
+    for tutor in tutors:
+        share = _share(request, survey, tutor)
+        item = {"tutor": tutor, "url": share["url"], "qr": share["qr"], "count": counts.get(tutor.pk, 0)}
+        item["message"] = (
+            f"Hurmatli talabalar! «{survey.title}» so'rovnomasini to'ldiring. Ro'yxatdan o'tish shart emas, "
+            f"bir necha daqiqa vaqt oladi. Tyutoringiz: {tutor.full_name}.\n{share['url']}"
+        )
+        if not groups or groups[-1]["faculty"] != tutor.faculty:
+            groups.append({"faculty": tutor.faculty, "items": []})
+        groups[-1]["items"].append(item)
+    for group in groups:
+        group["text"] = "\n".join(f"{i['tutor'].full_name}: {i['url']}" for i in group["items"])
+        group["silent"] = sum(1 for i in group["items"] if not i["count"])
+    context = {"survey": survey, "groups": groups, "total": len(tutors), "share": _share(request, survey)}
+    return render(request, "web/surveys/tutor_links.html", context)
 
 
 # ---------------------------------------------------------------- ommaviy to'ldirish
@@ -468,7 +510,11 @@ def survey_fill(request, token):
 
     questions = list(survey.questions.all())
     errors = {}
-    identity = SurveyIdentityForm(initial=_identity_initial(user)) if survey.collect_identity else None
+    via_tutor = _link_tutor(request) if survey.collect_identity else None
+    initial = _identity_initial(user)
+    if via_tutor is not None:
+        initial.update(faculty=via_tutor.faculty_id, tutor=via_tutor.pk)
+    identity = SurveyIdentityForm(initial=initial) if survey.collect_identity else None
     if request.method == "POST" and not preview:
         if request.POST.get("website"):  # botlar uchun tuzoq maydon
             return redirect("web:survey-thanks", token=survey.token)
@@ -498,6 +544,7 @@ def survey_fill(request, token):
         "survey": survey,
         "fields": _fields(questions, request.POST if request.method == "POST" else None, errors),
         "identity": identity,
+        "via_tutor": via_tutor,
         "preview": preview,
         "required_count": sum(1 for q in questions if q.required),
         "answerable": answerable,

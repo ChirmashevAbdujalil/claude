@@ -213,6 +213,14 @@ class IssuedAccount(models.Model):
     initial_password = models.CharField("boshlang'ich parol", max_length=40, blank=True)
     must_change_password = models.BooleanField("parolni almashtirishi kerak", default=True)
     group = models.CharField("guruh", max_length=40, blank=True)
+    tutor = models.ForeignKey(
+        "accounts.Tutor",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="issued_accounts",
+        verbose_name="tyutor",
+    )
     phone = models.CharField("telefon", max_length=30, blank=True)
     phone_key = models.CharField(max_length=15, blank=True, db_index=True, editable=False)
     created_at = models.DateTimeField("ochilgan", default=timezone.now, db_index=True)

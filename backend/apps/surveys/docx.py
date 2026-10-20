@@ -150,15 +150,12 @@ def _section(landscape):
 # ---------------------------------------------------------------- ko'rinishlar
 
 
-def _table_body(rows, meta):
-    widths = [520, 3500, 2900, 800, 1250, 2550, 1900, 1978]  # albom: jami 15398
+TABLE_WIDTHS = [520, 3500, 2900, 800, 1250, 2550, 1900, 1978]  # albom: jami 15398
+
+
+def _credentials_table(rows, *, sections=True):
+    widths = TABLE_WIDTHS
     total = sum(widths)
-    parts = [
-        _banner("Talabalar uchun login va parollar", meta["subtitle"], total),
-        _p(after=120),
-        _note(meta["note"], total),
-        _p(after=120),
-    ]
     head = ["№", "Familiya, ism", "Fakultet", "Kurs", "Guruh", "Login", "Parol", "Oldim (imzo)"]
     table_rows = [
         _row(
@@ -172,7 +169,7 @@ def _table_body(rows, meta):
     ]
     current = None
     for index, row in enumerate(rows, 1):
-        if row["faculty"] != current:
+        if sections and row["faculty"] != current:
             current = row["faculty"]
             label = _p(_run(current or "Fakultet ko'rsatilmagan", bold=True, size=9.5, color=TEAL), keep=True)
             table_rows.append(_row([_cell(label, total, fill="E2F0F4", span=len(widths))], height=360))
@@ -194,8 +191,51 @@ def _table_body(rows, meta):
             _p(_run("", size=9)),
         ]
         table_rows.append(_row([_cell(c, w, fill=fill) for c, w in zip(cells, widths, strict=True)], height=440))
-    parts.append(_table(table_rows, widths))
-    parts.append(_p(_run(meta["signature"], size=9, color=MUTED), before=240))
+    return _table(table_rows, widths)
+
+
+def _table_body(rows, meta):
+    total = sum(TABLE_WIDTHS)
+    parts = [
+        _banner("Talabalar uchun login va parollar", meta["subtitle"], total),
+        _p(after=120),
+        _note(meta["note"], total),
+        _p(after=120),
+        _credentials_table(rows),
+        _p(_run(meta["signature"], size=9, color=MUTED), before=240),
+    ]
+    return "".join(parts), True
+
+
+def _tutors_body(rows, meta):
+    """Har bir tyutorga alohida varaq: o'z guruhlaridagi talabalarning login va parollari."""
+    total = sum(TABLE_WIDTHS)
+    groups = []
+    for row in rows:
+        key = (row["faculty"], row.get("tutor") or "")
+        if not groups or groups[-1][0] != key:
+            groups.append((key, []))
+        groups[-1][1].append(row)
+    parts = []
+    for number, ((faculty, tutor), items) in enumerate(groups):
+        if number:
+            parts.append('<w:p><w:r><w:br w:type="page"/></w:r></w:p>')
+        title = f"Tyutor: {tutor}" if tutor else "Tyutor ko'rsatilmagan talabalar"
+        place = faculty or "Fakultet ko'rsatilmagan"
+        subtitle = f"{place} · {len(items)} nafar talaba · {meta['date']}"
+        parts += [
+            _banner(title, subtitle, total),
+            _p(after=120),
+            _note(meta["note"], total),
+            _p(after=120),
+            _credentials_table(items, sections=False),
+            _p(
+                _run(f"Tyutor: {tutor or '________________'}  ____________ (imzo)", size=9, color=MUTED),
+                before=240,
+            ),
+        ]
+    if not parts:
+        parts = [_banner("Talabalar uchun login va parollar", meta["subtitle"], total)]
     return "".join(parts), True
 
 
@@ -276,8 +316,9 @@ def _cards_body(rows, meta):
     return "".join(parts), False
 
 
-def render(rows, *, layout, institution, site, subtitle, signature) -> bytes:
+def render(rows, *, layout, institution, site, subtitle, signature, date="") -> bytes:
     meta = {
+        "date": date,
         "institution": institution,
         "site": site,
         "subtitle": subtitle,
@@ -287,7 +328,7 @@ def render(rows, *, layout, institution, site, subtitle, signature) -> bytes:
             "o'rnatadi. Ro'yxat maxfiy: har bir talabaga faqat o'z ma'lumotini bering."
         ),
     }
-    body, landscape = (_cards_body if layout == "cards" else _table_body)(rows, meta)
+    body, landscape = {"cards": _cards_body, "tutors": _tutors_body}.get(layout, _table_body)(rows, meta)
     document = (
         f'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document {W_NS}><w:body>'
         f"{body}{_section(landscape)}</w:body></w:document>"

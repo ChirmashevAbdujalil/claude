@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from apps.accounts.models import Faculty
+from apps.accounts.models import Faculty, Tutor
 from apps.audit import services as audit
 from apps.audit.models import AuditLog
 from apps.surveys import accounts
@@ -21,6 +21,15 @@ from apps.surveys.models import IssuedAccount, Survey
 from .common import management_required, paginate
 
 ORDER = ("user__faculty__name", "user__course", "group", "user__last_name", "user__first_name")
+TUTOR_ORDER = (
+    "user__faculty__name",
+    "tutor__full_name",
+    "user__course",
+    "group",
+    "user__last_name",
+    "user__first_name",
+)
+LAYOUTS = {"table": "jadval", "cards": "kartochkalar", "tutors": "tyutorlar bo'yicha"}
 
 
 def _filtered(request):
@@ -41,6 +50,10 @@ def _filtered(request):
         items = items.filter(user__course=params["course"])
     if params.get("group"):
         items = items.filter(group__iexact=params["group"].strip())
+    if params.get("tutor", "").isdigit():
+        items = items.filter(tutor_id=params["tutor"])
+    elif params.get("tutor") == "none":
+        items = items.filter(tutor__isnull=True)
     if params.get("survey", "").isdigit():
         items = items.filter(survey_id=params["survey"])
     if params.get("status") == "waiting":
@@ -59,17 +72,18 @@ def _query(request):
 @management_required
 def credentials(request):
     base = accounts.visible_to(request.user)
-    items = _filtered(request).order_by(
-        "user__faculty__name", "user__course", "group", "user__last_name", "user__first_name"
-    )
+    items = _filtered(request).order_by(*ORDER)
     faculties = Faculty.objects.order_by("name")
+    tutors = Tutor.objects.filter(is_active=True).select_related("faculty").order_by("faculty__name", "full_name")
     if request.user.role == request.user.Role.DEAN and request.user.faculty_id:
         faculties = faculties.filter(pk=request.user.faculty_id)
+        tutors = tutors.filter(faculty_id=request.user.faculty_id)
     context = {
         "page": paginate(request, items, per_page=50),
         "filters": request.GET,
         "query": _query(request),
         "faculties": faculties,
+        "tutors": list(tutors),
         "courses": range(1, 7),
         "surveys": Survey.objects.filter(issued_accounts__isnull=False).distinct().order_by("-created_at"),
         "groups": base.exclude(group="").order_by("group").values_list("group", flat=True).distinct(),
@@ -87,12 +101,8 @@ def credentials(request):
 
 @management_required
 def credentials_word(request):
-    layout = "cards" if request.GET.get("layout") == "cards" else "table"
-    items = list(
-        _filtered(request).order_by(
-            "user__faculty__name", "user__course", "group", "user__last_name", "user__first_name"
-        )
-    )
+    layout = request.GET.get("layout") if request.GET.get("layout") in LAYOUTS else "table"
+    items = list(_filtered(request).order_by(*(TUTOR_ORDER if layout == "tutors" else ORDER)))
     institution = request.institution
     site = institution.base_url(request) if institution is not None else request.build_absolute_uri("/")
     site = site.replace("https://", "").replace("http://", "").rstrip("/")
@@ -103,6 +113,7 @@ def credentials_word(request):
             "faculty_short": a.user.faculty.short_name if a.user.faculty_id else "",
             "course": a.user.course or "",
             "group": a.group,
+            "tutor": a.tutor.full_name if a.tutor_id else "",
             "phone": a.phone,
             "login": a.user.username,
             "password": a.initial_password,
@@ -119,6 +130,7 @@ def credentials_word(request):
         site=site,
         subtitle=subtitle,
         signature=signature,
+        date=f"{now:%d.%m.%Y}",
     )
     audit.record(
         AuditLog.Action.EXPORT,
@@ -128,7 +140,7 @@ def credentials_word(request):
         changes={
             "file": {
                 "label": "Fayl",
-                "new": "Login va parollar (Word, " + ("kartochkalar" if layout == "cards" else "jadval") + ")",
+                "new": f"Login va parollar (Word, {LAYOUTS[layout]})",
             },
             "count": {"label": "Talabalar soni", "new": str(len(rows))},
         },
@@ -136,7 +148,7 @@ def credentials_word(request):
     response = HttpResponse(
         content, content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
-    name = "login-parollar-kartochkalar" if layout == "cards" else "login-parollar"
+    name = {"cards": "login-parollar-kartochkalar", "tutors": "login-parollar-tyutorlar"}.get(layout, "login-parollar")
     response["Content-Disposition"] = f'attachment; filename="{name}-{now:%Y%m%d-%H%M}.docx"'
     return response
 

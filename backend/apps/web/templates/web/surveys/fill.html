@@ -48,6 +48,7 @@
         <span class="sv-icon">👤</span>
         <div><h2>Siz haqingizda</h2><p>{% if user.is_authenticated %}Profilingizdan to'ldirildi: kerak bo'lsa, tuzating.{% else %}Javobingiz kimga tegishli ekanini bilishimiz uchun.{% endif %}</p></div>
       </div>
+      {% if via_tutor %}<p class="sv-via-tutor"><span>🧑‍🏫</span><span>Havolani tyutoringiz <b>{{ via_tutor.full_name }}</b> yubordi: fakultet va tyutor oldindan tanlandi. Boshqa bo'lsa, o'zgartiring.</span></p>{% endif %}
       <div class="sv-identity-grid">
         {% for field in identity %}
         <div class="field {% if field.errors %}has-error{% endif %} {% if field.name == 'full_name' %}sv-span-2{% endif %}" {% if field.name == "tutor" %}data-tutor-field{% endif %}>

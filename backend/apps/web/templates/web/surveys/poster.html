@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ survey.title }} · QR plakat</title>
+  <title>{{ survey.title }} · QR plakat{% if tutor %} · {{ tutor.full_name }}{% endif %}</title>
   <style>
     @page { size: A4; margin: 0; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -15,6 +15,8 @@
     .tag { display: inline-block; margin-top: 12mm; background: #f59e0b; color: #1f1300; font-weight: 800; font-size: 11pt; letter-spacing: .12em; text-transform: uppercase; padding: 2mm 4mm; border-radius: 2mm; }
     h1 { font-size: 30pt; line-height: 1.1; margin-top: 6mm; letter-spacing: -.01em; }
     .desc { font-size: 12.5pt; line-height: 1.5; margin-top: 5mm; color: #d6e8ec; max-width: 165mm; }
+    .tutor { display: inline-block; margin-top: 6mm; padding: 2.5mm 5mm; border-radius: 3mm; background: rgba(255,255,255,.12); font-size: 12.5pt; color: #e8f4f6; }
+    .tutor b { color: #fff; }
     .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12mm 16mm; text-align: center; }
     .qr { padding: 6mm; border: 1.2mm solid #062d3b; border-radius: 6mm; }
     .qr svg { width: 105mm !important; height: 105mm !important; display: block; }
@@ -36,6 +38,7 @@
       <span class="tag">{% if survey.talent_census %}Iqtidorlarni ro'yxatga olish{% else %}So'rovnoma{% endif %}</span>
       <h1>{{ survey.title }}</h1>
       {% if survey.description %}<p class="desc">{{ survey.description|truncatechars:260 }}</p>{% endif %}
+      {% if tutor %}<p class="tutor">🧑‍🏫 Tyutor: <b>{{ tutor.full_name }}</b> · {{ tutor.faculty.name }}</p>{% endif %}
     </div>
     <div class="main">
       <div class="qr">{{ share.qr }}</div>

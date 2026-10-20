@@ -219,6 +219,12 @@ orqali javob beradi. Asosiy vazifasi: butun institut bo'yicha iqtidorli talabala
   tyutorlari ichidan o'z tyutorini belgilaydi (fakultetda tyutor bo'lsa, majburiy). Natijalarda «Tyutorlar
   kesimida» bo'limi chiqadi: har bir tyutor guruhidan nechta talaba javob bergani, eng faol tyutor va javobi yo'q
   tyutorlar. Shuningdek tyutor filtri, kesishma jadvalda «Tyutor» o'lchovi va Excel'da «Tyutorlar» varag'i bor.
+- **Tyutorlar havolalari** (`/sorovnomalar/<id>/tyutorlar/`): har bir tyutorga shaxsiy havola (`/s/<token>/?t=<id>`),
+  QR kod, tayyor Telegram xabari va o'z QR plakati. Talaba shu havolani ochsa, fakultet va tyutor oldindan
+  tanlangan bo'ladi.
+- **Login-parollar tyutorlar kesimida:** akkauntda talabaning tyutori saqlanadi (so'nggi javobi bo'yicha).
+  «Login va parollar» sahifasida tyutor filtri bor, «Word: tyutorlar bo'yicha» faylida esa har bir tyutorga
+  alohida varaq chiqadi: tyutor o'z guruhlaridagi talabalarga login va parollarni tarqatadi.
 - **Chuqur tahlil** (natijalar → «🔎 Tahlil»): avtomatik xulosalar, 21 kunlik javoblar dinamikasi, javoblar
   to'liqligi va kesishma jadval (istalgan savol × fakultet, kurs yoki boshqa savol; issiqlik rangi va ★ eng kuchli
   variant). Grafikdagi istalgan variantni bossangiz, butun sahifa, javoblar ro'yxati va Excel faqat shu javobni

@@ -32,6 +32,7 @@
       <div class="row-sm wrap">
         <button type="button" class="btn btn-primary btn-sm" data-copy="{{ share.url }}">{% icon "link" "icon-sm" %} <span data-label>Havolani nusxalash</span></button>
         <a href="{% url 'web:survey-poster' survey.pk %}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">{% icon "file" "icon-sm" %} QR plakatni chop etish</a>
+        {% if tutors %}<a href="{% url 'web:survey-tutor-links' survey.pk %}" class="btn btn-ghost btn-sm" title="Har bir tyutor uchun shaxsiy havola va QR">🧑‍🏫 Tyutorlar havolalari</a>{% endif %}
         <a href="{% url 'web:survey-fill' survey.token %}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">{% icon "external" "icon-sm" %} Ochish</a>
       </div>
       <p class="tiny muted">Telegram guruhlariga havolani yuboring yoki plakatni o'quv binolariga osing. Talaba ro'yxatdan o'tmasdan, profilsiz javob bera oladi.</p>

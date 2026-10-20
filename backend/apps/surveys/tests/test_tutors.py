@@ -10,7 +10,7 @@ from django.urls import reverse
 from apps.accounts import tutors as tutor_services
 from apps.accounts.models import Faculty, Tutor, User
 from apps.surveys import analytics, services
-from apps.surveys.models import Question, Response
+from apps.surveys.models import IssuedAccount, Question, Response
 from apps.talent.tracks import Track
 from apps.web.forms import SurveyIdentityForm
 
@@ -150,3 +150,50 @@ def test_tutor_statistics_on_results(rector, andti):
     names = re.findall(r'<sheet name="([^"]+)"', archive.read("xl/workbook.xml").decode())
     sheet = archive.read(f"xl/worksheets/sheet{names.index('Tyutorlar') + 1}.xml").decode()
     assert at_tutors[0].full_name in sheet and "Tyutor tanlamagan talabalar: 1" in sheet
+
+
+def test_tutor_personal_link_prefills_identity(rector, andti):
+    survey = services.create_survey(rector, "census")
+    services.publish(survey)
+    tutor = Tutor.objects.filter(faculty=andti["IB"]).order_by("full_name").first()
+    fill = reverse("web:survey-fill", args=[survey.token])
+    page = web().get(fill, {"t": tutor.pk}).content.decode()
+    assert "Havolani tyutoringiz" in page and f'<option value="{tutor.pk}" selected' in page
+    assert "Havolani tyutoringiz" not in web().get(fill, {"t": "999999"}).content.decode()
+
+    links = web(rector).get(reverse("web:survey-tutor-links", args=[survey.pk])).content.decode()
+    assert f"{fill}?t={tutor.pk}" in links and "Telegram xabari" in links and links.count("tl-card") >= 25
+    poster = web(rector).get(reverse("web:survey-poster", args=[survey.pk]), {"t": tutor.pk}).content.decode()
+    assert tutor.full_name in poster and f"?t={tutor.pk}" in poster
+
+
+def test_credentials_by_tutor(rector, andti):
+    survey = services.create_survey(rector, "census")
+    services.publish(survey)
+    first, second = Tutor.objects.filter(faculty=andti["AT"]).order_by("full_name")[:2]
+    for i, tutor in enumerate([first, first, second]):
+        services.submit(
+            survey,
+            answers={},
+            identity={"full_name": f"Tursunov Talaba{i}", "faculty": andti["AT"], "tutor": tutor, "course": 2,
+                      "group": f"AT-23-0{i}", "phone": f"+99890777000{i}"},
+        )  # fmt: skip
+    assert IssuedAccount.objects.filter(tutor=first).count() == 2
+
+    # Talaba keyingi so'rovnomada boshqa tyutorni ko'rsatsa, akkauntda yangisi turadi
+    again = services.create_survey(rector, "census")
+    services.publish(again)
+    services.submit(
+        again,
+        answers={},
+        identity={"full_name": "Tursunov Talaba0", "faculty": andti["AT"], "tutor": second, "phone": "+998907770000"},
+    )
+    assert IssuedAccount.objects.filter(tutor=second).count() == 2
+
+    url = reverse("web:credentials")
+    page = web(rector).get(url, {"tutor": first.pk}).content.decode()
+    assert "Talaba1" in page and "Talaba2" not in page and "Word: tyutorlar bo" in page
+    word = web(rector).get(reverse("web:credentials-word"), {"layout": "tutors"})
+    document = zipfile.ZipFile(io.BytesIO(word.content)).read("word/document.xml").decode()
+    assert f"Tyutor: {first.full_name}" in document and f"Tyutor: {second.full_name}" in document
+    assert document.count('w:type="page"') == 1 and "tyutorlar" in word["Content-Disposition"]
