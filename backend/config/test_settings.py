@@ -7,6 +7,7 @@ from .settings import *  # noqa: E402,F403
 
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 MEDIA_ROOT = tempfile.mkdtemp(prefix="talenthub-media-")
+PRIVATE_MEDIA_ROOT = tempfile.mkdtemp(prefix="talenthub-private-")
 REST_FRAMEWORK = {**REST_FRAMEWORK, "DEFAULT_THROTTLE_CLASSES": []}  # noqa: F405
 
 STORAGES = {**STORAGES, "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}}  # noqa: F405

@@ -93,6 +93,20 @@
       <div class="rv-a">
         {% if item.view == "empty" %}
         <span class="rv-empty">Javob berilmagan</span>
+        {% elif item.view == "files" %}
+        <div class="rv-files">
+          {% for f in item.files %}
+          <div class="rv-file">
+            {% if f.is_image %}<a href="{% url 'web:survey-file' survey.pk f.pk %}" target="_blank" rel="noopener" class="rv-file-thumb" title="Kattaroq ko'rish"><img src="{% url 'web:survey-file' survey.pk f.pk %}" alt="{{ f.name }}" loading="lazy"></a>
+            {% else %}<span class="rv-file-thumb is-doc"><span>{{ f.icon }}</span><small>{{ f.ext }}</small></span>{% endif %}
+            <div class="rv-file-info"><b title="{{ f.name }}">{{ f.name }}</b><small>{{ f.human_size }} · {{ f.created_at|date:"d.m.Y H:i" }}</small></div>
+            <div class="rv-file-actions">
+              {% if f.inline %}<a href="{% url 'web:survey-file' survey.pk f.pk %}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">Ko'rish</a>{% endif %}
+              <a href="{% url 'web:survey-file' survey.pk f.pk %}?download=1" class="btn btn-primary btn-sm">{% icon "download" "icon-sm" %} Yuklab olish</a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
         {% elif item.view == "chips" %}
         <div class="rv-chips">{% for c in item.chips %}<span class="rv-chip {% if c.other %}is-other{% endif %}">{% if c.other %}<small>Boshqa</small>{% else %}✓{% endif %} {{ c.text }}</span>{% endfor %}</div>
         {% elif item.view == "track" %}

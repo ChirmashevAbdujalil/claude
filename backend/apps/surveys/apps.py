@@ -15,3 +15,16 @@ class SurveysConfig(AppConfig):
             on_login(user)
 
         user_logged_in.connect(first_login, dispatch_uid="surveys:first-login", weak=False)
+
+        from django.db import transaction
+        from django.db.models.signals import post_delete
+
+        from .models import ResponseFile
+
+        def remove_file(sender, instance, **kwargs):
+            # Diskdagi fayl tranzaksiya muvaffaqiyatli tugagandan keyin o'chiriladi
+            name, storage = instance.file.name, instance.file.storage
+            if name:
+                transaction.on_commit(lambda: storage.delete(name))
+
+        post_delete.connect(remove_file, sender=ResponseFile, dispatch_uid="surveys:remove-file", weak=False)

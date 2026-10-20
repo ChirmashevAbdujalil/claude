@@ -7,6 +7,8 @@ from django.utils import timezone
 from apps.tenants.context import default_institution_id
 from apps.tenants.managers import TenantManager
 
+from . import files
+
 
 def new_token() -> str:
     return secrets.token_urlsafe(6)
@@ -97,6 +99,7 @@ class Question(models.Model):
         EMAIL = "email", "Elektron pochta"
         PHONE = "phone", "Telefon raqam"
         TRACK = "track", "Iqtidor yo'nalishi"
+        FILE = "file", "Fayl yuklash"
         SECTION = "section", "Bo'lim sarlavhasi"
 
     CHOICE_KINDS = {Kind.SINGLE, Kind.MULTIPLE, Kind.DROPDOWN}
@@ -113,6 +116,9 @@ class Question(models.Model):
     scale_max = models.PositiveSmallIntegerField("shkala chegarasi", default=5)
     scale_min_label = models.CharField("shkala boshi", max_length=40, blank=True)
     scale_max_label = models.CharField("shkala oxiri", max_length=40, blank=True)
+    file_types = models.JSONField("ruxsat etilgan fayl turlari", default=list, blank=True)
+    max_files = models.PositiveSmallIntegerField("fayllar soni chegarasi", default=1)
+    max_file_mb = models.PositiveSmallIntegerField("bitta fayl hajmi (MB)", default=10)
 
     objects = TenantManager()
 
@@ -188,6 +194,51 @@ class Response(models.Model):
         if self.user_id:
             return str(self.user)
         return "Anonim"
+
+
+class ResponseFile(models.Model):
+    """«Fayl yuklash» savoliga biriktirilgan fayl: yopiq joyda saqlanadi, faqat rahbariyat ko'radi."""
+
+    tenant_path = "response__survey__institution"
+
+    response = models.ForeignKey(Response, on_delete=models.CASCADE, related_name="files", verbose_name="javob")
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="files", verbose_name="savol")
+    file = models.FileField("fayl", upload_to=files.upload_to, storage=files.private_storage, max_length=255)
+    name = models.CharField("asl nomi", max_length=160)
+    size = models.PositiveIntegerField("hajmi (bayt)")
+    category = models.CharField("turi", max_length=10)
+    content_type = models.CharField(max_length=100)
+    created_at = models.DateTimeField("yuklangan", default=timezone.now)
+
+    objects = TenantManager()
+
+    class Meta:
+        verbose_name = "javob fayli"
+        verbose_name_plural = "javob fayllari"
+        ordering = ["id"]
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def icon(self) -> str:
+        return files.TYPES.get(self.category, {}).get("icon", "📎")
+
+    @property
+    def is_image(self) -> bool:
+        return self.content_type in files.INLINE and self.category == "image"
+
+    @property
+    def inline(self) -> bool:
+        return self.content_type in files.INLINE
+
+    @property
+    def human_size(self) -> str:
+        return files.human_size(self.size)
+
+    @property
+    def ext(self) -> str:
+        return self.name.rsplit(".", 1)[-1].upper() if "." in self.name else ""
 
 
 class IssuedAccount(models.Model):

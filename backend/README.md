@@ -222,6 +222,15 @@ orqali javob beradi. Asosiy vazifasi: butun institut bo'yicha iqtidorli talabala
 - **Tyutorlar havolalari** (`/sorovnomalar/<id>/tyutorlar/`): har bir tyutorga shaxsiy havola (`/s/<token>/?t=<id>`),
   QR kod, tayyor Telegram xabari va o'z QR plakati. Talaba shu havolani ochsa, fakultet va tyutor oldindan
   tanlangan bo'ladi.
+- **Fayl yuklash savoli** (konstruktorda «📎 Fayl yuklash»): qaysi turlar qabul qilinishi (PDF, rasm, Word, Excel,
+  PowerPoint), fayllar soni (1–10) va bitta fayl hajmi (2–20 MB) belgilanadi. Talaba faylni tanlaydi, sudrab
+  tashlaydi yoki telefonda suratga oladi; yuklanish foizi ko'rinib turadi. Fayl turi nomidan emas, ichidan
+  tekshiriladi. Fayllar `PRIVATE_MEDIA_ROOT` papkasida (standart: `backend/private_media/`) saqlanadi: ularga
+  `/media/` orqali kirib bo'lmaydi, faqat rahbariyat ko'radi (dekan o'z fakultetinikini). Natijalarda fayllar
+  statistikasi va ko'rinishlari, javob sahifasida «Ko'rish/Yuklab olish», shuningdek fakultet → talaba papkalari
+  bilan ZIP yuklab olish bor (filtrlar hisobga olinadi, jurnalga yoziladi). Bitta yuborishda jami 100 MB gacha,
+  bir manzildan soatiga 120 tagacha fayl. Server oldida nginx bo'lsa, `client_max_body_size 105m;` qo'ying.
+  Docker'da fayllar `private_media` volume'ida saqlanadi.
 - **Login-parollar tyutorlar kesimida:** akkauntda talabaning tyutori saqlanadi (so'nggi javobi bo'yicha).
   «Login va parollar» sahifasida tyutor filtri bor, «Word: tyutorlar bo'yicha» faylida esa har bir tyutorga
   alohida varaq chiqadi: tyutor o'z guruhlaridagi talabalarga login va parollarni tarqatadi.

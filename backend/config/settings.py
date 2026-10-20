@@ -70,6 +70,7 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "apps.tenants.middleware.TenantMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "apps.surveys.middleware.UploadLimitMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "apps.audit.middleware.AuditMiddleware",
@@ -142,6 +143,8 @@ STORAGES = {
 }
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
+# So'rovnomaga yuklangan fayllar: MEDIA_URL orqali berilmaydi, faqat ruxsatni tekshiradigan sahifa orqali
+PRIVATE_MEDIA_ROOT = Path(os.environ.get("PRIVATE_MEDIA_ROOT") or BASE_DIR / "private_media")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

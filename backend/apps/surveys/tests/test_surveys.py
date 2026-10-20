@@ -90,8 +90,8 @@ def test_census_template_is_ready_to_publish(rector):
     survey = services.create_survey(rector, "census")
     assert survey.status == Survey.Status.DRAFT and survey.talent_census and survey.created_by == rector
     kinds = list(survey.questions.values_list("kind", flat=True))
-    assert Kind.TRACK in kinds and Kind.SECTION in kinds and len(kinds) == 14
-    assert services.answerable_count(survey) == 11
+    assert Kind.TRACK in kinds and Kind.FILE in kinds and len(kinds) == 15
+    assert services.answerable_count(survey) == 12
 
 
 def test_save_schema_keeps_ids_reorders_and_removes(rector):

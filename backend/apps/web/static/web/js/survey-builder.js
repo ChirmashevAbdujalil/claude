@@ -18,8 +18,12 @@
 
   function blank(kind) {
     var q = { kind: kind, title: "", help_text: "", required: false, options: [], allow_other: false,
-      scale_max: 5, scale_min_label: "", scale_max_label: "" };
+      scale_max: 5, scale_min_label: "", scale_max_label: "", file_types: [], max_files: 1, max_file_mb: 10 };
     if (CHOICE[kind]) q.options = ["1-variant"];
+    if (kind === "file") {
+      q.title = "Yutuqlaringizni tasdiqlovchi hujjatni yuklang (sertifikat, diplom)";
+      q.file_types = ["pdf", "image"];
+    }
     if (kind === "track") q.title = "Qaysi yo'nalishda o'zingizni eng kuchli his qilasiz?";
     if (kind === "section") q.title = "Yangi bo'lim";
     return q;
@@ -113,6 +117,38 @@
     ]);
   }
 
+  var FILE_TYPES = [
+    ["pdf", "📕 PDF"], ["image", "🖼 Rasm (JPG, PNG, HEIC)"], ["word", "📘 Word"], ["excel", "📗 Excel"],
+    ["slides", "📙 PowerPoint"]
+  ];
+
+  function fileEditor(q) {
+    q.file_types = q.file_types || [];
+    var types = el("div", { className: "sb-file-types" }, FILE_TYPES.map(function (t) {
+      var box = el("input", { type: "checkbox", checked: q.file_types.indexOf(t[0]) !== -1,
+        on: { change: function (e) {
+          q.file_types = FILE_TYPES.map(function (x) { return x[0]; }).filter(function (key) {
+            return key === t[0] ? e.target.checked : q.file_types.indexOf(key) !== -1;
+          });
+          touch(); render();
+        } } });
+      return el("label", { className: "chip chip-outline sb-file-type" + (box.checked ? " is-on" : "") }, [box, document.createTextNode(" " + t[1])]);
+    }));
+    var count = el("select", { className: "input", "aria-label": "Fayllar soni",
+      on: { change: function (e) { q.max_files = parseInt(e.target.value, 10); touch(); render(); } } });
+    for (var n = 1; n <= 10; n++) count.appendChild(el("option", { value: n, text: n === 1 ? "1 ta fayl" : "Ko'pi bilan " + n + " ta fayl", selected: q.max_files === n }));
+    var size = el("select", { className: "input", "aria-label": "Bitta fayl hajmi",
+      on: { change: function (e) { q.max_file_mb = parseInt(e.target.value, 10); touch(); render(); } } });
+    [2, 5, 10, 15, 20].forEach(function (mb) { size.appendChild(el("option", { value: mb, text: "Har biri " + mb + " MB gacha", selected: q.max_file_mb === mb })); });
+    var allowed = q.file_types.length ? FILE_TYPES.filter(function (t) { return q.file_types.indexOf(t[0]) !== -1; }).map(function (t) { return t[1].split(" ").slice(1).join(" "); }).join(", ") : "istalgan hujjat yoki rasm";
+    return el("div", { className: "stack-sm sb-file" }, [
+      el("span", { className: "small bold", text: "Qaysi fayllar qabul qilinadi?" }),
+      types,
+      el("div", { className: "sb-scale" }, [count, size]),
+      hint("Talaba: " + allowed + ". Hech biri belgilanmasa, PDF, rasm, Word, Excel va PowerPoint qabul qilinadi. Fayl turi ichidan tekshiriladi; fayllarni faqat rahbariyat ko'radi.")
+    ]);
+  }
+
   function hint(text) { return el("p", { className: "sb-hint small", text: text }); }
 
   function card(q, index) {
@@ -121,6 +157,7 @@
         var kind = e.target.value;
         if (CHOICE[kind] && !q.options.length) q.options = ["1-variant"];
         if (kind === "section") q.required = false;
+        if (kind === "file" && !q.max_files) { q.file_types = q.file_types || []; q.max_files = 1; q.max_file_mb = 10; }
         q.kind = kind; touch(); render(index);
       } } });
     kinds.forEach(function (k) { kindSelect.appendChild(el("option", { value: k.value, text: k.label, selected: k.value === q.kind })); });
@@ -153,6 +190,7 @@
 
     if (CHOICE[q.kind]) body.push(optionsEditor(q, index));
     if (q.kind === "scale") body.push(scaleEditor(q));
+    if (q.kind === "file") body.push(fileEditor(q));
     if (q.kind === "track") body.push(hint("Variantlar avtomatik: " + TRACKS.join(", ") + ". Javob talabani iqtidorlar reyestriga qo'shishda yo'nalish sifatida olinadi."));
     if (q.kind === "short") body.push(hint("Talaba bir qatorli javob yozadi."));
     if (q.kind === "long") body.push(hint("Talaba bir necha jumladan iborat javob yozadi."));

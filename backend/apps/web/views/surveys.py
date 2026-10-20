@@ -1,14 +1,18 @@
 """So'rovnomalar: konstruktor, ommaviy to'ldirish sahifasi, natijalar, eksport va iqtidorlar reyestriga qo'shish."""
 
 import json
+import re
 import secrets
+import shutil
+import tempfile
+import zipfile
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Count, Q
-from django.http import HttpResponse
+from django.http import FileResponse, Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -16,8 +20,11 @@ from django.views.decorators.http import require_POST
 
 from apps.accounts.models import Faculty, Tutor
 from apps.arena.models import PointTransaction
+from apps.audit import services as audit
+from apps.audit.models import AuditLog
 from apps.surveys import analytics, clubs, exports, services
-from apps.surveys.models import Question, Response, Survey
+from apps.surveys import files as file_rules
+from apps.surveys.models import Question, Response, ResponseFile, Survey
 from apps.surveys.services import SurveyError
 from apps.talent.tracks import ICONS, Track
 
@@ -358,6 +365,87 @@ def survey_response_delete(request, pk, rid):
     return redirect(f"{reverse('web:survey-results', args=[survey.pk])}?tab=responses")
 
 
+@management_required
+def survey_file(request, pk, fid):
+    """Javobga biriktirilgan fayl: faqat shu javobni ko'rish huquqi bor rahbariyat uchun."""
+    survey = get_object_or_404(Survey, pk=pk)
+    stored = get_object_or_404(
+        ResponseFile.objects.select_related("response"),
+        pk=fid,
+        response__in=services.responses_for(request.user, survey),
+    )
+    inline = stored.inline and request.GET.get("download") != "1"
+    try:
+        handle = stored.file.open("rb")
+    except FileNotFoundError as exc:
+        raise Http404("Fayl topilmadi") from exc
+    response = FileResponse(handle, as_attachment=not inline, filename=stored.name, content_type=stored.content_type)
+    response["X-Content-Type-Options"] = "nosniff"
+    response["Content-Security-Policy"] = "sandbox; default-src 'none'; img-src 'self'; style-src 'unsafe-inline'"
+    response["Cache-Control"] = "private, max-age=600"
+    return response
+
+
+def _zip_part(text, fallback="—"):
+    text = re.sub(r'[\\/:*?"<>|\x00-\x1f]+', " ", str(text or "")).strip(" .")
+    return text[:80] or fallback
+
+
+@management_required
+def survey_files_zip(request, pk):
+    """Fayllarni bitta ZIP'da: papkalar fakultet va talaba bo'yicha, joriy filtrlar hisobga olinadi."""
+    survey = get_object_or_404(Survey, pk=pk)
+    questions = list(survey.questions.filter(kind=Question.Kind.FILE))
+    if request.GET.get("question", "").isdigit():
+        questions = [q for q in questions if q.pk == int(request.GET["question"])]
+    stored = (
+        ResponseFile.objects.filter(question__in=questions, response__in=_filtered(request, survey))
+        .select_related("response", "response__faculty", "question")
+        .order_by("response__faculty__name", "response__full_name", "response_id", "id")
+    )
+    if not stored.exists():
+        messages.info(request, "Tanlangan javoblarda yuklangan fayl yo'q")
+        return redirect(reverse("web:survey-results", args=[survey.pk]))
+    numbers = {q.pk: n for n, q in enumerate(survey.questions.exclude(kind=Question.Kind.SECTION), 1)}
+    archive_file = tempfile.TemporaryFile()
+    used, count = set(), 0
+    with zipfile.ZipFile(archive_file, "w", zipfile.ZIP_STORED) as archive:
+        for item in stored:
+            answer = item.response
+            folder = _zip_part(answer.faculty.short_name if answer.faculty_id else "", "Fakultetsiz")
+            person = _zip_part(" ".join(filter(None, [answer.display_name, answer.group])), f"Javob {answer.pk}")
+            name = _zip_part(item.name, f"fayl-{item.pk}")
+            if len(questions) > 1:
+                name = f"{numbers.get(item.question_id, 0)}-savol - {name}"
+            path = f"{folder}/{person}/{name}"
+            stem, dot, ext = path.rpartition(".")
+            copy = 2
+            while path in used:
+                path = f"{stem} ({copy}).{ext}" if dot else f"{stem}{ext} ({copy})"
+                copy += 1
+            used.add(path)
+            try:
+                entry = zipfile.ZipInfo(path, timezone.localtime(item.created_at).timetuple()[:6])
+                with item.file.open("rb") as source, archive.open(entry, "w", force_zip64=True) as target:
+                    shutil.copyfileobj(source, target, 1024 * 1024)
+            except FileNotFoundError:
+                continue
+            count += 1
+    archive_file.seek(0)
+    audit.record(
+        AuditLog.Action.EXPORT,
+        actor=request.user,
+        actor_repr=request.user.username,
+        actor_role="Platforma egasi" if request.user.is_superuser else request.user.get_role_display(),
+        changes={
+            "file": {"label": "Fayl", "new": f"So'rovnoma fayllari (ZIP): {survey.title}"[:200]},
+            "count": {"label": "Fayllar soni", "new": str(count)},
+        },
+    )
+    stamp = timezone.localtime().strftime("%Y%m%d-%H%M")
+    return FileResponse(archive_file, as_attachment=True, filename=f"sorovnoma-{survey.pk}-fayllar-{stamp}.zip")
+
+
 XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
@@ -475,7 +563,22 @@ def _fields(questions, data, errors):
                 else question.choices,
             }
         )
+        if question.kind == Question.Kind.FILE:
+            types = question.file_types or list(file_rules.TYPES)
+            fields[-1] |= {
+                "accept": file_rules.accept_for(types),
+                "exts": ",".join(ext for t in types for ext in file_rules.TYPES[t]["ext"]),
+                "types_label": file_rules.describe(types),
+            }
     return fields
+
+
+def _too_large(request, questions) -> bool:
+    try:
+        length = int(request.META.get("CONTENT_LENGTH") or 0)
+    except ValueError:
+        return False
+    return length > file_rules.request_limit(questions)
 
 
 def _identity_initial(user):
@@ -515,13 +618,25 @@ def survey_fill(request, token):
     if via_tutor is not None:
         initial.update(faculty=via_tutor.faculty_id, tutor=via_tutor.pk)
     identity = SurveyIdentityForm(initial=initial) if survey.collect_identity else None
+    file_questions = [q for q in questions if q.kind == Question.Kind.FILE]
+    if request.method == "POST" and not preview and _too_large(request, questions):
+        messages.error(request, "Yuborilgan fayllar hajmi ruxsat etilganidan katta. Kichikroq fayl tanlang")
+        request.method = "GET"  # tanani o'qimasdan formani qayta ko'rsatamiz
     if request.method == "POST" and not preview:
         if request.POST.get("website"):  # botlar uchun tuzoq maydon
             return redirect("web:survey-thanks", token=survey.token)
-        answers, errors = services.clean_answers(survey, request.POST, questions)
+        answers, errors = services.clean_answers(survey, request.POST, questions, files=request.FILES)
         if survey.collect_identity:
             identity = SurveyIdentityForm(request.POST)
-        if not errors and (identity is None or identity.is_valid()):
+        sent = sum(len(request.FILES.getlist(f"q{q.pk}")) for q in file_questions)
+        if sent and file_rules.over_ip_limit(request.META.get("REMOTE_ADDR", ""), sent):
+            errors = {q.pk: "Juda ko'p fayl yuborildi. Birozdan keyin qayta urinib ko'ring" for q in file_questions}
+        valid = not errors and (identity is None or identity.is_valid())
+        if not valid:
+            for q in file_questions:  # brauzer tanlangan faylni qayta ko'rsatmaydi: talabaga eslatamiz
+                if request.FILES.getlist(f"q{q.pk}") and q.pk not in errors:
+                    errors[q.pk] = "Boshqa savollarda xato bo'lgani uchun faylni qayta tanlang"
+        if valid:
             try:
                 saved = services.submit(
                     survey,

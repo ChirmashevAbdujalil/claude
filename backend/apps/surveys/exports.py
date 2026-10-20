@@ -18,6 +18,8 @@ def _answer_value(question, value):
         return ""
     if question.kind == Kind.SCALE:
         return int(value)
+    if question.kind == Kind.FILE and isinstance(value, list):
+        return f"📎 {len(value)} ta fayl: " + "; ".join(str(v) for v in value)
     if question.kind == Kind.NUMBER:
         try:
             return float(value) if "." in str(value) else int(value)
@@ -33,7 +35,7 @@ def _widths_for(questions):
             widths.append(48)
         elif q.kind in (Kind.SCALE, Kind.NUMBER):
             widths.append(14)
-        elif q.kind == Kind.MULTIPLE:
+        elif q.kind in (Kind.MULTIPLE, Kind.FILE):
             widths.append(36)
         else:
             widths.append(26)

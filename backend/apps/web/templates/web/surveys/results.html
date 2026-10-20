@@ -165,7 +165,33 @@
       <span class="chip nowrap">{{ b.question.get_kind_display }}</span>
     </div>
     <p class="tiny muted">{{ b.answered }} ta javob{% if b.skipped %} · {{ b.skipped }} kishi o'tkazib yuborgan{% endif %}{% if b.average is not None %} · o'rtacha <b class="survey-avg">{{ b.average }}</b>{% if b.question.kind == "scale" %} / {{ b.question.scale_max }}{% endif %}{% endif %}{% if b.min is not None %} · eng kichik {{ b.min }} · eng katta {{ b.max }}{% endif %}</p>
-    {% if b.bars %}
+    {% if b.files %}
+    {% if b.files.count %}
+    <div class="fs-stats">
+      <div><b>{{ b.files.count }}</b><span>fayl</span></div>
+      <div><b>{{ b.answered }}</b><span>talaba yukladi</span></div>
+      <div><b>{{ b.files.size }}</b><span>umumiy hajm</span></div>
+    </div>
+    <div class="hbars hbars-wide survey-bars">
+      {% for bar in b.files.bars %}<div class="hbar" title="{{ bar.label }}: {{ bar.count }} ta, {{ bar.size }}"><span class="hbar-label">{{ bar.label }}</span><span class="hbar-track"><span class="hbar-fill" style="width:{{ bar.width }}%"></span></span><span class="hbar-value">{{ bar.count }} · {{ bar.pct }}%</span></div>{% endfor %}
+    </div>
+    <div class="fs-grid">
+      {% for f in b.files.recent %}
+      <a href="{% url 'web:survey-response' survey.pk f.response_id %}" class="fs-item" title="{{ f.name }} · {{ f.response.display_name }}">
+        <span class="fs-thumb">{% if f.is_image %}<img src="{% url 'web:survey-file' survey.pk f.pk %}" alt="" loading="lazy">{% else %}<span>{{ f.icon }}</span><small>{{ f.ext }}</small>{% endif %}</span>
+        <span class="fs-name">{{ f.name }}</span>
+        <span class="fs-who">{{ f.response.display_name }}</span>
+      </a>
+      {% endfor %}
+    </div>
+    <div class="row-sm wrap">
+      <a href="{% url 'web:survey-files-zip' survey.pk %}?question={{ b.question.pk }}{% if filter_qs %}&amp;{{ filter_qs }}{% endif %}" class="btn btn-primary btn-sm">{% icon "download" "icon-sm" %} Barcha fayllar (ZIP)</a>
+      <span class="tiny muted">ZIP ichida papkalar: fakultet → talaba. Filtr qo'llansa, faqat shu javoblar fayllari.</span>
+    </div>
+    {% else %}
+    <p class="small muted">Bu savolga hali fayl yuklanmagan.</p>
+    {% endif %}
+    {% elif b.bars %}
     <div class="hbars hbars-wide survey-bars">
       {% for bar in b.bars %}
       {% with raw=b.question.pk|stringformat:"d"|add:":"|add:bar.value %}

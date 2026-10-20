@@ -818,6 +818,10 @@ html, body { overflow-x: clip; }
 .sb-mark { flex: none; width: 22px; text-align: center; color: var(--muted); font-weight: 700; }
 .sb-hint { color: var(--muted); padding: 8px 12px; background: var(--surface-2); border-radius: var(--radius-sm); }
 .sb-scale { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.sb-file-types { display: flex; flex-wrap: wrap; gap: 6px; }
+.sb-file-type { cursor: pointer; gap: 6px; }
+.sb-file-type input { accent-color: var(--primary); margin: 0; }
+.sb-file-type.is-on { background: var(--primary-soft); border-color: transparent; color: var(--primary-text); }
 .sb-scale-preview { display: flex; gap: 6px; flex-wrap: wrap; }
 .sb-scale-preview span { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--border); font-weight: 700; font-size: 13px; }
 .sb-q-foot { display: flex; justify-content: flex-end; padding-top: 8px; border-top: 1px solid var(--border); }
@@ -899,6 +903,40 @@ textarea.sv-input { min-height: 110px; resize: vertical; line-height: 1.55; }
 .sv-error:empty { display: none; }
 .sv-error::before { content: "⚠ "; }
 
+/* Fayl yuklash */
+.sv-upload { display: grid; gap: 10px; }
+.sv-drop { position: relative; display: grid; justify-items: center; gap: 6px; padding: 26px 18px; text-align: center; border-radius: 16px;
+  border: 2px dashed color-mix(in srgb, var(--primary) 35%, var(--border)); background: color-mix(in srgb, var(--primary-soft) 55%, var(--surface));
+  cursor: pointer; transition: border-color .15s ease, background .15s ease, transform .1s ease; -webkit-tap-highlight-color: transparent; }
+.sv-drop:hover, .sv-drop.is-over { border-color: var(--primary); background: var(--primary-soft); }
+.sv-drop.is-over { transform: scale(1.01); }
+.sv-drop:focus-within { outline: 3px solid color-mix(in srgb, var(--primary) 35%, transparent); outline-offset: 2px; }
+.sv-file-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.sv-drop-icon { width: 52px; height: 52px; display: grid; place-items: center; border-radius: 16px; background: var(--surface); box-shadow: var(--shadow-sm); font-size: 24px; }
+.sv-drop-title { font-size: 15px; }
+.sv-drop-title b { color: var(--primary-text); }
+.sv-drop-hint { font-size: 12.5px; color: var(--muted); }
+.sv-upload.has-files .sv-drop { padding: 14px 16px; grid-template-columns: auto 1fr; justify-items: start; text-align: left; column-gap: 12px; }
+.sv-upload.has-files .sv-drop-icon { grid-row: span 2; width: 40px; height: 40px; font-size: 18px; border-radius: 12px; }
+.sv-upload.is-full .sv-drop { opacity: .75; }
+.sv-files { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.sv-file { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 8px 10px 8px 8px;
+  border: 1.5px solid color-mix(in srgb, var(--success) 35%, var(--border)); border-radius: 14px; background: var(--surface); animation: sv-pop .2s ease; }
+.sv-file-thumb { width: 48px; height: 48px; border-radius: 10px; overflow: hidden; display: grid; place-items: center; background: var(--surface-2); font-size: 22px; }
+.sv-file-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.sv-file-info { display: grid; gap: 2px; min-width: 0; }
+.sv-file-info b { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sv-file-info small { font-size: 12px; color: var(--success); font-weight: 600; }
+.sv-file-remove { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; font-size: 14px; }
+.sv-file-remove:hover { color: var(--danger); border-color: var(--danger); }
+@keyframes sv-pop { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.sv-uploading { position: fixed; left: 50%; bottom: 96px; z-index: 60; width: min(440px, calc(100% - 32px)); transform: translateX(-50%); display: grid; gap: 8px;
+  padding: 14px 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-lg); }
+.sv-uploading-row { display: flex; justify-content: space-between; gap: 10px; font-weight: 700; font-size: 14px; }
+.sv-uploading-bar { height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.sv-uploading-bar span { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--gradient); transition: width .2s ease; }
+.sv-uploading small { color: var(--muted); font-size: 12px; }
+@media (max-width: 520px) { .sv-drop-or { display: none; } }
 .sv-options { display: grid; gap: 8px; }
 @media (min-width: 640px) { .sv-options-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .sv-options-grid .sv-opt-other { grid-column: 1 / -1; } }
 .sv-opt { position: relative; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 12px 14px; border-radius: 14px;
@@ -1349,4 +1387,33 @@ a.reg-row:hover { color: inherit; background: var(--surface-2); }
   .tl-howto { grid-template-columns: 1fr; }
   .tl-card { grid-template-columns: 76px minmax(0, 1fr); gap: 12px; }
   .tl-qr { width: 76px; height: 76px; }
+}
+
+/* So'rovnoma fayllari: natijalar (fs-) va javob sahifasi (rv-file) */
+.fs-stats { display: flex; flex-wrap: wrap; gap: 8px; }
+.fs-stats > div { display: grid; min-width: 96px; padding: 8px 12px; border-radius: 12px; background: var(--surface-2); line-height: 1.15; }
+.fs-stats b { font-size: 1.25rem; }
+.fs-stats span { font-size: 11.5px; color: var(--muted); }
+.fs-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); }
+.fs-item { display: grid; gap: 4px; padding: 8px; border: 1px solid var(--border); border-radius: 14px; color: inherit; min-width: 0; transition: border-color .15s ease, transform .1s ease; }
+.fs-item:hover { color: inherit; border-color: var(--primary); transform: translateY(-1px); }
+.fs-thumb { aspect-ratio: 4 / 3; border-radius: 10px; overflow: hidden; display: grid; place-items: center; align-content: center; gap: 2px; background: var(--surface-2); font-size: 30px; }
+.fs-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.fs-thumb small { font-size: 11px; font-weight: 800; color: var(--muted); letter-spacing: .05em; }
+.fs-name { font-size: 12.5px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fs-who { font-size: 11.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rv-files { display: grid; gap: 10px; }
+.rv-file { display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 10px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+.rv-file-thumb { width: 72px; height: 72px; border-radius: 12px; overflow: hidden; display: grid; place-items: center; align-content: center; background: var(--surface-2); font-size: 28px; }
+.rv-file-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.rv-file-thumb small { font-size: 10.5px; font-weight: 800; color: var(--muted); letter-spacing: .05em; }
+.rv-file-info { display: grid; gap: 3px; min-width: 0; }
+.rv-file-info b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rv-file-info small { color: var(--muted); font-size: 12px; }
+.rv-file-actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+@media (max-width: 560px) {
+  .rv-file { grid-template-columns: 56px minmax(0, 1fr); gap: 10px; }
+  .rv-file-thumb { width: 56px; height: 56px; }
+  .rv-file-actions { grid-column: 1 / -1; justify-content: stretch; }
+  .rv-file-actions .btn { flex: 1; justify-content: center; }
 }

@@ -12,7 +12,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import transaction
-from django.db.models import Count
+from django.db.models import Count, Sum
 from django.urls import reverse
 from django.utils import timezone
 
@@ -23,7 +23,8 @@ from apps.talent import services as talent_services
 from apps.talent.models import TalentProfile
 from apps.talent.tracks import Track
 
-from .models import IssuedAccount, Question, Response, Survey
+from . import files as file_rules
+from .models import IssuedAccount, Question, Response, ResponseFile, Survey
 
 User = get_user_model()
 Kind = Question.Kind
@@ -132,6 +133,13 @@ TEMPLATES = {
                 scale_max_label="Juda yuqori",
             ),
             _q(Kind.SHORT, "Portfolio, GitHub yoki ishlaringizga havola"),
+            _q(
+                Kind.FILE,
+                "Yutuqlaringizni tasdiqlovchi hujjatlar (sertifikat, diplom, guvohnoma)",
+                help_text="Ixtiyoriy: PDF yoki rasm, 5 tagacha fayl. Hujjatni telefonda suratga olsangiz ham bo'ladi",
+                file_types=["pdf", "image"],
+                max_files=5,
+            ),
             _q(Kind.SECTION, "Rivojlanish"),
             _q(
                 Kind.SINGLE,
@@ -204,7 +212,7 @@ def duplicate(survey, by) -> Survey:
 
 
 FIELDS = ["kind", "title", "help_text", "required", "options", "allow_other", "scale_max", "scale_min_label",
-          "scale_max_label"]  # fmt: skip
+          "scale_max_label", "file_types", "max_files", "max_file_mb"]  # fmt: skip
 
 
 def schema(survey) -> list[dict]:
@@ -232,6 +240,9 @@ def _clean_item(raw, number) -> dict:
         "scale_max": 5,
         "scale_min_label": "",
         "scale_max_label": "",
+        "file_types": [],
+        "max_files": 1,
+        "max_file_mb": file_rules.DEFAULT_FILE_MB,
     }
     if kind in Question.CHOICE_KINDS:
         options = []
@@ -252,7 +263,19 @@ def _clean_item(raw, number) -> dict:
             item["scale_max"] = 5
         item["scale_min_label"] = str(raw.get("scale_min_label") or "").strip()[:40]
         item["scale_max_label"] = str(raw.get("scale_max_label") or "").strip()[:40]
+    if kind == Kind.FILE:
+        types = raw.get("file_types") or []
+        item["file_types"] = [t for t in file_rules.TYPES if isinstance(types, list) and t in types]
+        item["max_files"] = _bounded(raw.get("max_files"), 1, file_rules.MAX_FILES, 1)
+        item["max_file_mb"] = _bounded(raw.get("max_file_mb"), 1, file_rules.MAX_FILE_MB, file_rules.DEFAULT_FILE_MB)
     return item
+
+
+def _bounded(value, low, high, default) -> int:
+    try:
+        return min(max(int(value), low), high)
+    except (TypeError, ValueError):
+        return default
 
 
 @transaction.atomic
@@ -345,13 +368,19 @@ def _clean_value(question, data):
     return raw, None
 
 
-def clean_answers(survey, data, questions=None) -> tuple[dict, dict]:
-    """POST ma'lumotidan javoblarni oladi. (javoblar, xatolar): kalit savol identifikatori."""
+def clean_answers(survey, data, questions=None, files=None) -> tuple[dict, dict]:
+    """POST ma'lumotidan javoblarni oladi. (javoblar, xatolar): kalit savol identifikatori.
+
+    «Fayl yuklash» javobi tekshirilgan fayllar ro'yxati (files.Upload) bo'ladi: submit() ularni saqlaydi.
+    """
     answers, errors = {}, {}
     for question in questions if questions is not None else survey.questions.all():
         if not question.is_answerable:
             continue
-        value, error = _clean_value(question, data)
+        if question.kind == Kind.FILE:
+            value, error = file_rules.clean(question, files.getlist(f"q{question.pk}") if files else [])
+        else:
+            value, error = _clean_value(question, data)
         if error:
             errors[question.pk] = error
         elif value is None:
@@ -382,6 +411,7 @@ def submit(survey, *, answers, identity=None, user=None, browser_key="") -> Resp
     if already_answered(survey, user, browser_key):
         raise SurveyError("Siz bu so'rovnomaga javob bergansiz")
     identity = identity or {}
+    answers, uploads = file_rules.split(answers)
     response = Response.objects.create(
         survey=survey,
         user=user,
@@ -394,6 +424,7 @@ def submit(survey, *, answers, identity=None, user=None, browser_key="") -> Resp
         answers=answers,
         browser_key="" if user else browser_key[:32],
     )
+    file_rules.attach(response, uploads)
     if user is None and survey.create_accounts and survey.collect_identity:
         from .accounts import provision
 
@@ -524,6 +555,8 @@ def summary(survey, responses) -> dict:
             block |= {"bars": bars, "others": others[:20]}
             if question.kind == Kind.SCALE and values:
                 block["average"] = round(sum(int(v) for v in values) / len(values), 1)
+        elif question.kind == Kind.FILE:
+            block["files"] = file_summary(question, responses)
         elif question.kind == Kind.NUMBER:
             numbers = [Decimal(str(v)) for v in values]
             if numbers:
@@ -551,14 +584,44 @@ def summary(survey, responses) -> dict:
     }
 
 
+def file_summary(question, responses) -> dict:
+    """«Fayl yuklash» savoli: nechta fayl, umumiy hajm, turlar bo'yicha taqsimot va oxirgi yuklanganlar."""
+    stored = ResponseFile.objects.filter(question=question, response__in=responses)
+    by_type = {row["category"]: row for row in stored.values("category").annotate(n=Count("id"), size=Sum("size"))}
+    count = sum(row["n"] for row in by_type.values())
+    top = max([row["n"] for row in by_type.values()] + [1])
+    bars = [
+        {
+            "label": f"{meta['icon']} {meta['label']}",
+            "count": by_type[key]["n"],
+            "size": file_rules.human_size(by_type[key]["size"] or 0),
+            "pct": round(by_type[key]["n"] * 100 / count) if count else 0,
+            "width": round(by_type[key]["n"] * 100 / top),
+        }
+        for key, meta in file_rules.TYPES.items()
+        if key in by_type
+    ]
+    total_size = sum(row["size"] or 0 for row in by_type.values())
+    return {
+        "count": count,
+        "size": file_rules.human_size(total_size) if count else "0 KB",
+        "bars": bars,
+        "recent": list(stored.select_related("response").order_by("-id")[:8]),
+    }
+
+
 def answer_items(survey, response) -> list[dict]:
     """Bitta javobni ko'rish uchun: har bir savol va javobi, turiga qarab ko'rsatish shakli bilan.
 
-    view: section (bo'lim), empty (javob yo'q), chips (variantlar), scale (shkala), track (yo'nalish), text.
+    view: section (bo'lim), empty (javob yo'q), chips (variantlar), scale (shkala), track (yo'nalish),
+    files (fayllar), text.
     """
     from apps.talent.tracks import ICONS
 
     items, number = [], 0
+    attached = {}
+    for stored in response.files.all():
+        attached.setdefault(stored.question_id, []).append(stored)
     for question in survey.questions.all():
         if not question.is_answerable:
             items.append({"question": question, "view": "section"})
@@ -566,7 +629,9 @@ def answer_items(survey, response) -> list[dict]:
         number += 1
         value = response.answers.get(str(question.pk))
         item = {"question": question, "number": number}
-        if value in (None, "", []):
+        if question.kind == Kind.FILE and attached.get(question.pk):
+            item |= {"view": "files", "files": attached[question.pk]}
+        elif value in (None, "", []):
             item["view"] = "empty"
         elif question.kind == Kind.TRACK:
             item |= {"view": "track", "text": _label(question, value), "icon": ICONS.get(value, "✨")}

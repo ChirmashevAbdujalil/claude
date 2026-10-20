@@ -39,7 +39,7 @@
     <span>{% if user.is_authenticated %}Siz <b>{{ user|display_name }}</b> sifatida javob beryapsiz: javobingiz profilingizga bog'lanadi.{% else %}<b>Ro'yxatdan o'tish shart emas.</b> Savollarga javob bering va «Yuborish» tugmasini bosing.{% if survey.xp_reward %} Platformada akkauntingiz bo'lsa, <a href="{% url 'web:login' %}?next={{ request.get_full_path|urlencode }}">kiring</a> va +{{ survey.xp_reward }} XP oling.{% endif %}{% endif %}</span>
   </div>
 
-  <form method="post" class="sv-form" novalidate data-survey-fill data-draft-key="sv-draft:{{ survey.token }}" data-restore="{% if request.method == 'GET' and not preview %}1{% endif %}">{% csrf_token %}
+  <form method="post" class="sv-form" enctype="multipart/form-data" novalidate data-survey-fill data-draft-key="sv-draft:{{ survey.token }}" data-restore="{% if request.method == 'GET' and not preview %}1{% endif %}">{% csrf_token %}
     <div class="survey-trap" aria-hidden="true"><label>Sayt <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
 
     {% if identity %}
@@ -94,6 +94,16 @@
         <option value="">Tanlang</option>
         {% for value, text in f.choices %}<option value="{{ value }}" {% if f.value == value %}selected{% endif %}>{{ text }}</option>{% endfor %}
       </select>
+      {% elif q.kind == "file" %}
+      <div class="sv-upload" data-upload data-max-files="{{ q.max_files }}" data-max-mb="{{ q.max_file_mb }}" data-exts="{{ f.exts }}">
+        <label class="sv-drop" data-drop>
+          <input type="file" name="{{ f.name }}" class="sv-file-input" accept="{{ f.accept }}" {% if q.max_files > 1 %}multiple{% endif %} aria-label="{{ q.title }}" data-file-input>
+          <span class="sv-drop-icon" aria-hidden="true">📎</span>
+          <span class="sv-drop-title"><b>{% if q.max_files > 1 %}Fayllarni tanlang{% else %}Faylni tanlang{% endif %}</b><span class="sv-drop-or"> yoki shu yerga sudrab tashlang</span></span>
+          <span class="sv-drop-hint">{{ f.types_label }} · {% if q.max_files > 1 %}{{ q.max_files }} tagacha fayl, {% endif %}har biri {{ q.max_file_mb }} MB gacha</span>
+        </label>
+        <ul class="sv-files" data-file-list></ul>
+      </div>
       {% elif q.kind == "scale" %}
       <div class="sv-scale" style="--n: {{ q.scale_max }}">
         <div class="sv-scale-row" role="radiogroup" aria-label="{{ q.title }}">

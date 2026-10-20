@@ -22,6 +22,7 @@ services:
       POSTGRES_HOST: db
     volumes:
       - media:/app/media
+      - private_media:/app/private_media
     ports:
       - "8000:8000"
     depends_on:
@@ -31,3 +32,4 @@ services:
 volumes:
   pgdata:
   media:
+  private_media:
