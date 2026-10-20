@@ -5,7 +5,7 @@
   <div class="sv-curator-body">
     <span class="sv-curator-kicker">{{ curator.curator_title|default:"Mas'ul shaxs" }}</span>
     <b class="sv-curator-name">{{ curator.curator_name }}</b>
-    {% if curator.curator_message %}<p class="sv-curator-msg">{{ curator.curator_message }}</p>{% endif %}
+    {% if curator.curator_message %}<div class="sv-curator-msg">{{ curator.curator_message|rich_text }}</div>{% endif %}
     {% if curator.curator_url %}
     <div class="sv-curator-actions">
       <a href="{{ curator.curator_url }}" target="_blank" rel="noopener" class="btn btn-telegram">{% icon "send" "icon-sm" %} E'lonlarni kuzatib borish</a>

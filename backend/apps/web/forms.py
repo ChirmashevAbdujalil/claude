@@ -400,7 +400,7 @@ class CuratorForm(forms.ModelForm):
             "curator_name": forms.TextInput(attrs={"placeholder": "Abdujalil Chirmashev"}),
             "curator_title": forms.TextInput(attrs={"placeholder": "Platforma muallifi va mas'ul dasturchi xodim"}),
             "curator_url": forms.URLInput(attrs={"placeholder": "https://t.me/kanal_nomi"}),
-            "curator_message": forms.Textarea(attrs={"rows": 3}),
+            "curator_message": forms.Textarea(attrs={"rows": 8}),
         }
 
     def clean(self):

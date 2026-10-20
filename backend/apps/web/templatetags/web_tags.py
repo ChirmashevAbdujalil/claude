@@ -1,11 +1,13 @@
 import math
 import os
+import re
 
 from django import template
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.templatetags.static import static
-from django.utils.html import format_html
+from django.utils.html import escape, format_html
+from django.utils.safestring import mark_safe
 
 from apps.arena.levels import level_for_xp
 
@@ -215,3 +217,17 @@ def brand_logo(context, size=40, extra_class=""):
         classes,
         name,
     )
+
+
+BOLD = re.compile(r"\*\*(.+?)\*\*")
+
+
+@register.filter
+def rich_text(value):
+    """Oddiy matn: **qalin**, bo'sh qator — yangi xatboshi, oddiy qator tashlash — <br>. HTML xavfsiz qochiriladi."""
+    paragraphs = [p.strip() for p in re.split(r"\n\s*\n", str(value or "").replace("\r\n", "\n")) if p.strip()]
+    html = []
+    for paragraph in paragraphs:
+        text = BOLD.sub(r"<b>\1</b>", str(escape(paragraph)))
+        html.append(f"<p>{text.replace(chr(10), '<br>')}</p>")
+    return mark_safe("".join(html))

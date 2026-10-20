@@ -49,8 +49,10 @@ class Institution(models.Model):
     curator_url = models.URLField(
         "e'lonlar havolasi", blank=True, help_text="Masalan, Telegram kanal: https://t.me/kanal_nomi"
     )
-    curator_message = models.CharField(
-        "murojaat matni", max_length=300, blank=True, help_text="«Rahmat» sahifasida rasm yonida chiqadi"
+    curator_message = models.TextField(
+        "murojaat matni",
+        blank=True,
+        help_text="«Rahmat» sahifasida rasm yonida chiqadi. **matn** qalin bo'ladi, bo'sh qator yangi xatboshi",
     )
     created_at = models.DateTimeField(auto_now_add=True)
 

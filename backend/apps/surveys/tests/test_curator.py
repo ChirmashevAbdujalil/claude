@@ -46,3 +46,33 @@ def test_curator_block_on_fill_and_thanks_pages(rector):
     assert not institution.curator_enabled and institution.curator_url == "https://t.me/boshqa_kanal"
     thanks = client.get(reverse("web:survey-thanks", args=[survey.token])).content.decode()
     assert "sv-curator" not in thanks
+
+
+def test_long_curator_message_with_bold_and_paragraphs(rector):
+    from apps.web.templatetags.web_tags import rich_text
+
+    message = (
+        "Assalomu alaykum! Men — **Abdujalil Chirmashev**.\n"
+        + "Uzun matn. " * 80
+        + "\n\n📢 Yangi xatboshi <script>x</script>"
+    )
+    assert len(message) > 300
+    admin = Client()
+    admin.force_login(rector)
+    admin.post(
+        reverse("web:institution-settings"),
+        {"form": "curator", "curator-curator_enabled": "on", "curator-curator_name": "Abdujalil Chirmashev",
+         "curator-curator_url": "https://t.me/abdujalil_chirmashev", "curator-curator_message": message},
+    )  # fmt: skip
+    institution = default_institution()
+    institution.refresh_from_db()
+    assert institution.curator_message == message.replace("\n", "\r\n") or institution.curator_message == message
+
+    html = rich_text(message)
+    assert "<b>Abdujalil Chirmashev</b>" in html and html.count("<p>") == 2 and "<br>" in html
+    assert "<script>" not in html and "&lt;script&gt;" in html
+
+    survey = services.create_survey(rector, "feedback")
+    services.publish(survey)
+    page = Client().get(reverse("web:survey-thanks", args=[survey.token])).content.decode()
+    assert "<b>Abdujalil Chirmashev</b>" in page and "Uzun matn. Uzun matn." in page
