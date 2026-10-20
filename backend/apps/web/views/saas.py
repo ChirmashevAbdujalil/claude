@@ -19,7 +19,7 @@ from apps.tenants.context import unscoped
 from apps.tenants.models import Institution, InstitutionRequest
 
 from ..context_processors import branding
-from ..forms import FacultyForm, InstitutionRequestForm, InstitutionSettingsForm
+from ..forms import CuratorForm, FacultyForm, InstitutionRequestForm, InstitutionSettingsForm
 
 User = get_user_model()
 
@@ -123,7 +123,17 @@ def institution_settings(request):
         instance=institution,
     )
     faculty_form = FacultyForm(request.POST if request.POST.get("form") == "faculty" else None)
+    curator_form = CuratorForm(
+        request.POST if request.POST.get("form") == "curator" else None,
+        request.FILES if request.POST.get("form") == "curator" else None,
+        instance=institution,
+        prefix="curator",
+    )
     if request.method == "POST":
+        if request.POST.get("form") == "curator" and curator_form.is_valid():
+            curator_form.save()
+            messages.success(request, "Mas'ul shaxs bloki saqlandi")
+            return redirect(f"{reverse('web:institution-settings')}#masul")
         if request.POST.get("form") == "settings" and form.is_valid():
             form.save()
             messages.success(request, "OTM sozlamalari saqlandi")
@@ -148,6 +158,7 @@ def institution_settings(request):
     context = {
         "form": form,
         "faculty_form": faculty_form,
+        "curator_form": curator_form,
         "faculties": Faculty.objects.all(),
         "plan": institution.plan_info,
         "plans": _plans(),

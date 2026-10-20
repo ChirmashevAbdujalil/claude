@@ -225,6 +225,10 @@ orqali javob beradi. Asosiy vazifasi: butun institut bo'yicha iqtidorli talabala
 - **«ANDTI TALENT» 1-bosqich so'rovnomasi** (`apps/surveys/presets.py`): rahbariyat bergan Google Forms savollari
   (40 ta qobiliyat, tillar, faollik, o'zi haqida 20 savol). `migrate` asosiy OTMda uni qoralama sifatida yaratadi
   (muallif: rektor); yangi bazada «Yangi so'rovnoma» oynasidagi «🎯 ANDTI TALENT 1-bosqich» shablonidan yaratiladi.
+- **Mas'ul shaxs bloki** (OTM sozlamalari → «So'rovnomalarda mas'ul shaxs»): «Rahmat» sahifasida rasm, ism,
+  lavozim, qisqa murojaat va e'lonlar havolasi (masalan, Telegram kanal), to'ldirish sahifasi pastida kichik imzo.
+  ANDTI uchun migratsiyada platforma muallifi ma'lumotlari bilan yoqilgan; istalgan vaqtda o'zgartiriladi yoki
+  o'chiriladi. OTM logotipi va bu rasm `/media/institutions/` orqali production'da ham beriladi.
 - **Word hisobot** (natijalar → «Word hisobot»): asosiy ko'rsatkichlar, avtomatik xulosalar, fakultetlar va
   tyutorlar kesimi, har bir savol bo'yicha diagrammali jadval, matnli javoblardan namunalar, klublar va imzo joyi.
   Joriy filtrlar (fakultet, tyutor, javob sharti) hisobga olinadi.

@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib import admin, messages
-from django.db import transaction
+from django.db import models, transaction
 from django.utils.text import slugify
 
 from . import services
@@ -77,7 +77,21 @@ class InstitutionAdmin(admin.ModelAdmin):
         ("Tarif", {"fields": ["plan", "paid_until", "is_active", "registration_open", "show_in_league"]}),
         ("Brend", {"fields": ["logo", "color_dark", "color_light"]}),
         ("Aloqa", {"fields": ["contact_name", "contact_phone", "contact_email"]}),
+        (
+            "So'rovnomalarda mas'ul shaxs",
+            {
+                "fields": [
+                    "curator_enabled",
+                    "curator_name",
+                    "curator_title",
+                    "curator_photo",
+                    "curator_url",
+                    "curator_message",
+                ]
+            },
+        ),
     ]
+    formfield_overrides = {models.URLField: {"assume_scheme": "https"}}
     add_fieldsets = [
         (None, {"fields": ["name", "short_name", "slug", "domain", "tagline"]}),
         ("Administrator", {"fields": ["admin_username", "contact_name", "contact_phone", "contact_email"]}),

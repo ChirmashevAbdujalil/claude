@@ -95,4 +95,23 @@
   {% include "web/partials/field.html" with field=form.show_in_league %}
   <div class="form-actions"><button class="btn btn-primary btn-lg">{% icon "check" %} Saqlash</button></div>
 </form>
+
+<form method="post" enctype="multipart/form-data" class="card card-lg form" style="max-width:860px; margin-top:20px" id="masul">
+  {% csrf_token %}<input type="hidden" name="form" value="curator">
+  <h2>So'rovnomalarda mas'ul shaxs</h2>
+  <p class="small muted">Javob yuborilgandan keyingi «Rahmat» sahifasida rasm, ism, lavozim, qisqa murojaat va e'lonlar havolasi bilan blok chiqadi. To'ldirish sahifasi pastida esa kichik imzo ko'rinadi.</p>
+  {% if curator_form.non_field_errors %}<div class="form-errors">{{ curator_form.non_field_errors|join:" " }}</div>{% endif %}
+  {% include "web/partials/field.html" with field=curator_form.curator_enabled %}
+  <div class="grid-2">
+    {% include "web/partials/field.html" with field=curator_form.curator_name %}
+    {% include "web/partials/field.html" with field=curator_form.curator_title %}
+  </div>
+  <div class="row" style="align-items:center">
+    {% if institution.curator_photo %}<img src="{{ institution.curator_photo.url }}" alt="" class="sv-curator-photo" style="width:64px;height:64px">{% endif %}
+    <div class="grow">{% include "web/partials/field.html" with field=curator_form.curator_photo %}</div>
+  </div>
+  {% include "web/partials/field.html" with field=curator_form.curator_url %}
+  {% include "web/partials/field.html" with field=curator_form.curator_message %}
+  <div class="form-actions"><button class="btn btn-primary btn-lg">{% icon "check" %} Saqlash</button></div>
+</form>
 {% endblock %}

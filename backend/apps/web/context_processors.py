@@ -21,6 +21,7 @@ def branding(institution) -> dict:
             "institution_tagline": "",
             "theme_colors": None,
             "features": set(),
+            "curator": None,
         }
     colors = (institution.color_dark, institution.color_light)
     custom = institution.has_feature("branding") and colors != DEFAULT_COLORS
@@ -32,6 +33,8 @@ def branding(institution) -> dict:
         "institution_tagline": institution.tagline,
         "theme_colors": colors if custom else None,
         "features": institution.plan_info["features"],
+        # So'rovnoma sahifalaridagi mas'ul shaxs bloki (OTM sozlamalarida yoqiladi)
+        "curator": institution if institution.curator_enabled and institution.curator_name else None,
     }
 
 

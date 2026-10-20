@@ -150,6 +150,9 @@
     </div>
   </form>
 
+  {% if curator %}
+  <p class="sv-sign">{% if curator.curator_photo %}<img src="{{ curator.curator_photo.url }}" alt="" width="34" height="34" loading="lazy">{% endif %}<span>{{ curator.curator_title|default:"Mas'ul shaxs" }}: <b>{{ curator.curator_name }}</b></span></p>
+  {% endif %}
   <p class="sv-foot">{% brand_logo 28 %}<span>© {{ institution_name }} · {{ brand_name }}</span></p>
 </main>
 {% endblock %}

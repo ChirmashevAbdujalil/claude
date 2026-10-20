@@ -389,6 +389,27 @@ class InstitutionSettingsForm(forms.ModelForm):
                 self.fields[name].help_text = "«Standart» va «Premium» tariflarida"
 
 
+class CuratorForm(forms.ModelForm):
+    """So'rovnoma sahifalaridagi mas'ul shaxs bloki."""
+
+    class Meta:
+        model = Institution
+        fields = ["curator_enabled", "curator_name", "curator_title", "curator_photo", "curator_url", "curator_message"]
+        formfield_callback = https_urls
+        widgets = {
+            "curator_name": forms.TextInput(attrs={"placeholder": "Abdujalil Chirmashev"}),
+            "curator_title": forms.TextInput(attrs={"placeholder": "Platforma muallifi va mas'ul dasturchi xodim"}),
+            "curator_url": forms.URLInput(attrs={"placeholder": "https://t.me/kanal_nomi"}),
+            "curator_message": forms.Textarea(attrs={"rows": 3}),
+        }
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get("curator_enabled") and not cleaned.get("curator_name"):
+            self.add_error("curator_name", "Blok yoqilgan bo'lsa, ismni yozing")
+        return cleaned
+
+
 class FacultyForm(forms.ModelForm):
     class Meta:
         model = Faculty

@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
+from django.views.static import serve
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from apps.notifications.views import telegram_webhook
@@ -37,3 +38,8 @@ handler404 = "apps.web.views.public.page_not_found"
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+else:
+    # OTM logotipi va mas'ul shaxs rasmi ommaviy: alohida veb-server bo'lmasa ham ko'rinadi
+    urlpatterns += [
+        re_path(r"^media/(?P<path>institutions/[\w./-]+)$", serve, {"document_root": settings.MEDIA_ROOT}),
+    ]

@@ -44,6 +44,8 @@
     <p>Havola noto'g'ri, so'rovnoma o'chirilgan yoki hali e'lon qilinmagan. Havolani yuborgan odamdan qayta so'rang.</p>
     {% endif %}
 
+    {% if survey %}{% include "web/surveys/_curator.html" %}{% endif %}
+
     {% if share_url and state != "closed" %}
     <div class="sv-share">
       <div class="sv-share-text"><b>Kursdoshlaringizga ham ulashing</b><span>Qancha ko'p talaba javob bersa, shuncha ko'p iqtidor e'tiborga tushadi.</span></div>

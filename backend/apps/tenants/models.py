@@ -37,6 +37,21 @@ class Institution(models.Model):
     contact_name = models.CharField("mas'ul shaxs", max_length=200, blank=True)
     contact_phone = models.CharField("telefon", max_length=30, blank=True)
     contact_email = models.EmailField("email", blank=True)
+    # So'rovnoma sahifalaridagi «mas'ul shaxs» bloki: kim javobgar va qayerda e'lonlar chiqadi
+    curator_enabled = models.BooleanField(
+        "so'rovnomalarda mas'ul shaxsni ko'rsatish",
+        default=False,
+        help_text="«Rahmat» sahifasida rasm, ism va havola bilan blok, to'ldirish sahifasi pastida imzo chiqadi",
+    )
+    curator_name = models.CharField("mas'ul shaxs (F.I.Sh.)", max_length=120, blank=True)
+    curator_title = models.CharField("lavozimi", max_length=120, blank=True)
+    curator_photo = models.ImageField("rasmi", upload_to="institutions/", blank=True)
+    curator_url = models.URLField(
+        "e'lonlar havolasi", blank=True, help_text="Masalan, Telegram kanal: https://t.me/kanal_nomi"
+    )
+    curator_message = models.CharField(
+        "murojaat matni", max_length=300, blank=True, help_text="«Rahmat» sahifasida rasm yonida chiqadi"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
