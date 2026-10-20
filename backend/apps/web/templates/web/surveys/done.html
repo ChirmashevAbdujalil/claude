@@ -23,11 +23,29 @@
     <h1>Javobingiz qabul qilindi!</h1>
     <p>{{ survey.thank_you|default:"Rahmat! Fikringiz biz uchun muhim." }}</p>
     {% if xp %}<span class="sv-done-xp">⚡ +{{ xp }} XP hisobingizga qo'shildi</span>{% endif %}
-    {% if new_account %}
+    {% if new_account.password %}
+    <section class="sv-cred" aria-label="Platformaga kirish ma'lumotlari">
+      <div class="sv-cred-head">
+        <span class="sv-cred-icon" aria-hidden="true">🎓</span>
+        <div><b>Siz uchun platformada akkaunt ochildi!</b>
+          <span>Shu login va parol bilan {{ brand_name }} platformasiga kirasiz{% if survey.xp_reward %}: hisobingizda allaqachon +{{ survey.xp_reward }} XP bor{% endif %}.</span></div>
+      </div>
+      <div class="sv-cred-rows">
+        <button type="button" class="sv-cred-row" data-copy="{{ new_account.login }}"><span>Login</span><b class="mono">{{ new_account.login }}</b><em data-label>Nusxalash</em></button>
+        <button type="button" class="sv-cred-row is-password" data-copy="{{ new_account.password }}"><span>Parol</span><b class="mono">{{ new_account.password }}</b><em data-label>Nusxalash</em></button>
+      </div>
+      <p class="sv-cred-warn">📸 <b>Rasmga (skrinshot) saqlab qo'ying yoki yozib oling.</b> Bu ma'lumot faqat hozir, bir marta ko'rsatiladi.</p>
+      <div class="sv-cred-actions">
+        <button type="button" class="btn btn-ghost" data-copy="Login: {{ new_account.login }}&#10;Parol: {{ new_account.password }}&#10;Kirish: {{ login_url }}">{% icon "copy" "icon-sm" %} <span data-label>Hammasini nusxalash</span></button>
+        <a href="{% url 'web:login' %}" class="btn btn-primary">{% icon "external" "icon-sm" %} Platformaga kirish</a>
+      </div>
+      <p class="sv-cred-note">Birinchi kirishda o'zingiz biladigan yangi parol o'rnatasiz. Parolni hech kimga bermang.</p>
+    </section>
+    {% elif new_account.existing %}
     <div class="sv-account">
-      <span class="sv-account-icon">🎓</span>
-      <div><b>Siz uchun platformada akkaunt ochildi!</b>
-        <span>Login va parolingizni guruh sardoringiz yoki dekanat orqali olasiz. Birinchi kirishda o'z parolingizni o'rnatasiz.{% if survey.xp_reward %} Hisobingizda allaqachon +{{ survey.xp_reward }} XP bor.{% endif %}</span></div>
+      <span class="sv-account-icon">🔐</span>
+      <div><b>Sizda platformada akkaunt bor: <span class="mono">{{ new_account.login }}</span></b>
+        <span>Javobingiz shu akkauntga qo'shildi. Parolni unutgan bo'lsangiz, tyutoringiz yoki dekanatga murojaat qiling: ular yangi parol berishadi.</span></div>
     </div>
     {% endif %}
     {% elif state == "answered" %}

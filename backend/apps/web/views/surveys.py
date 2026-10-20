@@ -672,7 +672,7 @@ def survey_fill(request, token):
                 messages.error(request, str(exc))
             else:
                 if not user.is_authenticated and saved.user_id:
-                    request.session[f"sv-account:{survey.token}"] = True
+                    request.session[f"sv-account:{survey.token}"] = _account_note(saved)
                 return redirect("web:survey-thanks", token=survey.token)
         else:
             messages.error(request, "Ba'zi javoblarda xato bor: belgilangan savollarni tekshiring")
@@ -716,6 +716,19 @@ def survey_thanks(request, token):
         "state": "thanks",
         "xp": xp,
         "share_url": _fill_url(request, survey),
-        "new_account": request.session.pop(f"sv-account:{survey.token}", False),
+        "new_account": request.session.pop(f"sv-account:{survey.token}", None),  # faqat bir marta ko'rsatiladi
+        "login_url": request.build_absolute_uri(reverse("web:login")),
     }
     return render(request, "web/surveys/done.html", context)
+
+
+def _account_note(response):
+    """«Rahmat» sahifasi uchun: yangi ochilgan akkauntning login va boshlang'ich paroli.
+
+    Javob oldin ochilgan akkauntga bog'langan bo'lsa parol ko'rsatilmaydi: boshqa talabaning ismini yozgan
+    odam uning parolini ko'rib qolmasin.
+    """
+    account = getattr(response, "issued_account", None)
+    if getattr(response, "account_created", False) and account is not None and account.initial_password:
+        return {"login": account.user.username, "password": account.initial_password}
+    return {"login": response.user.username, "existing": True}

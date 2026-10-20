@@ -121,8 +121,29 @@ def test_thanks_page_tells_student_about_account(survey, faculty):
         "who-group": "K-23-01",
     }
     page = client.post(url, data, follow=True).content.decode()
-    assert "akkaunt ochildi" in page
-    assert "akkaunt ochildi" not in client.get(reverse("web:survey-thanks", args=[survey.token])).content.decode()
+    account = IssuedAccount.objects.get(user__last_name="Yusupova")
+    assert "akkaunt ochildi" in page and account.user.username in page and account.initial_password in page
+    assert "Rasmga (skrinshot) saqlab qo" in page.replace("&#x27;", "'")
+    again = client.get(reverse("web:survey-thanks", args=[survey.token])).content.decode()
+    assert "akkaunt ochildi" not in again and account.initial_password not in again  # faqat bir marta
+
+    # Shu ism-fakultet-kurs bilan boshqa so'rovnomani to'ldirgan odamga eski akkaunt paroli ko'rsatilmaydi
+    other = services.create_survey(survey.created_by, "feedback")
+    services.publish(other)
+    other.collect_identity = True
+    other.save()
+    other_url = reverse("web:survey-fill", args=[other.token])
+    stranger = web()
+    stranger.get(other_url)
+    scale = other.questions.get(kind=Question.Kind.SCALE)
+    page = stranger.post(
+        other_url,
+        {f"q{scale.pk}": "5", "who-full_name": "Yusupova Madina", "who-faculty": faculty.pk, "who-course": "1",
+         "who-group": "K-23-01"},
+        follow=True,
+    ).content.decode()  # fmt: skip
+    assert "Sizda platformada akkaunt bor" in page and account.user.username in page
+    assert account.initial_password not in page
 
 
 # ---------------------------------------------------------------- birinchi kirish

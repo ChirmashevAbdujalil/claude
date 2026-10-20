@@ -442,8 +442,10 @@ def submit(survey, *, answers, identity=None, user=None, browser_key="") -> Resp
     if user is None and survey.create_accounts and survey.collect_identity:
         from .accounts import provision
 
-        account, _ = provision(response)
+        account, created = provision(response)
         user = account.user if account is not None else None
+        response.issued_account = account  # «Rahmat» sahifasi yangi akkaunt ma'lumotini ko'rsatishi uchun
+        response.account_created = created
     elif user is not None and response.tutor_id:
         from .accounts import remember_tutor
 
