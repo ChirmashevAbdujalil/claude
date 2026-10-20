@@ -1,0 +1,40 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Tyutor kabinetlari{% endblock %}
+
+{% block content %}
+{% if groups is None %}
+<div class="card card-lg">
+  {% include "web/partials/empty.html" with emoji="🧑‍🏫" title="Bu sahifa tyutorlar uchun" text="Akkauntingiz hech qaysi tyutorga biriktirilmagan. Tyutor bo'lsangiz, OTM rahbariyatidan «Tyutorlar» sahifasida sizga login ochib berishini so'rang." %}
+</div>
+{% else %}
+<div class="page-header">
+  <div><h1>Tyutor kabinetlari 🧑‍🏫</h1>
+    <p>Siz tyutor emassiz, shuning uchun bu yerda barcha tyutorlar ro'yxati chiqadi. Istalgan tyutorning kabinetini u ko'rgandek ochib ko'rishingiz mumkin.</p></div>
+  {% if user.is_institution_admin %}<a href="{% url 'web:tutors' %}" class="btn btn-primary btn-sm">🔑 Tyutorlarga login ochish</a>{% endif %}
+</div>
+<p class="small muted">{{ with_login }} / {{ total }} tyutorda login bor. Tyutor o'z logini bilan shu manzilga kirsa, darhol o'z kabineti ochiladi.</p>
+
+<div class="stack" style="margin-top:12px">
+  {% for faculty, items in groups %}
+  <section class="card stack-sm">
+    <div class="row-sm"><span class="chip">{{ faculty.short_name }}</span><h3>{{ faculty.name }}</h3></div>
+    <div class="list">
+      {% for t in items %}
+      <div class="list-item">
+        <span class="tut-medal">🧑‍🏫</span>
+        <div class="grow" style="min-width:0">
+          <div class="bold">{{ t.full_name }}</div>
+          <div class="tiny muted">{{ t.students }} ta talaba belgilagan · {% if t.user %}<span class="mono">🔑 {{ t.user.username }}</span>{% else %}login ochilmagan{% endif %}</div>
+        </div>
+        <a href="{% url 'web:tutor-cabinet-view' t.pk %}" class="btn btn-ghost btn-sm">Kabinetni ochish →</a>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% empty %}
+  <div class="card">{% include "web/partials/empty.html" with emoji="🏛" title="Tyutorlar yo'q" text="OTM sozlamalaridagi «Tyutorlar» sahifasida tyutorlarni qo'shing." %}</div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

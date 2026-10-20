@@ -118,7 +118,34 @@ def _cabinet(request, tutor, *, preview=False):
 
 @login_required
 def cabinet(request):
-    return _cabinet(request, _own_tutor(request))
+    tutor = Tutor.objects.filter(user=request.user, is_active=True).select_related("faculty").first()
+    if tutor is not None:
+        return _cabinet(request, tutor)
+    return _choose(request)
+
+
+def _choose(request):
+    """Tyutor bo'lmagan foydalanuvchi: rahbariyatga barcha tyutor kabinetlari ro'yxati, boshqalarga izoh."""
+    user = request.user
+    if not user.is_management:
+        return render(request, "web/tutor/choose.html", {"groups": None}, status=403)
+    tutors = (
+        Tutor.objects.filter(is_active=True)
+        .select_related("faculty", "user")
+        .annotate(students=Count("responses"))
+        .order_by("faculty__name", "full_name")
+    )
+    if user.role == User.Role.DEAN and not user.is_superuser and user.faculty_id:
+        tutors = tutors.filter(faculty_id=user.faculty_id)
+    groups = {}
+    for tutor in tutors:
+        groups.setdefault(tutor.faculty, []).append(tutor)
+    context = {
+        "groups": list(groups.items()),
+        "total": sum(len(items) for items in groups.values()),
+        "with_login": sum(1 for items in groups.values() for t in items if t.user_id),
+    }
+    return render(request, "web/tutor/choose.html", context)
 
 
 @login_required

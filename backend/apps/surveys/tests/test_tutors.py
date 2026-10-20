@@ -252,7 +252,10 @@ def test_tutor_cabinet(rector, andti, make_user):
     assert me.get(poster, {"t": second.pk}).status_code == 403
 
     teacher = make_user(role=User.Role.TEACHER, username="oddiy-ustoz")
-    assert web(teacher).get(reverse("web:tutor-cabinet")).status_code == 404
+    assert web(teacher).get(reverse("web:tutor-cabinet")).status_code == 403  # tushunarli izoh bilan
+    chooser = admin.get(reverse("web:tutor-cabinet"))  # rahbar: barcha tyutorlar ro'yxati
+    assert chooser.status_code == 200 and "Tyutor kabinetlari" in chooser.content.decode()
+    assert reverse("web:tutor-cabinet-view", args=[second.pk]) in chooser.content.decode()
     assert admin.get(reverse("web:tutor-cabinet-view", args=[first.pk])).status_code == 200
     dean = make_user(role=User.Role.DEAN, faculty=andti["IB"], username="ib-dekan")
     assert web(dean).get(reverse("web:tutor-cabinet-view", args=[first.pk])).status_code == 403
