@@ -222,6 +222,9 @@ orqali javob beradi. Asosiy vazifasi: butun institut bo'yicha iqtidorli talabala
 - **Tyutorlar havolalari** (`/sorovnomalar/<id>/tyutorlar/`): har bir tyutorga shaxsiy havola (`/s/<token>/?t=<id>`),
   QR kod, tayyor Telegram xabari va o'z QR plakati. Talaba shu havolani ochsa, fakultet va tyutor oldindan
   tanlangan bo'ladi.
+- **«ANDTI TALENT» 1-bosqich so'rovnomasi** (`apps/surveys/presets.py`): rahbariyat bergan Google Forms savollari
+  (40 ta qobiliyat, tillar, faollik, o'zi haqida 20 savol). `migrate` asosiy OTMda uni qoralama sifatida yaratadi
+  (muallif: rektor); yangi bazada «Yangi so'rovnoma» oynasidagi «🎯 ANDTI TALENT 1-bosqich» shablonidan yaratiladi.
 - **Fayl yuklash savoli** (konstruktorda «📎 Fayl yuklash»): qaysi turlar qabul qilinishi (PDF, rasm, Word, Excel,
   PowerPoint), fayllar soni (1–10) va bitta fayl hajmi (2–20 MB) belgilanadi. Talaba faylni tanlaydi, sudrab
   tashlaydi yoki telefonda suratga oladi; yuklanish foizi ko'rinib turadi. Fayl turi nomidan emas, ichidan

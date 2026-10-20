@@ -510,3 +510,31 @@ def test_result_pages_share_link_and_missing_link(web, survey, faculty):
     services.close(survey)
     closed = web().get(url).content.decode()
     assert "So'rovnoma yopilgan" in closed and "tugagan" not in closed and "t.me/share" not in closed
+
+
+def test_andti_talent_survey_from_migration_and_template(make_user):
+    import importlib
+
+    from django.db import connection
+    from django.db.migrations.loader import MigrationLoader
+
+    from apps.surveys import presets
+
+    migration = importlib.import_module("apps.surveys.migrations.0008_andti_talent_survey")
+    state = MigrationLoader(connection).project_state(("surveys", "0008_andti_talent_survey")).apps
+    rector = make_user(role=User.Role.RECTOR, username="rektor-talent")
+    # Test bazasi yaratilganda migratsiya foydalanuvchisiz ishlagan: rektor bor holatni qayta tekshiramiz
+    state.get_model("surveys", "Survey").objects.filter(title=presets.ANDTI_TALENT_TITLE).delete()
+    migration.add_survey(state, None)
+    migration.add_survey(state, None)  # takror ishlasa ham bitta bo'ladi
+    survey = Survey.objects.get(title=presets.ANDTI_TALENT_TITLE)
+    assert survey.status == Survey.Status.DRAFT and survey.created_by == rector and survey.talent_census
+    assert services.answerable_count(survey) == 20 and survey.questions.filter(kind=Kind.SECTION).count() == 5
+    skills = survey.questions.get(title="Sizning qanday qobiliyatlaringiz bor?")
+    assert skills.kind == Kind.MULTIPLE and len(skills.options) == 40 and skills.allow_other and skills.required
+    assert survey.questions.filter(required=True).count() == 19  # faqat «Qaysi tillarni bilasiz?» ixtiyoriy
+
+    copy = services.create_survey(rector, "andti_talent")
+    assert services.schema(copy)[1:] and [q["title"] for q in services.schema(copy)] == [
+        q.title for q in survey.questions.all()
+    ]

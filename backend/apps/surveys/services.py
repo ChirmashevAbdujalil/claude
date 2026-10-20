@@ -24,6 +24,7 @@ from apps.talent.models import TalentProfile
 from apps.talent.tracks import Track
 
 from . import files as file_rules
+from . import presets
 from .models import IssuedAccount, Question, Response, ResponseFile, Survey
 
 User = get_user_model()
@@ -73,7 +74,7 @@ TEMPLATES = {
     "census": {
         "label": "Iqtidorlarni ro'yxatga olish",
         "emoji": "🧭",
-        "hint": "Butun institut bo'yicha iqtidorli talabalarni aniqlash uchun tayyor 11 savol",
+        "hint": "Butun institut bo'yicha iqtidorli talabalarni aniqlash uchun tayyor 12 savol",
         "survey": {
             "title": "Iqtidorli talabalarni ro'yxatga olish",
             "description": (
@@ -173,6 +174,12 @@ TEMPLATES = {
             ),
             _q(Kind.LONG, "Keyingi safar nimani yaxshilash kerak?"),
         ],  # fmt: skip
+    },
+    "andti_talent": {
+        "label": "«ANDTI TALENT» 1-bosqich",
+        "emoji": "🎯",
+        "hint": "Talabalar qobiliyatlarini aniqlash: 40 ta qobiliyat, faollik va o'zi haqida 20 savol",
+        **presets.ANDTI_TALENT,
     },
     "blank": {
         "label": "Bo'sh so'rovnoma",
