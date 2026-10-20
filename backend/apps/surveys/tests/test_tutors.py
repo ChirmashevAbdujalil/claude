@@ -197,3 +197,62 @@ def test_credentials_by_tutor(rector, andti):
     document = zipfile.ZipFile(io.BytesIO(word.content)).read("word/document.xml").decode()
     assert f"Tyutor: {first.full_name}" in document and f"Tyutor: {second.full_name}" in document
     assert document.count('w:type="page"') == 1 and "tyutorlar" in word["Content-Disposition"]
+
+
+def test_tutor_cabinet(rector, andti, make_user):
+    survey = services.create_survey(rector, "census")
+    services.publish(survey)
+    first, second = Tutor.objects.filter(faculty=andti["AT"]).order_by("full_name")[:2]
+    for i, tutor in enumerate([first, first, second]):
+        services.submit(
+            survey,
+            answers={},
+            identity={"full_name": f"Tursunov Talaba{i}", "faculty": andti["AT"], "tutor": tutor, "course": 2,
+                      "group": f"AT-23-0{i % 2}", "phone": f"+99890777100{i}"},
+        )  # fmt: skip
+
+    admin = web(rector)
+    admin.post(reverse("web:tutor-account", args=[first.pk]))
+    first.refresh_from_db()
+    account = IssuedAccount.objects.get(user=first.user)
+    assert first.user.role == User.Role.TEACHER and account.initial_password and account.group == "Tyutor"
+    assert first.user.username in admin.get(reverse("web:tutors")).content.decode()  # xabarda login va parol
+    credentials = admin.get(reverse("web:credentials")).content.decode()
+    assert first.user.username not in credentials  # tyutor talabalar login ro'yxatiga aralashmaydi
+    admin.post(reverse("web:tutor-accounts-all"))
+    assert Tutor.objects.filter(user__isnull=True).count() == 0
+    word = admin.get(reverse("web:tutor-accounts-word"))
+    document = zipfile.ZipFile(io.BytesIO(word.content)).read("word/document.xml").decode()
+    assert first.user.username in document and account.initial_password in document
+
+    me = web(first.user)
+    page = me.get(reverse("web:tutor-cabinet")).content.decode()
+    assert "Tyutor kabineti" in page and "Talaba0" in page and "Talaba1" in page and "Talaba2" not in page
+    assert f"?t={first.pk}" in page and "Telegram xabari" in page
+    assert "<b>2</b> ta talabam" in page
+    filtered = me.get(reverse("web:tutor-cabinet"), {"group": "AT-23-01"}).content.decode()
+    assert "Talaba1" in filtered and "Talaba0" not in filtered
+
+    own = IssuedAccount.objects.get(user__last_name="Tursunov", user__first_name="Talaba0")
+    other = IssuedAccount.objects.get(user__first_name="Talaba2")
+    old = own.initial_password
+    assert me.post(reverse("web:tutor-cabinet-reset", args=[own.pk])).status_code == 302
+    own.refresh_from_db()
+    assert own.initial_password != old
+    assert me.post(reverse("web:tutor-cabinet-reset", args=[other.pk])).status_code == 404
+    document = (
+        zipfile.ZipFile(io.BytesIO(me.get(reverse("web:tutor-cabinet-word")).content))
+        .read("word/document.xml")
+        .decode()
+    )
+    assert "Talaba0" in document and "Talaba2" not in document
+
+    poster = reverse("web:survey-poster", args=[survey.pk])
+    assert me.get(poster, {"t": first.pk}).status_code == 200
+    assert me.get(poster, {"t": second.pk}).status_code == 403
+
+    teacher = make_user(role=User.Role.TEACHER, username="oddiy-ustoz")
+    assert web(teacher).get(reverse("web:tutor-cabinet")).status_code == 404
+    assert admin.get(reverse("web:tutor-cabinet-view", args=[first.pk])).status_code == 200
+    dean = make_user(role=User.Role.DEAN, faculty=andti["IB"], username="ib-dekan")
+    assert web(dean).get(reverse("web:tutor-cabinet-view", args=[first.pk])).status_code == 403

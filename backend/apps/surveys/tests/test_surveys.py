@@ -521,7 +521,8 @@ def test_andti_talent_survey_from_migration_and_template(make_user):
     from apps.surveys import presets
 
     migration = importlib.import_module("apps.surveys.migrations.0008_andti_talent_survey")
-    state = MigrationLoader(connection).project_state(("surveys", "0008_andti_talent_survey")).apps
+    loader = MigrationLoader(connection)
+    state = loader.project_state(loader.graph.leaf_nodes("surveys")[0]).apps  # bazadagi jadvallarga mos holat
     rector = make_user(role=User.Role.RECTOR, username="rektor-talent")
     # Test bazasi yaratilganda migratsiya foydalanuvchisiz ishlagan: rektor bor holatni qayta tekshiramiz
     state.get_model("surveys", "Survey").objects.filter(title=presets.ANDTI_TALENT_TITLE).delete()

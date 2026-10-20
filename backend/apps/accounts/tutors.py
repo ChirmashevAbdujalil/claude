@@ -130,3 +130,78 @@ def summary():
     for tutor in tutors:
         grouped.setdefault(tutor.faculty, []).append(tutor)
     return list(grouped.items())
+
+
+# ---------------------------------------------------------------- tyutor kabineti uchun akkaunt
+
+
+def create_account(tutor):
+    """Tyutorga platformaga kirish uchun login va boshlang'ich parol ochadi: (akkaunt, yangi ochildimi).
+
+    Boshlang'ich parol talabalarnikidek faqat birinchi kirishgacha saqlanadi, keyin tyutor o'z parolini o'rnatadi.
+    """
+    from django.db import transaction
+
+    from apps.surveys import accounts as survey_accounts
+    from apps.surveys.models import IssuedAccount
+
+    from .models import User
+
+    if tutor.user_id:
+        return IssuedAccount.objects.filter(user_id=tutor.user_id).first(), False
+    with transaction.atomic():
+        first, last = survey_accounts.split_name(tutor.full_name)
+        password = survey_accounts.new_password()
+        user = User.objects.create_user(
+            username=survey_accounts.unique_username(first, last),
+            password=password,
+            first_name=first,
+            last_name=last,
+            role=User.Role.TEACHER,
+            faculty=tutor.faculty,
+        )
+        account = IssuedAccount.objects.create(
+            user=user,
+            initial_password=password,
+            group="Tyutor",
+            phone=tutor.phone,
+            phone_key=survey_accounts.normalize_phone(tutor.phone),
+        )
+        tutor.user = user
+        tutor.save(update_fields=["user"])
+    return account, True
+
+
+def reset_account(tutor) -> str:
+    from apps.surveys import accounts as survey_accounts
+    from apps.surveys.models import IssuedAccount
+
+    account, _ = create_account(tutor)
+    if account is None:  # akkaunt boshqa yo'l bilan bog'langan: parol yozuvi yo'q
+        account = IssuedAccount.objects.create(user=tutor.user, group="Tyutor")
+    return survey_accounts.reset_password(account)
+
+
+def account_rows(tutors) -> list[dict]:
+    """Word kartochkalari uchun: tyutor, login va boshlang'ich parol."""
+    from apps.surveys.models import IssuedAccount
+
+    accounts = {a.user_id: a for a in IssuedAccount.objects.filter(user__in=[t.user_id for t in tutors if t.user_id])}
+    rows = []
+    for tutor in tutors:
+        if not tutor.user_id:
+            continue
+        account = accounts.get(tutor.user_id)
+        rows.append(
+            {
+                "name": tutor.full_name,
+                "faculty": tutor.faculty.name,
+                "faculty_short": tutor.faculty.short_name,
+                "course": "",
+                "group": "Tyutor",
+                "phone": tutor.phone,
+                "login": tutor.user.username,
+                "password": account.initial_password if account else "",
+            }
+        )
+    return rows

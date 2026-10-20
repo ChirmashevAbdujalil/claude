@@ -1,0 +1,4 @@
+<label class="ts-chip {% if p.active %}is-on{% endif %}">
+  <input type="checkbox" name="{% if not p.active %}skill{% endif %}" value="{{ p.id }}" {% if p.active %}checked disabled{% endif %} data-ts-auto>
+  {{ p.name }} <b>{{ p.count }}</b>
+</label>

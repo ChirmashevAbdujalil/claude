@@ -1,0 +1,136 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Iqtidorlar qidiruvi{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><h1>Iqtidorlar qidiruvi 🔎</h1>
+    <p>Qobiliyat bo'yicha talabani toping: masalan, «Video montaj» qila oladigan 3-kurslar yoki AT fakultetidagi notiqlar. Qobiliyatlar so'rovnoma javoblaridan talaba profiliga avtomatik yoziladi.</p></div>
+  <div class="row-sm wrap">
+    <a href="{% url 'web:talent-search-export' %}?{{ query }}" class="btn btn-primary btn-sm">{% icon "download" "icon-sm" %} Excel</a>
+    {% if user.is_institution_admin %}
+    <form method="post" action="{% url 'web:talent-search-sync' %}">{% csrf_token %}
+      <button class="btn btn-ghost btn-sm" title="«Profilga qobiliyat bo'lib yozilsin» belgilangan savollarning barcha javoblarini qayta o'qiydi">↻ Javoblardan yangilash</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<form method="get" class="stack-lg" data-ts-form>
+  <section class="card ts-filters">
+    <div class="ts-search">
+      <span class="ts-search-icon" aria-hidden="true">{% icon "search" "icon-sm" %}</span>
+      <input type="search" name="q" value="{{ filters.q }}" class="input" placeholder="Ism yoki login bo'yicha" aria-label="Ism bo'yicha qidirish">
+    </div>
+    <select name="skill" class="input" aria-label="Qobiliyat qo'shish" data-ts-auto>
+      <option value="">+ Qobiliyat qo'shish…</option>
+      {% for s in all_skills %}<option value="{{ s.pk }}">{{ s.name }}</option>{% endfor %}
+    </select>
+    <select name="faculty" class="input" aria-label="Fakultet" data-ts-auto>
+      <option value="">Barcha fakultetlar</option>
+      {% for f in faculties %}<option value="{{ f.pk }}" {% if filters.faculty == f.pk|stringformat:"d" %}selected{% endif %}>{{ f.short_name }} · {{ f.name|truncatechars:34 }}</option>{% endfor %}
+    </select>
+    <select name="course" class="input" aria-label="Kurs" data-ts-auto>
+      <option value="">Barcha kurslar</option>
+      {% for c in courses %}<option value="{{ c }}" {% if filters.course == c|stringformat:"d" %}selected{% endif %}>{{ c }}-kurs</option>{% endfor %}
+    </select>
+    <input type="text" name="group" value="{{ filters.group }}" class="input" placeholder="Guruh (K-21-05)" aria-label="Guruh">
+    {% if tutors %}
+    <select name="tutor" class="input" aria-label="Tyutor" data-ts-auto>
+      <option value="">Barcha tyutorlar</option>
+      {% regroup tutors by faculty as tutor_groups %}
+      {% for g in tutor_groups %}<optgroup label="{{ g.grouper.short_name }}">{% for t in g.list %}<option value="{{ t.pk }}" {% if filters.tutor == t.pk|stringformat:"d" %}selected{% endif %}>{{ t.full_name }}</option>{% endfor %}</optgroup>{% endfor %}
+    </select>
+    {% endif %}
+    <button class="btn btn-primary">{% icon "search" "icon-sm" %} Qidirish</button>
+  </section>
+
+  {% if chosen %}
+  <section class="ts-chosen">
+    <span class="small bold">Tanlangan qobiliyatlar:</span>
+    {% for c in chosen %}
+    <input type="hidden" name="skill" value="{{ c.skill.pk }}">
+    <a href="?{{ c.remove }}" class="ts-chip is-on" title="Olib tashlash">{{ c.skill.name }} <span aria-hidden="true">✕</span></a>
+    {% endfor %}
+    {% if chosen|length > 1 %}
+    <div class="ts-mode" role="radiogroup" aria-label="Qidiruv sharti">
+      <label><input type="radio" name="mode" value="all" {% if filters.mode != "any" %}checked{% endif %} data-ts-auto> Hammasi bor</label>
+      <label><input type="radio" name="mode" value="any" {% if filters.mode == "any" %}checked{% endif %} data-ts-auto> Istalgan biri</label>
+    </div>
+    {% endif %}
+    <a href="?" class="small">Tozalash</a>
+  </section>
+  {% endif %}
+
+  {% if popular %}
+  <section class="card stack-sm">
+    <div class="row-between wrap"><h2 class="survey-h2">Eng ko'p uchraydigan qobiliyatlar</h2><span class="tiny muted">Bosing: shu qobiliyat bo'yicha qidiradi · {{ total }} nafar talabada qobiliyat yozilgan</span></div>
+    <div class="ts-cloud">
+      {% for p in popular|slice:":15" %}{% include "web/talent/_skill_chip.html" %}{% endfor %}
+    </div>
+    {% if popular|length > 15 %}
+    <details class="ts-more">
+      <summary>Yana {{ popular|length|add:"-15" }} ta qobiliyat</summary>
+      <div class="ts-cloud">{% for p in popular|slice:"15:" %}{% include "web/talent/_skill_chip.html" %}{% endfor %}</div>
+    </details>
+    {% endif %}
+  </section>
+  {% endif %}
+</form>
+
+<section class="stack" style="margin-top:20px">
+  <div class="row-between wrap">
+    <h2 class="survey-h2">{{ found }} nafar talaba topildi</h2>
+    {% if found %}<span class="tiny muted">Yashil belgi: qidirilgan qobiliyat</span>{% endif %}
+  </div>
+  {% if cards %}
+  <div class="ts-grid">
+    {% for card in cards %}
+    <article class="card ts-card">
+      <div class="ts-head">
+        {% avatar card.user %}
+        <div class="grow" style="min-width:0">
+          <div class="bold ts-name">{% if card.user.last_name or card.user.first_name %}{{ card.user.last_name }} {{ card.user.first_name }}{% else %}{{ card.user.username }}{% endif %}</div>
+          <div class="tiny muted">{{ card.user.faculty.short_name|default:"—" }}{% if card.user.course %} · {{ card.user.course }}-kurs{% endif %}{% if card.group %} · {{ card.group }}{% endif %}</div>
+        </div>
+        {% if card.talent %}<span class="chip chip-accent" title="Iqtidorlar reyestrida">🧭</span>{% endif %}
+      </div>
+      <div class="ts-skills">
+        {% for s in card.skills|slice:":9" %}<span class="ts-skill {% if s.matched %}is-match{% endif %}">{% if s.matched %}✓ {% endif %}{{ s.name }}</span>{% endfor %}
+        {% if card.skills|length > 9 %}<span class="ts-skill is-more" title="{% for s in card.skills|slice:'9:' %}{{ s.name }}{% if not forloop.last %}, {% endif %}{% endfor %}">+{{ card.skills|length|add:"-9" }}</span>{% endif %}
+      </div>
+      <div class="ts-meta">
+        {% if card.tutor %}<span>🧑‍🏫 {{ card.tutor.full_name }}</span>{% endif %}
+        {% if card.phone %}<a href="tel:{{ card.phone }}">📞 {{ card.phone }}</a>{% endif %}
+      </div>
+      <div class="ts-actions">
+        {% if card.response %}<a href="{% url 'web:survey-response' card.response.survey_id card.response.pk %}" class="btn btn-ghost btn-sm">Javoblari</a>{% endif %}
+        {% if card.talent %}<a href="{% url 'web:talent-profile' card.talent.pk %}" class="btn btn-ghost btn-sm">Reyestr kartasi</a>{% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% if page.has_other_pages %}
+  <nav class="pagination" aria-label="Sahifalar">
+    {% if page.has_previous %}<a class="btn btn-ghost btn-sm" href="?{% if query %}{{ query }}&amp;{% endif %}page={{ page.previous_page_number }}">← Oldingi</a>{% endif %}
+    <span class="btn btn-sm disabled" style="opacity:1">{{ page.number }} / {{ page.paginator.num_pages }}</span>
+    {% if page.has_next %}<a class="btn btn-ghost btn-sm" href="?{% if query %}{{ query }}&amp;{% endif %}page={{ page.next_page_number }}">Keyingi →</a>{% endif %}
+  </nav>
+  {% endif %}
+  {% else %}
+  <div class="card">{% include "web/partials/empty.html" with emoji="🔎" title="Hech kim topilmadi" text="Filtrlarni kamaytiring yoki «Istalgan biri» shartini tanlang. Qobiliyatlar so'rovnomada «Profilga qobiliyat bo'lib yozilsin» belgilangan savoldan keladi." %}</div>
+  {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    var form = document.querySelector("[data-ts-form]");
+    if (!form) return;
+    form.querySelectorAll("[data-ts-auto]").forEach(function (el) {
+      el.addEventListener("change", function () { form.submit(); });
+    });
+  })();
+</script>
+{% endblock %}

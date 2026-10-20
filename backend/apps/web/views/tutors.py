@@ -4,15 +4,21 @@ from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from apps.accounts import tutors as tutor_services
 from apps.accounts.models import Faculty, Tutor
+from apps.audit import services as audit
+from apps.audit.models import AuditLog
+from apps.surveys import docx as word
 
 from .saas import _settings_admin
 
 MAX_UPLOAD = 5 * 1024 * 1024
+DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 
 
 class TutorForm(forms.ModelForm):
@@ -49,7 +55,7 @@ def tutors(request):
         tutor = form.save()
         messages.success(request, f"{tutor.full_name} «{tutor.faculty.short_name}» fakultetiga biriktirildi")
         return redirect("web:tutors")
-    items = Tutor.objects.select_related("faculty").annotate(responses_count=Count("responses"))
+    items = Tutor.objects.select_related("faculty", "user").annotate(responses_count=Count("responses"))
     grouped = {}
     for tutor in items.order_by("faculty__name", "full_name"):
         grouped.setdefault(tutor.faculty, []).append(tutor)
@@ -58,6 +64,7 @@ def tutors(request):
         "form": form,
         "groups": [(faculty, grouped.get(faculty, [])) for faculty in faculties],
         "total": items.count(),
+        "with_accounts": items.filter(user__isnull=False).count(),
     }
     return render(request, "web/saas/tutors.html", context)
 
@@ -93,3 +100,72 @@ def tutor_import(request):
         text += f". Fakulteti topilmadi: {', '.join(result['unknown'][:5])}"
     messages.success(request, text)
     return redirect("web:tutors")
+
+
+# ---------------------------------------------------------------- tyutor kabineti: loginlar
+
+
+@login_required
+@require_POST
+def tutor_account(request, pk):
+    """Bitta tyutorga login ochadi yoki yangi parol beradi."""
+    _settings_admin(request)
+    tutor = get_object_or_404(Tutor.objects.select_related("faculty", "user"), pk=pk)
+    if tutor.user_id:
+        password = tutor_services.reset_account(tutor)
+        messages.success(request, f"{tutor.full_name}: yangi parol — {password} (login: {tutor.user.username})")
+    else:
+        account, _ = tutor_services.create_account(tutor)
+        login, password = account.user.username, account.initial_password
+        messages.success(request, f"{tutor.full_name} uchun kabinet ochildi. Login: {login}, parol: {password}")
+    return redirect("web:tutors")
+
+
+@login_required
+@require_POST
+def tutor_accounts_all(request):
+    _settings_admin(request)
+    created = 0
+    for tutor in Tutor.objects.filter(is_active=True, user__isnull=True).select_related("faculty"):
+        created += tutor_services.create_account(tutor)[1]
+    messages.success(request, f"{created} ta tyutorga kabinet ochildi. Login va parollarni Word faylda yuklab oling")
+    return redirect("web:tutors")
+
+
+@login_required
+def tutor_accounts_word(request):
+    _settings_admin(request)
+    tutors = list(
+        Tutor.objects.filter(is_active=True, user__isnull=False)
+        .select_related("faculty", "user")
+        .order_by("faculty__name", "full_name")
+    )
+    rows = [row for row in tutor_services.account_rows(tutors) if row["password"]]  # hali kirmaganlar
+    if not rows:
+        messages.info(request, "Barcha tyutorlar o'z parolini o'rnatgan: tarqatiladigan boshlang'ich parol yo'q")
+        return redirect("web:tutors")
+    institution = request.institution
+    site = institution.base_url(request) if institution is not None else request.build_absolute_uri("/")
+    site = site.replace("https://", "").replace("http://", "").rstrip("/")
+    now = timezone.localtime()
+    content = word.render(
+        rows,
+        layout="cards",
+        institution=institution.name if institution else "Talent Hub",
+        site=site,
+        subtitle=f"Tyutorlar kabineti · {len(rows)} nafar · {now:%d.%m.%Y %H:%M}",
+        signature="",
+    )
+    audit.record(
+        AuditLog.Action.EXPORT,
+        actor=request.user,
+        actor_repr=request.user.username,
+        actor_role="Platforma egasi" if request.user.is_superuser else request.user.get_role_display(),
+        changes={
+            "file": {"label": "Fayl", "new": "Tyutorlar login va parollari (Word)"},
+            "count": {"label": "Tyutorlar soni", "new": str(len(rows))},
+        },
+    )
+    response = HttpResponse(content, content_type=DOCX)
+    response["Content-Disposition"] = f'attachment; filename="tyutorlar-login-parollar-{now:%Y%m%d-%H%M}.docx"'
+    return response

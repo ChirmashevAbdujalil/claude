@@ -18,7 +18,7 @@
 
   function blank(kind) {
     var q = { kind: kind, title: "", help_text: "", required: false, options: [], allow_other: false,
-      scale_max: 5, scale_min_label: "", scale_max_label: "", file_types: [], max_files: 1, max_file_mb: 10 };
+      scale_max: 5, scale_min_label: "", scale_max_label: "", file_types: [], max_files: 1, max_file_mb: 10, to_profile: false };
     if (CHOICE[kind]) q.options = ["1-variant"];
     if (kind === "file") {
       q.title = "Yutuqlaringizni tasdiqlovchi hujjatni yuklang (sertifikat, diplom)";
@@ -200,9 +200,14 @@
     if (!isSection) {
       var req = el("input", { type: "checkbox", checked: q.required,
         on: { change: function (e) { q.required = e.target.checked; touch(); render(index); } } });
-      body.push(el("div", { className: "sb-q-foot" }, [
-        el("label", { className: "check small" }, [req, document.createTextNode(" Majburiy savol")])
-      ]));
+      var foot = [el("label", { className: "check small" }, [req, document.createTextNode(" Majburiy savol")])];
+      if (CHOICE[q.kind]) {
+        var profile = el("input", { type: "checkbox", checked: !!q.to_profile,
+          on: { change: function (e) { q.to_profile = e.target.checked; touch(); } } });
+        foot.push(el("label", { className: "check small", title: "Talaba tanlagan variantlar uning profiliga ko'nikma bo'lib yoziladi va «Iqtidorlar qidiruvi»da chiqadi" },
+          [profile, document.createTextNode(" 🧩 Profilga qobiliyat bo'lib yozilsin")]));
+      }
+      body.push(el("div", { className: "sb-q-foot" }, foot));
     }
     return el("div", { className: "card sb-q" + (isSection ? " sb-section" : "") + (q.required ? " is-required" : "") }, body);
   }

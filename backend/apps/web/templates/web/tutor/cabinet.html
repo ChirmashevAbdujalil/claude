@@ -1,0 +1,104 @@
+{% extends "web/layout.html" %}
+{% load web_tags %}
+{% block title %}Tyutor kabineti{% endblock %}
+
+{% block content %}
+{% if preview %}
+<div class="tc-preview">👁 Siz <b>{{ tutor.full_name }}</b> kabinetini rahbariyat sifatida ko'ryapsiz. <a href="{% url 'web:tutors' %}">← Tyutorlar</a></div>
+{% endif %}
+
+<section class="card card-lg tc-hero">
+  <span class="tc-avatar" aria-hidden="true">🧑‍🏫</span>
+  <div class="grow" style="min-width:0">
+    <span class="tiny muted">Tyutor kabineti</span>
+    <h1 class="tc-name">{{ tutor.full_name }}</h1>
+    <p class="small muted" style="margin:0">{{ tutor.faculty.name }}{% if tutor.phone %} · {{ tutor.phone }}{% endif %}</p>
+  </div>
+  <div class="tc-kpis">
+    <div><b>{{ totals.students }}</b><span>talabam</span></div>
+    <div><b>{{ totals.groups }}</b><span>guruh</span></div>
+    <div><b>{{ totals.accounts }}</b><span>akkaunt</span></div>
+    <div class="{% if totals.waiting %}is-warn{% endif %}"><b>{{ totals.waiting }}</b><span>parol berilmagan</span></div>
+    <div class="is-ok"><b>{{ totals.logged }}</b><span>tizimga kirgan</span></div>
+    <div><b>{{ totals.week }}</b><span>shu hafta</span></div>
+  </div>
+</section>
+
+<section class="stack" style="margin-top:20px">
+  <div class="row-between wrap">
+    <h2 class="survey-h2">📝 Ochiq so'rovnomalar</h2>
+    <span class="tiny muted">Havolani guruhlaringiz Telegram chatiga yuboring: talaba ochganda fakultet va siz oldindan tanlangan bo'lasiz</span>
+  </div>
+  {% for s in surveys %}
+  <article class="card tc-survey">
+    <div class="tc-qr">{{ s.qr }}</div>
+    <div class="stack-sm grow" style="min-width:0">
+      <h3 class="tc-survey-title">{{ s.survey.title }}</h3>
+      <div class="tc-survey-stats">
+        <span><b>{{ s.survey.mine }}</b> ta talabam to'ldirdi</span>
+        <span class="muted">fakultet bo'yicha jami {{ s.survey.faculty_total }}</span>
+        {% if s.survey.closes_at %}<span class="muted">⏳ {{ s.survey.closes_at|date:"d.m.Y H:i" }} gacha</span>{% endif %}
+      </div>
+      <div class="tl-url mono" title="{{ s.url }}">{{ s.url }}</div>
+      <div class="row-sm wrap">
+        <button type="button" class="btn btn-primary btn-sm" data-copy="{{ s.url }}">{% icon "link" "icon-sm" %} <span data-label>Havolani nusxalash</span></button>
+        <button type="button" class="btn btn-soft btn-sm" data-copy="{{ s.message }}">{% icon "send" "icon-sm" %} <span data-label>Telegram xabari</span></button>
+        <a href="{% url 'web:survey-poster' s.survey.pk %}?t={{ tutor.pk }}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">{% icon "file" "icon-sm" %} QR plakat</a>
+      </div>
+    </div>
+  </article>
+  {% empty %}
+  <div class="card">{% include "web/partials/empty.html" with emoji="📭" title="Hozir ochiq so'rovnoma yo'q" text="Rahbariyat yangi so'rovnoma e'lon qilganda shaxsiy havolangiz shu yerda chiqadi." %}</div>
+  {% endfor %}
+</section>
+
+<section class="card card-lg stack" style="margin-top:20px" id="talabalar">
+  <div class="row-between wrap">
+    <h2 class="survey-h2">👥 Talabalarim · {{ students|length }}{% if group_filter %} <span class="muted small">({{ group_filter }})</span>{% endif %}</h2>
+    {% if not preview and totals.accounts %}
+    <div class="row-sm wrap">
+      <a href="{% url 'web:tutor-cabinet-word' %}{% if group_filter %}?group={{ group_filter|urlencode }}{% endif %}" class="btn btn-primary btn-sm">{% icon "download" "icon-sm" %} Word: login-parollar</a>
+      <a href="{% url 'web:tutor-cabinet-word' %}?layout=cards{% if group_filter %}&amp;group={{ group_filter|urlencode }}{% endif %}" class="btn btn-soft btn-sm">{% icon "file" "icon-sm" %} Kartochkalar</a>
+    </div>
+    {% endif %}
+  </div>
+  {% if groups %}
+  <div class="tc-groups">
+    <a href="?#talabalar" class="ts-chip {% if not group_filter %}is-on{% endif %}">Barchasi <b>{{ totals.students }}</b></a>
+    {% for name, n in groups %}<a href="?group={{ name|urlencode }}#talabalar" class="ts-chip {% if group_filter == name %}is-on{% endif %}">{{ name }} <b>{{ n }}</b></a>{% endfor %}
+  </div>
+  {% endif %}
+
+  {% if students %}
+  <div class="table-wrap">
+    <table class="table cr-table">
+      <thead><tr><th>№</th><th>Talaba</th><th>Guruh</th><th>So'rovnomalar</th><th>Login</th><th>Parol</th>{% if not preview %}<th></th>{% endif %}</tr></thead>
+      <tbody>
+      {% for p in students %}
+      <tr>
+        <td class="tiny muted">{{ forloop.counter }}</td>
+        <td><div class="bold">{{ p.name }}</div>{% if p.phone %}<div class="tiny muted">{{ p.phone }}</div>{% endif %}</td>
+        <td class="small">{{ p.group|default:"—" }}{% if p.course %}<div class="tiny muted">{{ p.course }}-kurs</div>{% endif %}</td>
+        <td class="small" title="{{ p.surveys|join:', ' }}"><b>{{ p.surveys|length }}</b> ta<div class="tiny muted">{{ p.last|date:"d.m.Y" }}</div></td>
+        <td>{% if p.user %}<button type="button" class="cr-secret" data-copy="{{ p.user.username }}" title="Nusxalash"><span class="mono">{{ p.user.username }}</span><span class="cr-copy" aria-hidden="true">{% icon "copy" "icon-sm" %}</span></button>{% else %}<span class="tiny muted">akkaunt yo'q</span>{% endif %}</td>
+        <td>
+          {% if p.account and p.account.initial_password %}
+          {% if preview %}<span class="chip chip-accent">berilishi kerak</span>{% else %}<button type="button" class="cr-secret is-password" data-copy="{{ p.account.initial_password }}" title="Nusxalash"><span class="mono">{{ p.account.initial_password }}</span><span class="cr-copy" aria-hidden="true">{% icon "copy" "icon-sm" %}</span></button>{% endif %}
+          {% elif p.account %}<span class="chip chip-success">✓ Kirgan</span>
+          {% elif p.user %}<span class="tiny muted">o'zi ro'yxatdan o'tgan</span>
+          {% else %}<span class="tiny muted">—</span>{% endif %}
+        </td>
+        {% if not preview %}
+        <td>{% if p.account %}<form method="post" action="{% url 'web:tutor-cabinet-reset' p.account.pk %}" onsubmit="return confirm('{{ p.name|escapejs }} uchun yangi parol yaratilsinmi?')">{% csrf_token %}<button class="btn btn-ghost btn-sm" title="Talaba parolini unutsa">🔑 <span class="hide-mobile">Yangi parol</span></button></form>{% endif %}</td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  {% include "web/partials/empty.html" with emoji="🧑‍🎓" title="Hali talabalaringiz yo'q" text="So'rovnoma havolasini guruhlaringizga yuboring: talaba to'ldirib, sizni tyutor sifatida belgilaganda shu yerda paydo bo'ladi." %}
+  {% endif %}
+  <p class="tiny muted">Bu yerda faqat sizni tyutor deb belgilagan talabalar ko'rinadi. Javoblarning mazmunini rahbariyat ko'radi; siz qamrovni kuzatasiz va login-parollarni tarqatasiz.</p>
+</section>
+{% endblock %}

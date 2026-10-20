@@ -122,11 +122,11 @@ def _note(text, width):
     return _table([_row([cell])], [width], borders=False)
 
 
-def _footer():
+def _footer(text="Maxfiy: faqat talabaning o'ziga topshiring"):
     return (
         f'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:ftr {W_NS}>'
         '<w:p><w:pPr><w:jc w:val="center"/></w:pPr>'
-        + _run("Maxfiy: faqat talabaning o'ziga topshiring · ", size=8, color=MUTED)
+        + _run(f"{text} · ", size=8, color=MUTED)
         + _run("sahifa ", size=8, color=MUTED)
         + f'<w:r><w:rPr><w:color w:val="{MUTED}"/><w:sz w:val="16"/></w:rPr>'
         '<w:fldChar w:fldCharType="begin"/></w:r>'
@@ -329,6 +329,11 @@ def render(rows, *, layout, institution, site, subtitle, signature, date="") -> 
         ),
     }
     body, landscape = {"cards": _cards_body, "tutors": _tutors_body}.get(layout, _table_body)(rows, meta)
+    return package(body, landscape=landscape, title="Login va parollar", author=institution)
+
+
+def package(body, *, landscape, title, author, footer="Maxfiy: faqat talabaning o'ziga topshiring") -> bytes:
+    """Tayyor WordprocessingML tanasini .docx faylga yig'adi (uslublar, pastki yozuv, hujjat xossalari)."""
     document = (
         f'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document {W_NS}><w:body>'
         f"{body}{_section(landscape)}</w:body></w:document>"
@@ -375,11 +380,11 @@ def render(rows, *, layout, institution, site, subtitle, signature, date="") -> 
             '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" '
             'xmlns:dc="http://purl.org/dc/elements/1.1/">'
-            f"<dc:title>Login va parollar</dc:title><dc:creator>{escape(institution)}</dc:creator></cp:coreProperties>"
+            f"<dc:title>{escape(title)}</dc:title><dc:creator>{escape(author)}</dc:creator></cp:coreProperties>"
         ),
         "word/document.xml": document,
         "word/styles.xml": styles,
-        "word/footer1.xml": _footer(),
+        "word/footer1.xml": _footer(footer),
     }
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:

@@ -84,7 +84,7 @@ def _limit_reached() -> bool:
 
 def _find_existing(first, last, faculty, course, phone):
     """Shu talaba oldin boshqa so'rovnoma orqali akkaunt olgan bo'lsa, o'shani qaytaradi."""
-    issued = IssuedAccount.objects.select_related("user")
+    issued = IssuedAccount.objects.select_related("user").filter(user__role=User.Role.STUDENT)
     if phone:
         account = issued.filter(phone_key=phone).first()
         if account is not None:
@@ -192,7 +192,9 @@ def password_changed(user) -> None:
 
 def visible_to(user):
     """Rahbariyat ko'radigan akkauntlar: dekan faqat o'z fakultetini."""
-    accounts = IssuedAccount.objects.select_related("user", "user__faculty", "survey", "tutor")
+    accounts = IssuedAccount.objects.select_related("user", "user__faculty", "survey", "tutor").filter(
+        user__role=User.Role.STUDENT  # tyutorlar akkaunti alohida: «Tyutorlar» sahifasida
+    )
     if user.role == User.Role.DEAN and not user.is_superuser and user.faculty_id:
         accounts = accounts.filter(user__faculty_id=user.faculty_id)
     return accounts

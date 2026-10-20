@@ -225,6 +225,17 @@ orqali javob beradi. Asosiy vazifasi: butun institut bo'yicha iqtidorli talabala
 - **«ANDTI TALENT» 1-bosqich so'rovnomasi** (`apps/surveys/presets.py`): rahbariyat bergan Google Forms savollari
   (40 ta qobiliyat, tillar, faollik, o'zi haqida 20 savol). `migrate` asosiy OTMda uni qoralama sifatida yaratadi
   (muallif: rektor); yangi bazada «Yangi so'rovnoma» oynasidagi «🎯 ANDTI TALENT 1-bosqich» shablonidan yaratiladi.
+- **Word hisobot** (natijalar → «Word hisobot»): asosiy ko'rsatkichlar, avtomatik xulosalar, fakultetlar va
+  tyutorlar kesimi, har bir savol bo'yicha diagrammali jadval, matnli javoblardan namunalar, klublar va imzo joyi.
+  Joriy filtrlar (fakultet, tyutor, javob sharti) hisobga olinadi.
+- **Iqtidorlar qidiruvi** (`/iqtidorlar/qidiruv/`): konstruktorda «🧩 Profilga qobiliyat bo'lib yozilsin» belgilangan
+  savolda talaba tanlagan variantlar profilidagi ko'nikmalarga yoziladi («ANDTI TALENT»dagi qobiliyatlar savolida
+  yoqilgan). Rahbariyat qobiliyat (bir nechta, «hammasi»/«istalgani»), fakultet, kurs, guruh va tyutor bo'yicha
+  qidiradi; natija Excel'da yuklanadi. Dekan faqat o'z fakultetini ko'radi.
+- **Tyutor kabineti** (`/tyutor/`): «Tyutorlar» sahifasida tyutorga login ochiladi (bittalab yoki hammasiga,
+  login-parollar Word kartochkalarida). Tyutor o'z kabinetida faqat o'z talabalarini ko'radi: qamrov ko'rsatkichlari,
+  ochiq so'rovnomalar uchun shaxsiy havola, QR va Telegram xabari, guruhlari, talabalarining login-parollari (Word)
+  va parolni unutganlarga yangi parol. Javoblarning mazmuni faqat rahbariyatga ko'rinadi.
 - **Fayl yuklash savoli** (konstruktorda «📎 Fayl yuklash»): qaysi turlar qabul qilinishi (PDF, rasm, Word, Excel,
   PowerPoint), fayllar soni (1–10) va bitta fayl hajmi (2–20 MB) belgilanadi. Talaba faylni tanlaydi, sudrab
   tashlaydi yoki telefonda suratga oladi; yuklanish foizi ko'rinib turadi. Fayl turi nomidan emas, ichidan

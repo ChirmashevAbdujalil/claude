@@ -21,8 +21,9 @@ def add_survey(apps, schema_editor):
     if author is None:
         return  # rahbariyati hali yo'q baza: shablondan yaratiladi
     survey = Survey.objects.create(institution=institution, created_by=author, status="draft", **ANDTI_TALENT["survey"])
+    fields = {field.name for field in Question._meta.get_fields()}  # keyingi migratsiyalardagi maydonlarsiz
     for order, item in enumerate(ANDTI_TALENT["questions"]):
-        Question.objects.create(survey=survey, order=order, **item)
+        Question.objects.create(survey=survey, order=order, **{k: v for k, v in item.items() if k in fields})
 
 
 class Migration(migrations.Migration):

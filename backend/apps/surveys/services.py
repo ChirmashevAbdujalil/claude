@@ -219,7 +219,7 @@ def duplicate(survey, by) -> Survey:
 
 
 FIELDS = ["kind", "title", "help_text", "required", "options", "allow_other", "scale_max", "scale_min_label",
-          "scale_max_label", "file_types", "max_files", "max_file_mb"]  # fmt: skip
+          "scale_max_label", "file_types", "max_files", "max_file_mb", "to_profile"]  # fmt: skip
 
 
 def schema(survey) -> list[dict]:
@@ -250,6 +250,7 @@ def _clean_item(raw, number) -> dict:
         "file_types": [],
         "max_files": 1,
         "max_file_mb": file_rules.DEFAULT_FILE_MB,
+        "to_profile": False,
     }
     if kind in Question.CHOICE_KINDS:
         options = []
@@ -263,6 +264,7 @@ def _clean_item(raw, number) -> dict:
             raise SurveyError(f"{number}-savol: variantlar {MAX_OPTIONS} tadan oshmasin")
         item["options"] = options
         item["allow_other"] = bool(raw.get("allow_other")) and kind != Kind.DROPDOWN
+        item["to_profile"] = bool(raw.get("to_profile"))
     if kind == Kind.SCALE:
         try:
             item["scale_max"] = min(max(int(raw.get("scale_max") or 5), 2), 10)
@@ -306,6 +308,7 @@ def save_schema(survey, items) -> list[Question]:
     ]
 
     existing = {q.pk: q for q in survey.questions.all()}
+    was_on = {pk for pk, q in existing.items() if q.to_profile}
     kept, saved = set(), []
     for order, (pk, data) in enumerate(cleaned):
         question = existing.get(pk) if isinstance(pk, int) and pk not in kept else None
@@ -319,6 +322,10 @@ def save_schema(survey, items) -> list[Question]:
         saved.append(question)
     survey.questions.exclude(pk__in=kept).delete()
     Survey.objects.filter(pk=survey.pk).update(updated_at=timezone.now())
+    if any(q.to_profile and q.pk not in was_on for q in saved):
+        from .skills import sync_survey
+
+        transaction.on_commit(lambda: sync_survey(survey))  # oldin kelgan javoblar ham profilga yoziladi
     return saved
 
 
@@ -443,6 +450,10 @@ def submit(survey, *, answers, identity=None, user=None, browser_key="") -> Resp
         account = IssuedAccount.objects.filter(user=user).first()
         if account is not None:
             remember_tutor(account, response.tutor_id)
+    if response.user_id:
+        from .skills import sync_response
+
+        sync_response(response)
     if user is not None and user.role == User.Role.STUDENT and survey.xp_reward:
         arena.award(user, PointTransaction.Reason.SURVEY, min(survey.xp_reward, MAX_XP), ref=f"survey:{survey.pk}",
                     note=survey.title[:100])  # fmt: skip

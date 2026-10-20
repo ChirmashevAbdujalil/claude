@@ -1,3 +1,4 @@
+from apps.accounts.models import Tutor
 from apps.arena.levels import level_for_xp
 from apps.discovery.models import Submission
 from apps.notifications.services import unread_count
@@ -47,7 +48,10 @@ def navigation(request):
     }
     if user.role == user.Role.STUDENT:
         context["open_surveys_count"] = survey_services.open_for(user).count()
+    if user.role in (user.Role.STUDENT, user.Role.TEACHER):  # tyutor akkaunti ham boshlang'ich parol bilan ochiladi
         context["must_change_password"] = IssuedAccount.objects.filter(user=user, must_change_password=True).exists()
+    if user.role == user.Role.TEACHER:
+        context["is_tutor"] = Tutor.objects.filter(user=user, is_active=True).exists()
     if user.is_reviewer:
         context["review_count"] = (
             Submission.objects.filter(status=Submission.Status.PENDING).exclude(user=user).count()

@@ -13,6 +13,7 @@
   <div class="row-sm wrap">
     {% if can_edit %}<a href="{% url 'web:survey-builder' survey.pk %}" class="btn btn-ghost btn-sm">{% icon "edit" "icon-sm" %} Tahrirlash</a>{% endif %}
     <a href="{% url 'web:survey-export-xlsx' survey.pk %}?{{ filter_qs }}" class="btn btn-primary btn-sm" title="Umumiy natija, barcha javoblar, kesimlar va klublar alohida varaqlarda">{% icon "download" "icon-sm" %} Excel (.xlsx)</a>
+    <a href="{% url 'web:survey-export-docx' survey.pk %}?{{ filter_qs }}" class="btn btn-soft btn-sm" title="Rahbariyat uchun hisobot: ko'rsatkichlar, xulosalar, fakultetlar, tyutorlar va har bir savol bo'yicha diagrammalar">{% icon "file" "icon-sm" %} Word hisobot</a>
     <a href="{% url 'web:survey-export' survey.pk %}?{{ filter_qs }}" class="btn btn-ghost btn-sm" title="Oddiy jadval: boshqa dasturlarga import qilish uchun">CSV</a>
     {% if can_edit %}
     <form method="post" action="{% url 'web:survey-status' survey.pk %}" class="row-sm">{% csrf_token %}

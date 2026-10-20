@@ -8,7 +8,7 @@ kurs, guruh) so'raydi.
 ANDTI_TALENT_TITLE = "🎯 «ANDTI TALENT» — 1-bosqich: talabalar qobiliyatlarini aniqlash so'rovnomasi"
 
 
-def _q(kind, title, *, required=True, options=(), help_text="", allow_other=False):
+def _q(kind, title, *, required=True, options=(), help_text="", allow_other=False, to_profile=False):
     return {
         "kind": kind,
         "title": title,
@@ -16,6 +16,7 @@ def _q(kind, title, *, required=True, options=(), help_text="", allow_other=Fals
         "options": list(options),
         "help_text": help_text,
         "allow_other": allow_other,
+        "to_profile": to_profile,
     }
 
 
@@ -83,6 +84,7 @@ ANDTI_TALENT = {
             "Sizning qanday qobiliyatlaringiz bor?",
             options=SKILLS,
             allow_other=True,
+            to_profile=True,
             help_text="Bir nechtasini belgilang. Ro'yxatda yo'q bo'lsa, «Boshqa» qatoriga yozing",
         ),
         _long(

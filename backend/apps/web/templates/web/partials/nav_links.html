@@ -6,6 +6,7 @@
 <a href="{% url 'web:arena' %}" class="nav-link {% active 'arena' %}">{% icon "trophy" %} Arena</a>
 {% if "league" in features %}<a href="{% url 'web:league' %}" class="nav-link {% active 'league' %}">{% icon "award" %} OTMlararo liga</a>{% endif %}
 <a href="{% url 'web:ai' %}" class="nav-link {% active 'ai' %}">{% icon "sparkles" %} AI Mentor</a>
+{% if is_tutor %}<a href="{% url 'web:tutor-cabinet' %}" class="nav-link {% active 'tutor-cabinet' %}">{% icon "users" %} Tyutor kabineti</a>{% endif %}
 {% if user.role == "student" %}<a href="{% url 'web:my-path' %}" class="nav-link {% active 'my-path' 'talent-diagnostic' %}">{% icon "compass" %} Mening yo'lim</a>{% endif %}
 <a href="{% url 'web:surveys' %}" class="nav-link {% active 'surveys' 'survey' %}">{% icon "clipboard" %} So'rovnomalar
   {% if open_surveys_count %}<span class="chip chip-accent count">{{ open_surveys_count }}</span>{% endif %}</a>
@@ -31,6 +32,7 @@
 {% if user.is_management %}
 <a href="{% url 'web:credentials' %}" class="nav-link {% active 'credentials' %}">{% icon "shield" %} Login va parollar</a>
 <a href="{% url 'web:talent-registry' %}" class="nav-link {% active 'talent-registry' 'talent-profile' 'talent-report' %}">{% icon "compass" %} Iqtidorlar reyestri</a>
+<a href="{% url 'web:talent-search' %}" class="nav-link {% active 'talent-search' %}">{% icon "search" %} Iqtidorlar qidiruvi</a>
 <a href="{% url 'web:insights' %}" class="nav-link {% active 'insights' %}">{% icon "chart" %} Statistika</a>
 <a href="{% url 'web:impact' %}" class="nav-link {% active 'impact' %}">{% icon "trophy" %} Natijalar (ochiq sahifa)</a>
 {% endif %}

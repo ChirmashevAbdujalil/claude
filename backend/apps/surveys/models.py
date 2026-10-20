@@ -119,6 +119,11 @@ class Question(models.Model):
     file_types = models.JSONField("ruxsat etilgan fayl turlari", default=list, blank=True)
     max_files = models.PositiveSmallIntegerField("fayllar soni chegarasi", default=1)
     max_file_mb = models.PositiveSmallIntegerField("bitta fayl hajmi (MB)", default=10)
+    to_profile = models.BooleanField(
+        "javoblar profilga qobiliyat bo'lib yoziladi",
+        default=False,
+        help_text="Tanlangan variantlar talaba profiliga ko'nikma sifatida qo'shiladi va iqtidorlar qidiruvida chiqadi",
+    )
 
     objects = TenantManager()
 

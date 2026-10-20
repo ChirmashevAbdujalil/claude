@@ -23,7 +23,9 @@
         {% for t in items %}
         <div class="list-item">
           <span class="tut-medal">🧑‍🏫</span>
-          <div class="grow" style="min-width:0"><div class="bold">{{ t.full_name }}</div><div class="tiny muted">{% if t.phone %}{{ t.phone }} · {% endif %}so'rovnomalarda {{ t.responses_count }} ta talaba belgilagan</div></div>
+          <div class="grow" style="min-width:0"><div class="bold">{{ t.full_name }}</div><div class="tiny muted">{% if t.phone %}{{ t.phone }} · {% endif %}so'rovnomalarda {{ t.responses_count }} ta talaba belgilagan{% if t.user %} · <span class="mono">🔑 {{ t.user.username }}</span>{% endif %}</div></div>
+          {% if t.user %}<a href="{% url 'web:tutor-cabinet-view' t.pk %}" class="btn btn-ghost btn-sm" title="Tyutor ko'radigan kabinet">Kabinet</a>{% endif %}
+          <form method="post" action="{% url 'web:tutor-account' t.pk %}" {% if t.user %}onsubmit="return confirm('{{ t.full_name|escapejs }} uchun yangi parol yaratilsinmi? Eski parol ishlamay qoladi.')"{% endif %}>{% csrf_token %}<button class="btn {% if t.user %}btn-ghost{% else %}btn-soft{% endif %} btn-sm" title="{% if t.user %}Yangi parol{% else %}Kabinet uchun login ochish{% endif %}">🔑 <span class="hide-mobile">{% if t.user %}Yangi parol{% else %}Login ochish{% endif %}</span></button></form>
           <form method="post" action="{% url 'web:tutor-delete' t.pk %}" onsubmit="return confirm('{{ t.full_name|escapejs }} ro\'yxatdan olib tashlansinmi?')">{% csrf_token %}<button class="btn btn-ghost btn-sm btn-icon" aria-label="O'chirish">{% icon "trash" "icon-sm" %}</button></form>
         </div>
         {% endfor %}
@@ -38,6 +40,16 @@
   </div>
 
   <aside class="stack">
+    <div class="card stack-sm tc-admin">
+      <h3>🧑‍🏫 Tyutor kabineti</h3>
+      <p class="tiny muted">Tyutor o'z kabinetida faqat o'z talabalarini ko'radi: kim so'rovnomani to'ldirdi, kim yo'q, guruhlari, shaxsiy havola va QR, talabalarining login-parollari.</p>
+      <div class="tc-admin-count"><b>{{ with_accounts }}</b> / {{ total }} tyutorda login bor</div>
+      {% if with_accounts < total %}
+      <form method="post" action="{% url 'web:tutor-accounts-all' %}">{% csrf_token %}<button class="btn btn-primary btn-block">🔑 Barchasiga login ochish</button></form>
+      {% endif %}
+      {% if with_accounts %}<a href="{% url 'web:tutor-accounts-word' %}" class="btn btn-soft btn-block">{% icon "download" "icon-sm" %} Word: login-parollar</a>{% endif %}
+      <p class="tiny muted">Tyutor birinchi kirishda o'z parolini o'rnatadi, shundan keyin boshlang'ich parol ro'yxatdan o'chadi.</p>
+    </div>
     <div class="card stack-sm">
       <h3>Tyutor qo'shish</h3>
       <form method="post" class="form">{% csrf_token %}

@@ -22,7 +22,7 @@ from apps.accounts.models import Faculty, Tutor
 from apps.arena.models import PointTransaction
 from apps.audit import services as audit
 from apps.audit.models import AuditLog
-from apps.surveys import analytics, clubs, exports, services
+from apps.surveys import analytics, clubs, exports, services, word_report
 from apps.surveys import files as file_rules
 from apps.surveys.models import Question, Response, ResponseFile, Survey
 from apps.surveys.services import SurveyError
@@ -447,6 +447,7 @@ def survey_files_zip(request, pk):
 
 
 XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 
 
 @management_required
@@ -465,6 +466,25 @@ def survey_export_xlsx(request, pk):
     response = HttpResponse(content, content_type=XLSX)
     stamp = timezone.localtime().strftime("%Y%m%d-%H%M")
     response["Content-Disposition"] = f'attachment; filename="sorovnoma-{survey.pk}-natijalar-{stamp}.xlsx"'
+    return response
+
+
+@management_required
+def survey_export_docx(request, pk):
+    """Natijalar hisoboti Word'da: joriy filtrlar (fakultet, tyutor, javob sharti) hisobga olinadi."""
+    survey = get_object_or_404(Survey, pk=pk)
+    content = word_report.render(
+        survey,
+        _filtered(request, survey),
+        institution=request.institution.name if request.institution else "Talent Hub",
+        prepared_by=request.user.get_full_name() or request.user.username,
+        conditions=analytics.parse_conditions(survey, request.GET.getlist("answer")),
+        faculties=_faculties_for(request.user),
+        tutors=_tutors_for(request.user),
+    )
+    response = HttpResponse(content, content_type=DOCX)
+    stamp = timezone.localtime().strftime("%Y%m%d-%H%M")
+    response["Content-Disposition"] = f'attachment; filename="sorovnoma-{survey.pk}-hisobot-{stamp}.docx"'
     return response
 
 
@@ -499,10 +519,13 @@ def survey_register(request, pk):
     return redirect(back)
 
 
-@management_required
+@login_required
 def survey_poster(request, pk):
     survey = get_object_or_404(Survey, pk=pk)
     tutor = _link_tutor(request)
+    own = tutor is not None and tutor.user_id == request.user.pk  # tyutor o'z plakatini chop etadi
+    if not (request.user.is_management or own):
+        raise PermissionDenied
     context = {"survey": survey, "tutor": tutor, "share": _share(request, survey, tutor)}
     return render(request, "web/surveys/poster.html", context)
 
