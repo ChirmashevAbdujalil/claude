@@ -5,11 +5,13 @@ from django.db import migrations, models
 
 def mark_andti_skills(apps, schema_editor):
     """«ANDTI TALENT» so'rovnomasidagi qobiliyatlar savoli javoblari profilga yoziladi."""
-    from apps.surveys.presets import ANDTI_TALENT_TITLE
+    from apps.surveys.presets import ANDTI_TALENT_TITLE, OLD_TITLES
 
     Question = apps.get_model("surveys", "Question")
     Question.objects.filter(
-        survey__title=ANDTI_TALENT_TITLE, title="Sizning qanday qobiliyatlaringiz bor?", kind="multiple"
+        survey__title__in=[ANDTI_TALENT_TITLE, *OLD_TITLES],
+        title="Sizning qanday qobiliyatlaringiz bor?",
+        kind="multiple",
     ).update(to_profile=True)
 
 

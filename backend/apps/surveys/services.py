@@ -176,7 +176,7 @@ TEMPLATES = {
         ],  # fmt: skip
     },
     "andti_talent": {
-        "label": "«ANDTI TALENT» 1-bosqich",
+        "label": "«ANDTI TALENT»",
         "emoji": "🎯",
         "hint": "Talabalar qobiliyatlarini aniqlash: 40 ta qobiliyat, faollik va o'zi haqida 20 savol",
         **presets.ANDTI_TALENT,

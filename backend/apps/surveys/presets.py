@@ -5,7 +5,8 @@ F.I.Sh. savoli alohida berilmaydi: uni so'rovnoma boshidagi «Siz haqingizda» b
 kurs, guruh) so'raydi.
 """
 
-ANDTI_TALENT_TITLE = "🎯 «ANDTI TALENT» — 1-bosqich: talabalar qobiliyatlarini aniqlash so'rovnomasi"
+ANDTI_TALENT_TITLE = "🎯 «ANDTI TALENT» — Institut talabalari qobiliyatlarini aniqlash so'rovnomasi"
+OLD_TITLES = ["🎯 «ANDTI TALENT» — 1-bosqich: talabalar qobiliyatlarini aniqlash so'rovnomasi"]
 
 
 def _q(kind, title, *, required=True, options=(), help_text="", allow_other=False, to_profile=False):

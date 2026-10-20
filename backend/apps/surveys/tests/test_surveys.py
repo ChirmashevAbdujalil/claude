@@ -539,3 +539,22 @@ def test_andti_talent_survey_from_migration_and_template(make_user):
     assert services.schema(copy)[1:] and [q["title"] for q in services.schema(copy)] == [
         q.title for q in survey.questions.all()
     ]
+
+
+def test_andti_talent_rename_migration(make_user):
+    import importlib
+
+    from django.db import connection
+    from django.db.migrations.loader import MigrationLoader
+
+    from apps.surveys import presets
+
+    rector = make_user(role=User.Role.RECTOR, username="rektor-nom")
+    old = services.create_survey(rector, "andti_talent")
+    old.title = presets.OLD_TITLES[0]
+    old.save()
+    loader = MigrationLoader(connection)
+    state = loader.project_state(loader.graph.leaf_nodes("surveys")[0]).apps
+    importlib.import_module("apps.surveys.migrations.0010_rename_andti_talent").rename(state, None)
+    old.refresh_from_db()
+    assert old.title == "🎯 «ANDTI TALENT» — Institut talabalari qobiliyatlarini aniqlash so'rovnomasi"

@@ -5,14 +5,16 @@ from django.db import migrations
 
 
 def add_survey(apps, schema_editor):
-    from apps.surveys.presets import ANDTI_TALENT, ANDTI_TALENT_TITLE
+    from apps.surveys.presets import ANDTI_TALENT, ANDTI_TALENT_TITLE, OLD_TITLES
 
     Institution = apps.get_model("tenants", "Institution")
     Survey = apps.get_model("surveys", "Survey")
     Question = apps.get_model("surveys", "Question")
     User = apps.get_model("accounts", "User")
     institution = Institution.objects.filter(slug=settings.DEFAULT_INSTITUTION_SLUG).first()
-    if institution is None or Survey.objects.filter(institution=institution, title=ANDTI_TALENT_TITLE).exists():
+    if institution is None or Survey.objects.filter(
+        institution=institution, title__in=[ANDTI_TALENT_TITLE, *OLD_TITLES]
+    ).exists():
         return  # yangi baza: so'rovnoma «Yangi so'rovnoma» oynasidagi shablondan bir bosishda yaratiladi
     author = (
         User.objects.filter(institution=institution, role="rector", is_active=True).order_by("id").first()
