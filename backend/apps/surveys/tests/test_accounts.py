@@ -146,6 +146,48 @@ def test_thanks_page_tells_student_about_account(survey, faculty):
     assert account.initial_password not in page
 
 
+def test_answered_page_shows_credentials_again_until_first_login(survey, faculty):
+    survey.one_response = True
+    survey.save()
+    url = reverse("web:survey-fill", args=[survey.token])
+    client = web()
+    client.get(url)
+    track = survey.questions.get(kind=Question.Kind.TRACK)
+    data = {
+        f"q{track.pk}": Track.IT,
+        f"q{survey.questions.get(title='Eng yuqori natijangiz qaysi darajada?').pk}": "Viloyat",
+        f"q{survey.questions.get(kind=Question.Kind.SCALE).pk}": "4",
+        f"q{survey.questions.get(title='Mentor (ustoz) bilan ishlashni xohlaysizmi?').pk}": "Ha, albatta",
+        "who-full_name": "Yusupova Madina",
+        "who-faculty": faculty.pk,
+        "who-course": "1",
+        "who-group": "K-23-01",
+    }
+    client.post(url, data, follow=True)
+    account = IssuedAccount.objects.get(user__last_name="Yusupova")
+
+    page = client.get(url).content.decode()  # talaba havolani qayta ochdi
+    assert "allaqachon javob bergansiz" in page
+    assert account.user.username in page and account.initial_password in page
+
+    # Boshqa telefonda (javob shu brauzerdan bo'lmasa) parol ko'rinmaydi
+    stranger = web()
+    stranger.cookies.load({"th_sv": "0" * 32})
+    assert account.initial_password not in stranger.get(url).content.decode()
+
+    # Shu ism bilan boshqa brauzerdan yuborilgan javob oldin ochilgan akkauntga bog'lanadi: parol chiqmaydi
+    other = web()
+    other.get(url)
+    other.post(url, data, follow=True)
+    assert IssuedAccount.objects.count() == 1
+    assert account.initial_password not in other.get(url).content.decode()
+
+    # Talaba birinchi marta kirgach boshlang'ich parol o'chadi va endi ko'rsatilmaydi
+    Client().post(reverse("web:login"), {"username": account.user.username, "password": account.initial_password})
+    page = client.get(url).content.decode()
+    assert "allaqachon javob bergansiz" in page and account.initial_password not in page and "sv-cred" not in page
+
+
 # ---------------------------------------------------------------- birinchi kirish
 
 

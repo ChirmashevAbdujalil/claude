@@ -6,6 +6,7 @@ import secrets
 import shutil
 import tempfile
 import zipfile
+from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -25,7 +26,7 @@ from apps.audit import services as audit
 from apps.audit.models import AuditLog
 from apps.surveys import analytics, clubs, exports, services, word_report
 from apps.surveys import files as file_rules
-from apps.surveys.models import Question, Response, ResponseFile, Survey
+from apps.surveys.models import IssuedAccount, Question, Response, ResponseFile, Survey
 from apps.surveys.services import SurveyError
 from apps.talent.tracks import ICONS, Track
 
@@ -634,6 +635,9 @@ def survey_fill(request, token):
         state = "answered"
     if state:
         context = {"survey": survey, "state": state, "share_url": _fill_url(request, survey)}
+        if state == "answered":
+            context["new_account"] = _waiting_account(survey, user, browser_key)
+            context["login_url"] = request.build_absolute_uri(reverse("web:login"))
         return render(request, "web/surveys/done.html", context)
 
     questions = list(survey.questions.all())
@@ -722,6 +726,30 @@ def survey_thanks(request, token):
         "login_url": request.build_absolute_uri(reverse("web:login")),
     }
     return render(request, "web/surveys/done.html", context)
+
+
+def _waiting_account(survey, user, browser_key):
+    """«Allaqachon javob bergansiz» sahifasi uchun: shu brauzerdan yuborilgan javob ochgan akkaunt.
+
+    Talaba «Rahmat» sahifasidagi login-parolni saqlamay qolgan bo'lsa, javob bergan telefonida yana ko'radi.
+    Faqat akkaunt aynan shu javob bilan ochilgan va talaba hali kirmagan bo'lsa: birinchi kirishda boshlang'ich
+    parol o'chadi. Boshqa talabaning ismini yozib, uning oldin ochilgan akkauntiga bog'langan javobda parol chiqmaydi.
+    """
+    if user.is_authenticated or not browser_key:
+        return None
+    response = (
+        Response.objects.filter(survey=survey, browser_key=browser_key[:32], user__isnull=False)
+        .order_by("submitted_at")
+        .first()
+    )
+    if response is None:
+        return None
+    account = IssuedAccount.objects.filter(user_id=response.user_id, survey=survey).select_related("user").first()
+    if account is None or not account.initial_password:
+        return None
+    if not timedelta(0) <= account.created_at - response.submitted_at <= timedelta(minutes=1):
+        return None
+    return {"login": account.user.username, "password": account.initial_password}
 
 
 def _account_note(response):
