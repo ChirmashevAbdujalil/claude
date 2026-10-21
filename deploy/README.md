@@ -100,12 +100,12 @@ Tekshirish: `ping iqtidorasti.uz` serveringiz IP sini ko'rsatishi kerak.
    ```bash
    pip install -r requirements.txt PyMySQL
    ```
-6. **`.env` fayli.**
-   - `backend` papkasida `deploy/env.production.example` dan nusxa olib, `.env` deb saqlang.
-   - To'ldiring: `DJANGO_SECRET_KEY`, `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`.
-   - `POSTGRES_DB` qatorini **bo'sh** qoldiring.
-   - `AUDIT_TRUST_X_FORWARDED_FOR=0` qiling.
-7. **Bazani tayyorlash** (o'sha terminalda):
+6. **`.env` fayli** (maxfiy kalit o'zi yaratiladi, sizdan faqat baza ma'lumotlari so'raladi):
+   ```bash
+   bash ~/iqtidorasti/deploy/cpanel_env.sh
+   ```
+   «TAYYOR: .env yaratildi va bazaga ulanildi» chiqsa, keyingi qadamga o'ting.
+7. **Bazani tayyorlash** (o'sha terminalda; `makemigrations` serverda **kerak emas**, migratsiyalar kodda tayyor):
    ```bash
    python manage.py migrate
    python manage.py collectstatic --noinput
