@@ -722,7 +722,9 @@ def survey_thanks(request, token):
         "state": "thanks",
         "xp": xp,
         "share_url": _fill_url(request, survey),
-        "new_account": request.session.pop(f"sv-account:{survey.token}", None),  # faqat bir marta ko'rsatiladi
+        # Sessiya saqlanmagan bo'lsa ham (cookie), shu brauzerdan ochilgan akkaunt topiladi
+        "new_account": request.session.pop(f"sv-account:{survey.token}", None)
+        or _waiting_account(survey, user, request.COOKIES.get(BROWSER_COOKIE, "")),
         "login_url": request.build_absolute_uri(reverse("web:login")),
     }
     return render(request, "web/surveys/done.html", context)

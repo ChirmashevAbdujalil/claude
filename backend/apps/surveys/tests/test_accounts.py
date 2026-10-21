@@ -124,8 +124,11 @@ def test_thanks_page_tells_student_about_account(survey, faculty):
     account = IssuedAccount.objects.get(user__last_name="Yusupova")
     assert "akkaunt ochildi" in page and account.user.username in page and account.initial_password in page
     assert "Rasmga (skrinshot) saqlab qo" in page.replace("&#x27;", "'")
+    # Sessiya yo'qolsa ham (cookie saqlanmagan) shu brauzerda login-parol chiqadi
+    client.cookies.pop("sessionid", None)
     again = client.get(reverse("web:survey-thanks", args=[survey.token])).content.decode()
-    assert "akkaunt ochildi" not in again and account.initial_password not in again  # faqat bir marta
+    assert "akkaunt ochildi" in again and account.initial_password in again
+    assert account.initial_password not in web().get(reverse("web:survey-thanks", args=[survey.token])).content.decode()
 
     # Shu ism-fakultet-kurs bilan boshqa so'rovnomani to'ldirgan odamga eski akkaunt paroli ko'rsatilmaydi
     other = services.create_survey(survey.created_by, "feedback")
