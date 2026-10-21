@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sahifani yangilang</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px; font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: #eef3f5; color: #0b1d24; }
+    .card { max-width: 460px; width: 100%; background: #fff; border-radius: 20px; padding: 28px 24px; box-shadow: 0 10px 30px rgba(6, 45, 59, .12); text-align: center; }
+    .icon { font-size: 44px; }
+    h1 { font-size: 1.35rem; margin: 10px 0 8px; }
+    p { margin: 0 0 12px; line-height: 1.55; color: #3a5560; }
+    ol { text-align: left; margin: 0 0 18px; padding-left: 20px; line-height: 1.6; color: #3a5560; }
+    a.btn { display: inline-block; padding: 12px 20px; border-radius: 12px; background: #0e5a73; color: #fff; text-decoration: none; font-weight: 700; }
+    small { display: block; margin-top: 14px; color: #7a8f97; }
+    @media (prefers-color-scheme: dark) { body { background: #0b161b; color: #e7f0f3; } .card { background: #12232a; } p, ol { color: #b5c7cd; } }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="icon">🔄</div>
+    <h1>Sahifani yangilab, qayta urinib ko'ring</h1>
+    <p>Xavfsizlik tekshiruvi forma yuborilishini to'xtatdi. Odatda bu sahifa uzoq vaqt ochiq turganda yoki sayt <b>https</b>siz ochilganda bo'ladi.</p>
+    <ol>
+      <li>Manzil <b>https://</b> bilan boshlanayotganini tekshiring.</li>
+      <li>Sahifani yangilang va formani qaytadan yuboring.</li>
+      <li>Bo'lmasa, brauzerda shu sayt uchun cookie'lar yoqilganini tekshiring.</li>
+    </ol>
+    <a class="btn" href="javascript:history.back()">← Orqaga qaytish</a>
+    <small>Xato kodi: 403 (CSRF)</small>
+  </main>
+</body>
+</html>
