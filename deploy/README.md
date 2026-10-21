@@ -76,8 +76,11 @@ Tekshirish: `ping iqtidorasti.uz` serveringiz IP sini ko'rsatishi kerak.
 
 > Talab: Python **3.10 yoki yangiroq**. Panelda faqat 3.9 bo'lsa, Django 5 ishlamaydi: VPS kerak bo'ladi.
 
-1. **Domen va SSL.** cPanel → *Domains*: `iqtidorasti.uz` qo'shing. *SSL/TLS Status* → *Run AutoSSL*. *Domains* →
-   *Force HTTPS Redirect* ni yoqing.
+1. **Domen va SSL.** cPanel → *Domains*: `iqtidorasti.uz` qo'shing. *SSL/TLS Status* → *Run AutoSSL*.
+   - Sayt http va https da ishlaydi. *Force HTTPS Redirect* ni **yoqmang**: sertifikat zanjiri to'liq bo'lmasa,
+     https Telegram ichki brauzerida ochilmaydi.
+   - `https://iqtidorasti.uz` Telegram'da ham ochilishini tekshirgach, faqat https qilish uchun:
+     `config/settings.py` da `HTTPS_ONLY = env_bool("DJANGO_HTTPS_ONLY", False)` qatoridagi `False` ni `True` qiling.
 2. **Kod GitHub'dan** (repozitoriy ochiq, kalit kerak emas). cPanel → *Terminal*:
    ```bash
    git clone -b claude/salom-dasturchi-startuper-48z19p https://github.com/ChirmashevAbdujalil/claude.git ~/iqtidorasti

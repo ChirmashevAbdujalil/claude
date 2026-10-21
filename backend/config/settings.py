@@ -277,11 +277,14 @@ if not DEBUG:
     # Production'da statik fayllarni gunicorn orqali whitenoise beradi (nginx bo'lsa, nginx o'zi beradi)
     MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    # HTTP -> HTTPS. Cookie'lar faqat https orqali saqlanadi: http da login va formalar «CSRF» xatosini beradi,
-    # shuning uchun sayt http da ochilsa darhol https ga o'tkaziladi. SSL hali o'rnatilmagan bo'lsa: 0 qiling
-    SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", True)
+    # Sayt faqat https da ishlaydimi? True: http dan https ga o'tkaziladi, cookie'lar faqat https da yuboriladi.
+    # False: sayt http da ham to'liq ishlaydi (login, so'rovnoma yuborish). Hostingdagi SSL sertifikati Telegram
+    # ichki brauzerida ochilmasa (zanjiri to'liq emas), shu False bo'lib tursin; SSL tuzalgach True qiling
+    HTTPS_ONLY = env_bool("DJANGO_HTTPS_ONLY", False)
+    # Cookie'lar rejimga mos: https talab qilinsa xavfsiz, aks holda http da ham saqlanadi (bo'lmasa «CSRF» xatosi)
+    SESSION_COOKIE_SECURE = CSRF_COOKIE_SECURE = HTTPS_ONLY
+    # http -> https ni Django o'zi qiladi. nginx yo'naltirsa (VPS), .env da DJANGO_SECURE_SSL_REDIRECT=0
+    SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", HTTPS_ONLY)
     # Sertifikat ishlayotganiga ishonch hosil qilgach yoqing, masalan 31536000 (1 yil)
     SECURE_HSTS_SECONDS = int(os.environ.get("DJANGO_HSTS_SECONDS", 0))
     SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("DJANGO_HSTS_SUBDOMAINS", False)
