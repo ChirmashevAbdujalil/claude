@@ -3,6 +3,7 @@ __pycache__/
 .venv/
 venv/
 .env
+backend/.secret_key
 *.sqlite3
 backend/media/
 backend/private_media/

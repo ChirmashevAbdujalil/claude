@@ -21,17 +21,35 @@ def env_list(name: str, default: str = "") -> list[str]:
     return [item.strip() for item in os.environ.get(name, default).split(",") if item.strip()]
 
 
-DEBUG = env_bool("DJANGO_DEBUG", False)
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
-if not SECRET_KEY:
-    if not DEBUG:
-        raise RuntimeError(
-            "DJANGO_SECRET_KEY o'rnatilmagan. Lokal ishga tushirish uchun backend papkasida .env faylini yarating: "
-            "Windows'da 'copy .env.example .env', Mac/Linux'da 'cp .env.example .env'"
-        )
-    SECRET_KEY = "dev-only-insecure-key"
+# Asosiy domen: .env bo'lmasa ham sayt shu domenda ishlaydi (ahost.uz, cPanel)
+SITE_DOMAIN = os.environ.get("SITE_DOMAIN", "iqtidorasti.uz")
 
-ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,.localhost")
+
+def secret_key_file(path: Path) -> str:
+    """Maxfiy kalit .env da berilmagan bo'lsa: birinchi ishga tushishda yaratiladi va faqat serverda saqlanadi.
+
+    Kalit kodga (GitHub'ga) yozilmaydi: uni bilgan odam istalgan foydalanuvchi sessiyasini soxtalashtira oladi.
+    """
+    try:
+        return path.read_text(encoding="utf-8").strip()
+    except FileNotFoundError:
+        pass
+    import secrets
+
+    key = secrets.token_urlsafe(50)
+    try:
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    except FileExistsError:  # boshqa jarayon shu lahzada yaratdi
+        return path.read_text(encoding="utf-8").strip()
+    with os.fdopen(fd, "w", encoding="utf-8") as handle:
+        handle.write(key)
+    return key
+
+
+DEBUG = env_bool("DJANGO_DEBUG", False)
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY") or secret_key_file(BASE_DIR / ".secret_key")
+
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", f"{SITE_DOMAIN},www.{SITE_DOMAIN},localhost,127.0.0.1,.localhost")
 if DEBUG and ".localhost" not in ALLOWED_HOSTS:
     # Lokal SaaS sinovi: <otm>.localhost:8000 subdomenlari doim ochiq
     ALLOWED_HOSTS.append(".localhost")
@@ -218,7 +236,7 @@ TELEGRAM_AUTH_MAX_AGE = int(os.environ.get("TELEGRAM_AUTH_MAX_AGE", 86400))
 TELEGRAM_WEBHOOK_SECRET = os.environ.get("TELEGRAM_WEBHOOK_SECRET", "")
 
 # Saytning tashqi manzili: Telegram tugmalari va xabarlardagi havolalar uchun
-SITE_URL = os.environ.get("SITE_URL", "")
+SITE_URL = os.environ.get("SITE_URL", f"https://{SITE_DOMAIN}")
 
 # SaaS: bitta platformada bir nechta OTM. Har bir OTM o'z subdomenida ishlaydi: <slug>.SAAS_BASE_DOMAIN
 # Bo'sh bo'lsa, platforma bitta OTM (DEFAULT_INSTITUTION) uchun ishlaydi. Lokal sinov: <slug>.localhost:8000

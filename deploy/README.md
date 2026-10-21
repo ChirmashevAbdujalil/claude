@@ -100,11 +100,12 @@ Tekshirish: `ping iqtidorasti.uz` serveringiz IP sini ko'rsatishi kerak.
    ```bash
    pip install -r requirements.txt PyMySQL
    ```
-6. **`.env` fayli** (maxfiy kalit o'zi yaratiladi, sizdan faqat baza ma'lumotlari so'raladi):
-   ```bash
-   bash ~/iqtidorasti/deploy/cpanel_env.sh
-   ```
-   «TAYYOR: .env yaratildi va bazaga ulanildi» chiqsa, keyingi qadamga o'ting.
+6. **`.env` shart emas.**
+   - Domen (iqtidorasti.uz), HTTPS va boshqa sozlamalar `settings.py` da tayyor.
+   - Maxfiy kalit birinchi ishga tushishda `backend/.secret_key` fayliga o'zi yoziladi. Bu faylni o'chirmang va
+     hech kimga bermang.
+   - Baza: SQLite (`backend/db.sqlite3`), parol kerak emas.
+   - MySQL ishlatmoqchi bo'lsangiz (ixtiyoriy): `bash ~/iqtidorasti/deploy/cpanel_env.sh`.
 7. **Bazani tayyorlash** (o'sha terminalda; `makemigrations` serverda **kerak emas**, migratsiyalar kodda tayyor):
    ```bash
    python manage.py migrate
