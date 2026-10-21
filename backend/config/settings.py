@@ -179,6 +179,8 @@ TIME_ZONE = "Asia/Tashkent"
 USE_I18N = True
 USE_TZ = True
 
+CSRF_FAILURE_VIEW = "apps.web.views.public.csrf_failure"
+
 LOGIN_URL = "web:login"
 LOGIN_REDIRECT_URL = "web:dashboard"
 

@@ -76,3 +76,22 @@ def test_long_curator_message_with_bold_and_paragraphs(rector):
     services.publish(survey)
     page = Client().get(reverse("web:survey-thanks", args=[survey.token])).content.decode()
     assert "<b>Abdujalil Chirmashev</b>" in page and "Uzun matn. Uzun matn." in page
+
+
+def test_csrf_failure_on_survey_returns_to_form(rector):
+    survey = services.create_survey(rector, "feedback")
+    services.publish(survey)
+    url = reverse("web:survey-fill", args=[survey.token])
+    client = Client(enforce_csrf_checks=True)
+    page = client.get(url)
+    assert "no-cache" in page["Cache-Control"] or "max-age=0" in page["Cache-Control"]  # hosting keshlamasin
+
+    stranger = Client(enforce_csrf_checks=True)  # cookie'siz yuborish (eski kesh yoki http)
+    response = stranger.post(url, {"x": "1"})
+    assert response.status_code == 302 and response.url == f"{url}?qayta=1"
+    again = stranger.get(response.url).content.decode()
+    assert "Javobingiz hali yuborilmadi" in again and 'data-restore="1"' in again
+    final = stranger.post(f"{url}?qayta=1", {"x": "1"})  # ikkinchi marta ham bo'lmasa: tushuntirish sahifasi
+    assert final.status_code == 403 and "Sahifani yangilab" in final.content.decode()
+    other = Client(enforce_csrf_checks=True).post(reverse("web:login"), {"username": "a", "password": "b"})
+    assert other.status_code == 403 and "Sahifani yangilab" in other.content.decode()

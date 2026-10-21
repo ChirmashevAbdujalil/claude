@@ -21,6 +21,10 @@
   <div class="sv-note sv-note-warn">👁 <span><b>Ko'rish rejimi.</b> So'rovnoma hali e'lon qilinmagan, javob yuborilmaydi. <a href="{% url 'web:survey-builder' survey.pk %}">Konstruktorga qaytish</a></span></div>
   {% endif %}
 
+  {% if request.GET.qayta and not preview %}
+  <div class="sv-note sv-note-warn" role="alert">🔄 <span><b>Javobingiz hali yuborilmadi.</b> Xavfsizlik tekshiruvi sahifani yangiladi: javoblaringiz tiklandi, pastdagi <b>«Yuborish»</b> tugmasini qayta bosing. Fayl biriktirgan bo'lsangiz, uni qayta tanlang.</span></div>
+  {% endif %}
+
   <section class="sv-hero">
     <div class="sv-hero-deco" aria-hidden="true"><i></i><i></i><i></i></div>
     <span class="sv-tag">{% if survey.talent_census %}🧭 Iqtidorlarni ro'yxatga olish{% else %}📝 So'rovnoma{% endif %}</span>

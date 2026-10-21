@@ -129,6 +129,18 @@ def page_not_found(request, exception=None):
     return render(request, "web/404.html", status=404)
 
 
+def csrf_failure(request, reason=""):
+    """Xavfsizlik tekshiruvi (CSRF) o'tmadi.
+
+    So'rovnomada talaba javoblarini yo'qotmasin: formaga qaytariladi, brauzerdagi qoralama javoblarni tiklaydi va
+    yangi xavfsizlik cookie'si o'rnatiladi, «Yuborish» ni qayta bosish kifoya. Boshqa sahifalarda tushuntirish chiqadi.
+    """
+    if request.method == "POST" and request.path.startswith("/s/") and not request.GET.get("qayta"):
+        separator = "&" if request.GET else "?"
+        return redirect(f"{request.get_full_path()}{separator}qayta=1")
+    return render(request, "403_csrf.html", status=403)
+
+
 def _contact_url(contact: str) -> str:
     """SPONSOR_CONTACT dan havola yasaydi: email, @telegram yoki to'liq URL."""
     contact = contact.strip()
