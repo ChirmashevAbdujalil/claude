@@ -23,20 +23,10 @@
     <h1>Javobingiz qabul qilindi!</h1>
     <p>{{ survey.thank_you|default:"Rahmat! Fikringiz biz uchun muhim." }}</p>
     {% if xp %}<span class="sv-done-xp">⚡ +{{ xp }} XP hisobingizga qo'shildi</span>{% endif %}
-    {% if new_account.password %}
-    {% include "web/surveys/_credentials.html" %}
-    {% elif new_account.existing %}
-    <div class="sv-account">
-      <span class="sv-account-icon">🔐</span>
-      <div><b>Sizda platformada akkaunt bor: <span class="mono">{{ new_account.login }}</span></b>
-        <span>Javobingiz shu akkauntga qo'shildi. Parolni unutgan bo'lsangiz, tyutoringiz yoki dekanatga murojaat qiling: ular yangi parol berishadi.</span></div>
-    </div>
-    {% endif %}
     {% elif state == "answered" %}
     <div class="sv-done-badge">📬</div>
     <h1>Siz allaqachon javob bergansiz</h1>
     <p>Bu so'rovnomaga javob faqat bir marta qabul qilinadi. Javobingiz saqlangan, rahmat!</p>
-    {% if new_account.password %}{% include "web/surveys/_credentials.html" %}{% endif %}
     {% elif state == "closed" %}
     <div class="sv-done-badge is-muted">🔒</div>
     <h1>So'rovnoma yopilgan</h1>
@@ -48,6 +38,17 @@
     {% endif %}
 
     {% if survey %}{% include "web/surveys/_curator.html" %}{% endif %}
+
+    {# Login-parol mas'ul shaxs blokidan keyin: talaba avval murojaatni o'qiydi #}
+    {% if new_account.password %}
+    {% include "web/surveys/_credentials.html" %}
+    {% elif new_account.existing %}
+    <div class="sv-account">
+      <span class="sv-account-icon">🔐</span>
+      <div><b>Sizda platformada akkaunt bor: <span class="mono">{{ new_account.login }}</span></b>
+        <span>Javobingiz shu akkauntga qo'shildi. Parolni unutgan bo'lsangiz, tyutoringiz yoki dekanatga murojaat qiling: ular yangi parol berishadi.</span></div>
+    </div>
+    {% endif %}
 
     {% if share_url and state != "closed" %}
     <div class="sv-share">
