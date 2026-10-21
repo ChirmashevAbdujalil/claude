@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.auth.decorators import login_required
 from django.urls import include, path, re_path
 from django.views.static import serve
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
@@ -39,7 +40,15 @@ handler404 = "apps.web.views.public.page_not_found"
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 else:
-    # OTM logotipi va mas'ul shaxs rasmi ommaviy: alohida veb-server bo'lmasa ham ko'rinadi
+    # nginx bo'lmasa ham (masalan, cPanel hosting) yuklangan rasmlar ko'rinadi: logotip, avatar, post va mukofot
+    # rasmlari ommaviy; talaba yutuqlarini tasdiqlovchi hujjatlar faqat tizimga kirganlarga.
+    # So'rovnoma fayllari bu yerda emas: ular PRIVATE_MEDIA_ROOT da, ruxsat tekshiriladigan sahifa orqali beriladi.
+    PUBLIC_MEDIA = r"(?:institutions|avatars|posts|sponsors|rewards)"
     urlpatterns += [
-        re_path(r"^media/(?P<path>institutions/[\w./-]+)$", serve, {"document_root": settings.MEDIA_ROOT}),
+        re_path(rf"^media/(?P<path>{PUBLIC_MEDIA}/[\w./-]+)$", serve, {"document_root": settings.MEDIA_ROOT}),
+        re_path(
+            r"^media/(?P<path>achievements/[\w./ -]+)$",
+            login_required(serve),
+            {"document_root": settings.MEDIA_ROOT},
+        ),
     ]

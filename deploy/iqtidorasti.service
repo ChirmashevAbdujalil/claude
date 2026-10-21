@@ -1,0 +1,16 @@
+[Unit]
+Description=iqtidorasti.uz (Django + gunicorn)
+After=network.target postgresql.service
+
+[Service]
+User=iqtidor
+Group=iqtidor
+WorkingDirectory=/srv/iqtidorasti/app/backend
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/srv/iqtidorasti/venv/bin/gunicorn config.wsgi:application \
+    --bind 127.0.0.1:8000 --workers 3 --timeout 180 --access-logfile - --error-logfile -
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

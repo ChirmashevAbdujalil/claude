@@ -36,6 +36,13 @@ if DEBUG and ".localhost" not in ALLOWED_HOSTS:
     # Lokal SaaS sinovi: <otm>.localhost:8000 subdomenlari doim ochiq
     ALLOWED_HOSTS.append(".localhost")
 CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
+if not CSRF_TRUSTED_ORIGINS and not DEBUG:
+    # Berilmagan bo'lsa ALLOWED_HOSTS dan: iqtidorasti.uz -> https://iqtidorasti.uz, .iqtidorasti.uz -> https://*.iqtidorasti.uz
+    CSRF_TRUSTED_ORIGINS = [
+        f"https://*{host}" if host.startswith(".") else f"https://{host}"
+        for host in ALLOWED_HOSTS
+        if host not in ("*", "localhost", "127.0.0.1") and not host.endswith("localhost")
+    ]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -110,11 +117,33 @@ if os.environ.get("POSTGRES_DB"):
             "CONN_MAX_AGE": 60,
         }
     }
+elif os.environ.get("MYSQL_DATABASE"):
+    # cPanel hostinglarida odatda MySQL/MariaDB beriladi. mysqlclient o'rnatilmasa, PyMySQL ishlatiladi
+    try:
+        import MySQLdb  # noqa: F401
+    except ImportError:
+        import pymysql
+
+        pymysql.install_as_MySQLdb()
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.mysql",
+            "NAME": os.environ["MYSQL_DATABASE"],
+            "USER": os.environ.get("MYSQL_USER", ""),
+            "PASSWORD": os.environ.get("MYSQL_PASSWORD", ""),
+            "HOST": os.environ.get("MYSQL_HOST", "localhost"),
+            "PORT": os.environ.get("MYSQL_PORT", "3306"),
+            "CONN_MAX_AGE": 60,
+            "OPTIONS": {"charset": "utf8mb4", "init_command": "SET sql_mode='STRICT_TRANS_TABLES'"},
+        }
+    }
 else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
+            "NAME": Path(os.environ.get("SQLITE_PATH") or BASE_DIR / "db.sqlite3"),
+            # Bir vaqtda ko'p yozuv kelganda «database is locked» bo'lmasligi uchun
+            "OPTIONS": {"timeout": 20, "transaction_mode": "IMMEDIATE"},
         }
     }
 
@@ -136,13 +165,13 @@ LOGIN_URL = "web:login"
 LOGIN_REDIRECT_URL = "web:dashboard"
 
 STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT = Path(os.environ.get("STATIC_ROOT") or BASE_DIR / "staticfiles")
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
 }
 MEDIA_URL = "media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT") or BASE_DIR / "media")
 # So'rovnomaga yuklangan fayllar: MEDIA_URL orqali berilmaydi, faqat ruxsatni tekshiradigan sahifa orqali
 PRIVATE_MEDIA_ROOT = Path(os.environ.get("PRIVATE_MEDIA_ROOT") or BASE_DIR / "private_media")
 
@@ -225,8 +254,39 @@ AI_HISTORY_MESSAGES = int(os.environ.get("AI_HISTORY_MESSAGES", 20))
 ARENA_DAILY_XP_CAP = int(os.environ.get("ARENA_DAILY_XP_CAP", 1000))
 
 if not DEBUG:
-    # Production'da statik fayllarni gunicorn orqali whitenoise beradi
+    # Production'da statik fayllarni gunicorn orqali whitenoise beradi (nginx bo'lsa, nginx o'zi beradi)
     MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    # HTTP -> HTTPS: nginx yoki hosting paneli yo'naltirmasa, 1 qiling
+    SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", False)
+    # Sertifikat ishlayotganiga ishonch hosil qilgach yoqing, masalan 31536000 (1 yil)
+    SECURE_HSTS_SECONDS = int(os.environ.get("DJANGO_HSTS_SECONDS", 0))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("DJANGO_HSTS_SUBDOMAINS", False)
+
+# Xatolar: konsolga (gunicorn/systemd jurnali) va LOG_FILE berilsa faylga ham yoziladi
+LOG_FILE = os.environ.get("LOG_FILE", "")
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {"plain": {"format": "{asctime} {levelname} {name}: {message}", "style": "{"}},
+    "handlers": {
+        "console": {"class": "logging.StreamHandler", "formatter": "plain"},
+        **(
+            {
+                "file": {
+                    "class": "logging.handlers.RotatingFileHandler",
+                    "filename": LOG_FILE,
+                    "maxBytes": 5 * 1024 * 1024,
+                    "backupCount": 5,
+                    "formatter": "plain",
+                    "encoding": "utf-8",
+                }
+            }
+            if LOG_FILE
+            else {}
+        ),
+    },
+    "root": {"handlers": ["console", *(["file"] if LOG_FILE else [])], "level": "WARNING"},
+}

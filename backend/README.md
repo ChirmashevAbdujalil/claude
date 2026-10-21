@@ -5,6 +5,8 @@ Python, Django va Django REST Framework. Ikki qismdan iborat:
 - **Veb-interfeys** (Django template'lar): talabalar, o'qituvchilar va rahbariyat uchun to'liq sayt. Telegram Mini App ichida ham ishlaydi.
 - **REST API** (`/api/v1/`): mobil ilova va tashqi integratsiyalar uchun.
 
+> **Serverga joylash (iqtidorasti.uz, ahost.uz):** [`deploy/README.md`](../deploy/README.md) — VPS uchun bitta skript va cPanel hosting yo'riqnomasi.
+
 ## Tez ishga tushirish
 
 ```bash
