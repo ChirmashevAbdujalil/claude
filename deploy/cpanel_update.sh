@@ -2,7 +2,13 @@
 # cPanel hostingda yangi versiyani o'rnatish (cPanel → Terminal):
 #   bash ~/iqtidorasti/deploy/cpanel_update.sh
 # GitHub'dan yangi kodni oladi, kutubxonalar, migratsiya va statik fayllarni yangilaydi va ilovani qayta ishga tushiradi.
+#
+# Avtomatik yangilash (cPanel → Cron Jobs, har 15 daqiqada):
+#   bash $HOME/iqtidorasti/deploy/cpanel_update.sh --auto >> $HOME/iqtidorasti-update.log 2>&1
+# --auto rejimida GitHub'da yangi versiya bo'lmasa, hech narsa qilmasdan chiqadi.
 set -euo pipefail
+AUTO=0
+[ "${1:-}" = "--auto" ] && AUTO=1
 
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 APP="$REPO_DIR/backend"
@@ -18,8 +24,13 @@ if [ -z "$PY" ] || [ ! -x "$PY" ]; then
     exit 1
 fi
 
-echo "== Kod: GitHub'dan yangilanmoqda"
-git -C "$REPO_DIR" pull --ff-only
+git -C "$REPO_DIR" fetch -q origin
+if [ "$(git -C "$REPO_DIR" rev-parse HEAD)" = "$(git -C "$REPO_DIR" rev-parse '@{u}')" ]; then
+    [ "$AUTO" = 1 ] && exit 0   # yangi versiya yo'q
+    echo "Kod allaqachon eng so'nggi versiyada: baribir migratsiya va statik fayllar tekshiriladi"
+fi
+echo "== $(date '+%F %T') Kod: GitHub'dan yangilanmoqda"
+git -C "$REPO_DIR" merge -q --ff-only '@{u}'
 echo "== Kutubxonalar"
 "$PY" -m pip install -q -r "$APP/requirements.txt" PyMySQL
 cd "$APP"

@@ -121,6 +121,16 @@ bash ~/iqtidorasti/deploy/cpanel_update.sh
 Bu skript kodni GitHub'dan oladi, kutubxonalar, migratsiya va statik fayllarni yangilaydi va ilovani qayta
 ishga tushiradi.
 
+**Avtomatik yangilash** (ixtiyoriy). cPanel → *Cron Jobs* → *Add New Cron Job*:
+- *Common Settings*: «Once Per Fifteen Minutes» (har 15 daqiqada);
+- *Command*:
+  ```
+  bash $HOME/iqtidorasti/deploy/cpanel_update.sh --auto >> $HOME/iqtidorasti-update.log 2>&1
+  ```
+
+Har 15 daqiqada GitHub tekshiriladi: yangi versiya bo'lmasa hech narsa qilinmaydi, bo'lsa o'zi o'rnatiladi.
+Nima o'rnatilgani `~/iqtidorasti-update.log` faylida yoziladi.
+
 **Zaxira:** cPanel → *Backup* (baza va `media`, `private_media` papkalari).
 
 ---
