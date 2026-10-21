@@ -78,10 +78,16 @@ Tekshirish: `ping iqtidorasti.uz` serveringiz IP sini ko'rsatishi kerak.
 
 1. **Domen va SSL.** cPanel → *Domains*: `iqtidorasti.uz` qo'shing. *SSL/TLS Status* → *Run AutoSSL*. *Domains* →
    *Force HTTPS Redirect* ni yoqing.
-2. **Kod.**
-   - *Git Version Control* bo'lsa: repozitoriyni `~/iqtidorasti` ga klonlang.
-   - Bo'lmasa: *File Manager* orqali `claude-kod.zip` ni yuklab, oching.
-   - Kerakli papka: `~/iqtidorasti/backend`.
+2. **Kod GitHub'dan** (repozitoriy ochiq, kalit kerak emas). cPanel → *Terminal*:
+   ```bash
+   git clone -b claude/salom-dasturchi-startuper-48z19p https://github.com/ChirmashevAbdujalil/claude.git ~/iqtidorasti
+   ```
+   *Terminal* bo'lmasa:
+   1. *Git™ Version Control* → *Create* sahifasida *Clone a Repository* ni yoqing.
+   2. *Clone URL*: `https://github.com/ChirmashevAbdujalil/claude.git`, *Repository Path*: `iqtidorasti`.
+   3. Yaratilgach, *Manage* → *Checked-Out Branch*: `claude/salom-dasturchi-startuper-48z19p` → *Update*.
+
+   Ikkala usulda ham ilova papkasi `~/iqtidorasti/backend` bo'ladi.
 3. **Baza.**
    - *MySQL Databases*: baza va foydalanuvchi yarating, foydalanuvchiga **ALL PRIVILEGES** bering.
    - Masalan: `user_iqtidor` bazasi, `user_iqtidor` foydalanuvchisi.
@@ -108,10 +114,12 @@ Tekshirish: `ping iqtidorasti.uz` serveringiz IP sini ko'rsatishi kerak.
    ```
 8. *Setup Python App* → **Restart**. `https://iqtidorasti.uz` ni oching.
 
-**Yangilash:**
-- Kodni yangilang: *Git Version Control* → *Pull* yoki yangi zip.
-- Terminalda: `pip install -r requirements.txt`, `python manage.py migrate`, `python manage.py collectstatic --noinput`.
-- Panelda **Restart**.
+**Yangilash** (GitHub'ga yangi versiya chiqqanda), cPanel → *Terminal*:
+```bash
+bash ~/iqtidorasti/deploy/cpanel_update.sh
+```
+Bu skript kodni GitHub'dan oladi, kutubxonalar, migratsiya va statik fayllarni yangilaydi va ilovani qayta
+ishga tushiradi.
 
 **Zaxira:** cPanel → *Backup* (baza va `media`, `private_media` papkalari).
 
