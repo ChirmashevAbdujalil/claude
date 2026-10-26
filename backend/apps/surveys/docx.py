@@ -17,6 +17,7 @@ ACCENT = "FFF6E0"
 MUTED = "5F747C"
 FONT = "Arial"
 MONO = "Consolas"
+NO_FACULTY = "Fakultet ko'rsatilmagan"
 
 OFFICE_REL = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 PACKAGE = "http://schemas.openxmlformats.org/package/2006"
@@ -314,6 +315,116 @@ def _cards_body(rows, meta):
         table_rows.append(_row(cells))
     parts.append(_table(table_rows, [col, total - col], borders=False))
     return "".join(parts), False
+
+
+def _tutor_card(row, meta, width):
+    head = _p(_run(meta["institution"], bold=True, size=8, color=TEAL), after=40) + _p(
+        _run(row["name"], bold=True, size=13, color=DARK), after=20
+    )
+    head += _p(_run(f"Tyutor · {row['faculty_short'] or row['faculty'] or '—'}", size=8.5, color=MUTED), after=120)
+    label_width = 900
+    value_width = width - label_width - 400
+
+    def line(label, value, fill):
+        return _row(
+            [
+                _cell(_p(_run(label, size=8, color=MUTED)), label_width, fill=fill),
+                _cell(_p(_run(value, bold=True, size=10.5, font=MONO, color=DARK)), value_width, fill=fill),
+            ]
+        )
+
+    creds = _table(
+        [line("Login", row["login"], LIGHT), line("Parol", row["password"], ACCENT)],
+        [label_width, value_width],
+        borders=False,
+    )
+    tail = _p(_run("Kirish: ", size=8, color=MUTED), _run(meta["login_url"], bold=True, size=8, color=TEAL), before=100)
+    tail += _p(_run("Kabinet: ", size=8, color=MUTED), _run(meta["cabinet_url"], bold=True, size=8, color=TEAL))
+    return head + creds + tail
+
+
+def _steps(steps, width):
+    col = width // len(steps)
+    cells = []
+    for number, (title, text) in enumerate(steps, 1):
+        content = (
+            _p(_run(number, bold=True, size=18, color=TEAL), after=20)
+            + _p(_run(title, bold=True, size=9.5, color=DARK), after=30)
+            + _p(_run(text, size=8.5, color=MUTED))
+        )
+        cells.append(_cell(content, col, fill=LIGHT, valign="top", margins=(140, 160, 140, 160),
+                           borders=_borders("FFFFFF", size=12)))  # fmt: skip
+    return _table([_row(cells)], [col] * len(steps), borders=False)
+
+
+def tutor_accounts(rows, *, institution, site, subtitle) -> bytes:
+    """Tyutorlarning kabinetga kirish login-parollari: yo'riqnoma va fakultetlar bo'yicha qirqiladigan kartochkalar."""
+    total = 10466  # kitob varaq
+    col = total // 2
+    meta = {"institution": institution, "login_url": f"{site}/login/", "cabinet_url": f"{site}/tyutor/"}
+    steps = [
+        ("Saytni oching", f"Brauzerda {meta['login_url']} manzilini oching"),
+        ("Tizimga kiring", "Kartochkadagi login va parolni yozing"),
+        ("Parolni almashtiring", "Birinchi kirishda o'zingiz biladigan yangi parol o'rnatasiz"),
+        ("Kabinetga o'ting", "Menyudagi «Tyutor kabineti» bo'limini bosing"),
+    ]
+    parts = [
+        _banner("Tyutorlar kabineti: login va parollar", subtitle, total),
+        _p(after=140),
+        _p(_run("Kabinetga qanday kiriladi", bold=True, size=11, color=DARK), after=80),
+        _steps(steps, total),
+        _p(after=100),
+        _p(
+            _run("Kabinetda: ", bold=True, size=9, color=DARK),
+            _run(
+                "guruhingiz talabalarining so'rovnoma javoblari, ularning login-parollari (Word), talabaga yangi parol "
+                "berish, so'rovnomaning shaxsiy havolasi va QR-kodi: shu havola orqali javob bergan talaba "
+                "avtomatik sizga biriktiriladi.",
+                size=9,
+                color=MUTED,
+            ),
+            after=120,
+        ),
+        _note(
+            "Kartochkalarni punktir chiziq bo'ylab qirqing va har bir tyutorga faqat o'zinikini topshiring. "
+            "Parolni Telegram guruhlarga tashlamang.",
+            total,
+        ),  # fmt: skip
+        _p(after=160),
+    ]
+    dashed = _borders("9FB3BA", size=6, style="dashed")
+    faculties = []
+    for row in rows:
+        if not faculties or faculties[-1][0] != row["faculty"]:
+            faculties.append((row["faculty"], []))
+        faculties[-1][1].append(row)
+    for faculty, items in faculties:
+        parts.append(
+            _p(
+                _run(f"{faculty or NO_FACULTY} · {len(items)} nafar", bold=True, size=10, color=TEAL),
+                before=120,
+                after=80,
+                keep=True,
+            )
+        )
+        table_rows = []
+        for i in range(0, len(items), 2):
+            pair = items[i : i + 2]
+            cells = [
+                _cell(_tutor_card(r, meta, col - 400), col, borders=dashed, valign="top", margins=(200, 200, 200, 200))
+                for r in pair
+            ]
+            if len(pair) == 1:
+                cells.append(_cell(_p(_run("")), col, borders=_borders("FFFFFF", style="nil")))
+            table_rows.append(_row(cells))
+        parts.append(_table(table_rows, [col, total - col], borders=False))
+    return package(
+        "".join(parts),
+        landscape=False,
+        title="Tyutorlar: login va parollar",
+        author=institution,
+        footer="Maxfiy: faqat tyutorning o'ziga topshiring",
+    )
 
 
 def render(rows, *, layout, institution, site, subtitle, signature, date="") -> bytes:

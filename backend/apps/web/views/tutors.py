@@ -148,13 +148,11 @@ def tutor_accounts_word(request):
     site = institution.base_url(request) if institution is not None else request.build_absolute_uri("/")
     site = site.replace("https://", "").replace("http://", "").rstrip("/")
     now = timezone.localtime()
-    content = word.render(
+    content = word.tutor_accounts(
         rows,
-        layout="cards",
         institution=institution.name if institution else "Talent Hub",
         site=site,
-        subtitle=f"Tyutorlar kabineti · {len(rows)} nafar · {now:%d.%m.%Y %H:%M}",
-        signature="",
+        subtitle=f"{len(rows)} nafar tyutor · {now:%d.%m.%Y %H:%M}",
     )
     audit.record(
         AuditLog.Action.EXPORT,

@@ -224,6 +224,7 @@ def test_tutor_cabinet(rector, andti, make_user):
     word = admin.get(reverse("web:tutor-accounts-word"))
     document = zipfile.ZipFile(io.BytesIO(word.content)).read("word/document.xml").decode()
     assert first.user.username in document and account.initial_password in document
+    assert "Tyutorlar kabineti" in document and "/tyutor/" in document and "talabaga o" not in document
 
     me = web(first.user)
     page = me.get(reverse("web:tutor-cabinet")).content.decode()
