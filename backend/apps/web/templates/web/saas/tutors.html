@@ -47,7 +47,13 @@
       {% if with_accounts < total %}
       <form method="post" action="{% url 'web:tutor-accounts-all' %}">{% csrf_token %}<button class="btn btn-primary btn-block">🔑 Barchasiga login ochish</button></form>
       {% endif %}
-      {% if with_accounts %}<a href="{% url 'web:tutor-accounts-word' %}" class="btn btn-soft btn-block">{% icon "download" "icon-sm" %} Word: login-parollar</a>{% endif %}
+      {% if with_accounts %}
+      <div class="row-sm">
+        <a href="{% url 'web:tutor-accounts-pdf' %}" class="btn btn-soft grow">{% icon "download" "icon-sm" %} PDF</a>
+        <a href="{% url 'web:tutor-accounts-word' %}" class="btn btn-soft grow">{% icon "download" "icon-sm" %} Word</a>
+      </div>
+      <p class="tiny muted" style="margin:0">Barcha tyutorlarning login-parollari bitta faylda, kirish yo'riqnomasi bilan.</p>
+      {% endif %}
       <p class="tiny muted">Tyutor birinchi kirishda o'z parolini o'rnatadi, shundan keyin boshlang'ich parol ro'yxatdan o'chadi.</p>
     </div>
     <div class="card stack-sm">

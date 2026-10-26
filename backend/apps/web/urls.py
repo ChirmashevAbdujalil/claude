@@ -58,6 +58,7 @@ urlpatterns = [
     path("settings/otm/tyutorlar/<int:pk>/kabinet/", tutors.tutor_account, name="tutor-account"),
     path("settings/otm/tyutorlar/kabinetlar/", tutors.tutor_accounts_all, name="tutor-accounts-all"),
     path("settings/otm/tyutorlar/login-parollar.docx", tutors.tutor_accounts_word, name="tutor-accounts-word"),
+    path("settings/otm/tyutorlar/login-parollar.pdf", tutors.tutor_accounts_pdf, name="tutor-accounts-pdf"),
     path("arena/otm-ligasi/", saas.league, name="league"),
     path("notifications/", onboarding.notifications, name="notifications"),
     path("notifications/<int:pk>/go/", onboarding.notification_go, name="notification-go"),

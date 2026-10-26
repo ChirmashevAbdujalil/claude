@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from apps.accounts import tutor_pdf
 from apps.accounts import tutors as tutor_services
 from apps.accounts.models import Faculty, Tutor
 from apps.audit import services as audit
@@ -19,6 +20,7 @@ from .saas import _settings_admin
 
 MAX_UPLOAD = 5 * 1024 * 1024
 DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+PDF = "application/pdf"
 
 
 class TutorForm(forms.ModelForm):
@@ -132,8 +134,8 @@ def tutor_accounts_all(request):
     return redirect("web:tutors")
 
 
-@login_required
-def tutor_accounts_word(request):
+def _account_export(request, kind):
+    """Hali kirmagan tyutorlarning login-parollari: Word yoki PDF. Hech kim qolmagan bo'lsa None."""
     _settings_admin(request)
     tutors = list(
         Tutor.objects.filter(is_active=True, user__isnull=False)
@@ -143,12 +145,13 @@ def tutor_accounts_word(request):
     rows = [row for row in tutor_services.account_rows(tutors) if row["password"]]  # hali kirmaganlar
     if not rows:
         messages.info(request, "Barcha tyutorlar o'z parolini o'rnatgan: tarqatiladigan boshlang'ich parol yo'q")
-        return redirect("web:tutors")
+        return None
     institution = request.institution
     site = institution.base_url(request) if institution is not None else request.build_absolute_uri("/")
     site = site.replace("https://", "").replace("http://", "").rstrip("/")
     now = timezone.localtime()
-    content = word.tutor_accounts(
+    render = tutor_pdf.render if kind == "pdf" else word.tutor_accounts
+    content = render(
         rows,
         institution=institution.name if institution else "Talent Hub",
         site=site,
@@ -160,10 +163,21 @@ def tutor_accounts_word(request):
         actor_repr=request.user.username,
         actor_role="Platforma egasi" if request.user.is_superuser else request.user.get_role_display(),
         changes={
-            "file": {"label": "Fayl", "new": "Tyutorlar login va parollari (Word)"},
+            "file": {"label": "Fayl", "new": f"Tyutorlar login va parollari ({'PDF' if kind == 'pdf' else 'Word'})"},
             "count": {"label": "Tyutorlar soni", "new": str(len(rows))},
         },
     )
-    response = HttpResponse(content, content_type=DOCX)
-    response["Content-Disposition"] = f'attachment; filename="tyutorlar-login-parollar-{now:%Y%m%d-%H%M}.docx"'
+    response = HttpResponse(content, content_type=PDF if kind == "pdf" else DOCX)
+    name = f"tyutorlar-login-parollar-{now:%Y%m%d-%H%M}.{'pdf' if kind == 'pdf' else 'docx'}"
+    response["Content-Disposition"] = f'attachment; filename="{name}"'
     return response
+
+
+@login_required
+def tutor_accounts_word(request):
+    return _account_export(request, "docx") or redirect("web:tutors")
+
+
+@login_required
+def tutor_accounts_pdf(request):
+    return _account_export(request, "pdf") or redirect("web:tutors")
