@@ -146,6 +146,7 @@ urlpatterns = [
     path("sorovnomalar/<int:pk>/eksport.csv", surveys.survey_export, name="survey-export"),
     path("sorovnomalar/<int:pk>/natijalar.xlsx", surveys.survey_export_xlsx, name="survey-export-xlsx"),
     path("sorovnomalar/<int:pk>/hisobot.docx", surveys.survey_export_docx, name="survey-export-docx"),
+    path("sorovnomalar/<int:pk>/javoblar.docx", surveys.survey_export_answers, name="survey-export-answers"),
     path("sorovnomalar/<int:pk>/reyestr/", surveys.survey_register, name="survey-register"),
     path("sorovnomalar/<int:pk>/plakat/", surveys.survey_poster, name="survey-poster"),
     path("sorovnomalar/<int:pk>/tyutorlar/", surveys.survey_tutor_links, name="survey-tutor-links"),

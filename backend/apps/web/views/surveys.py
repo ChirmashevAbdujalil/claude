@@ -24,7 +24,7 @@ from apps.accounts.models import Faculty, Tutor
 from apps.arena.models import PointTransaction
 from apps.audit import services as audit
 from apps.audit.models import AuditLog
-from apps.surveys import analytics, clubs, exports, services, word_report
+from apps.surveys import analytics, clubs, exports, services, word_answers, word_report
 from apps.surveys import files as file_rules
 from apps.surveys.models import IssuedAccount, Question, Response, ResponseFile, Survey
 from apps.surveys.services import SurveyError
@@ -487,6 +487,45 @@ def survey_export_docx(request, pk):
     response = HttpResponse(content, content_type=DOCX)
     stamp = timezone.localtime().strftime("%Y%m%d-%H%M")
     response["Content-Disposition"] = f'attachment; filename="sorovnoma-{survey.pk}-hisobot-{stamp}.docx"'
+    return response
+
+
+def _filter_note(request, survey) -> str:
+    """Word fayl boshida: qaysi filtr bo'yicha tayyorlangani."""
+    params, parts = request.GET, []
+    if params.get("faculty", "").isdigit():
+        faculty = Faculty.objects.filter(pk=params["faculty"]).first()
+        parts.append(faculty.name if faculty else "")
+    if params.get("course", "").isdigit():
+        parts.append(f"{params['course']}-kurs")
+    if params.get("group"):
+        parts.append(f"guruh {params['group'].strip()}")
+    if params.get("tutor", "").isdigit():
+        tutor = Tutor.objects.filter(pk=params["tutor"]).first()
+        parts.append(f"tyutor {tutor.full_name}" if tutor else "")
+    if params.get("q"):
+        parts.append(f"qidiruv «{params['q'].strip()}»")
+    if params.get("linked") == "1":
+        parts.append("faqat platformadagilar")
+    for condition in analytics.parse_conditions(survey, params.getlist("answer")):
+        parts.append(f"{condition['question'].title}: {condition['label']}")
+    return " · ".join(p for p in parts if p)
+
+
+@management_required
+def survey_export_answers(request, pk):
+    """Talabalar javoblari fakultetlar kesimida (Word): joriy filtrlar hisobga olinadi."""
+    survey = get_object_or_404(Survey, pk=pk)
+    content = word_answers.render(
+        survey,
+        _filtered(request, survey),
+        institution=request.institution.name if request.institution else "Talent Hub",
+        prepared_by=request.user.get_full_name() or request.user.username,
+        filter_note=_filter_note(request, survey),
+    )
+    response = HttpResponse(content, content_type=DOCX)
+    stamp = timezone.localtime().strftime("%Y%m%d-%H%M")
+    response["Content-Disposition"] = f'attachment; filename="sorovnoma-{survey.pk}-javoblar-fakultetlar-{stamp}.docx"'
     return response
 
 

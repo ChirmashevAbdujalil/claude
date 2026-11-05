@@ -72,7 +72,9 @@
     </select>
     {% endif %}
     <label class="check small"><input type="checkbox" name="linked" value="1" {% if filters.linked == "1" %}checked{% endif %}> Faqat platformadagilar</label>
-    <div class="row-sm"><button class="btn btn-primary btn-sm">Filtrlash</button>{% if filter_qs %}<a href="?tab={{ tab }}" class="btn btn-ghost btn-sm">Tozalash</a>{% endif %}</div>
+    {% for c in conditions %}<input type="hidden" name="answer" value="{{ c.raw }}">{% endfor %}
+    <div class="row-sm wrap"><button class="btn btn-primary btn-sm">Filtrlash</button>{% if filter_qs %}<a href="?tab={{ tab }}" class="btn btn-ghost btn-sm">Tozalash</a>{% endif %}
+      <button formaction="{% url 'web:survey-export-answers' survey.pk %}" class="btn btn-soft btn-sm" title="Tanlangan filtr bo'yicha: har bir fakultet alohida varaqda, talabalar ro'yxati va ularning to'liq javoblari">{% icon "file" "icon-sm" %} Word: javoblar fakultetlar kesimida</button></div>
   </form>
 
   {% if conditions %}
