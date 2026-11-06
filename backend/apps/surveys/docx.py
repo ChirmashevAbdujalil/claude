@@ -6,6 +6,7 @@ Ikki ko'rinish:
 """
 
 import io
+import re
 import zipfile
 from xml.sax.saxutils import escape
 
@@ -17,6 +18,7 @@ ACCENT = "FFF6E0"
 MUTED = "5F747C"
 FONT = "Arial"
 MONO = "Consolas"
+INVALID_XML = re.compile("[\x00-\x08\x0b\x0c\x0e-\x1f\ufffe\uffff]")
 NO_FACULTY = "Fakultet ko'rsatilmagan"
 
 OFFICE_REL = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
@@ -38,7 +40,10 @@ def _run(text, *, bold=False, size=10, color=None, font=None, italic=False):
     if color:
         props.append(f'<w:color w:val="{color}"/>')
     props.append(f'<w:sz w:val="{int(size * 2)}"/><w:szCs w:val="{int(size * 2)}"/>')
-    return f'<w:r><w:rPr>{"".join(props)}</w:rPr><w:t xml:space="preserve">{escape(str(text))}</w:t></w:r>'
+    # XML 1.0 da taqiqlangan boshqaruv belgilari (telefondan nusxalangan matnlarda uchraydi) Word faylini buzadi
+    text = INVALID_XML.sub("", str(text)).replace("\r\n", "\n").replace("\r", "\n")
+    body = '</w:t><w:br/><w:t xml:space="preserve">'.join(escape(line) for line in text.split("\n"))
+    return f'<w:r><w:rPr>{"".join(props)}</w:rPr><w:t xml:space="preserve">{body}</w:t></w:r>'
 
 
 def _p(*runs, align="left", before=0, after=0, keep=False):

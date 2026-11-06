@@ -78,7 +78,8 @@ def test_word_answers_by_faculty(rector):
     for i, faculty in enumerate([at, at, other]):
         services.submit(
             survey,
-            answers={str(track.pk): Track.IT, str(story.pk): f"Hakatonda {i + 1}-o'rin oldim"},
+            # Telefondan nusxalangan matnda XML taqiqlagan belgi (\x0b) va qator ko'chishi bo'lishi mumkin
+            answers={str(track.pk): Track.IT, str(story.pk): f"Hakatonda {i + 1}-o'rin oldim\x0b\nIkkinchi qator"},
             identity={"full_name": f"Javobov Talaba{i}", "faculty": faculty, "course": 2, "group": "AT-24-01"},
         )
 
@@ -89,6 +90,7 @@ def test_word_answers_by_faculty(rector):
     assert response.status_code == 200 and response["Content-Disposition"].endswith('.docx"')
     xml = zipfile.ZipFile(io.BytesIO(response.content)).read("word/document.xml").decode()
     minidom.parseString(xml)
+    assert "\x0b" not in xml and "<w:br/>" in xml
     for text in [at.name, other.name, "Talaba0", "Talaba2", "IT va dasturlash", "Hakatonda 3-o", "Rahbar Rektorov"]:
         assert text in xml, text
     assert xml.count('w:type="page"') == 2  # har fakultet yangi varaqda
